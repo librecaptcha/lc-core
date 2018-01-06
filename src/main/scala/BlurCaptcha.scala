@@ -12,7 +12,7 @@ class BlurCaptcha extends CaptchaProvider {
     val blur = new GaussianBlurFilter(5)
     blur.apply(image)
     val s = scala.util.Random
-    val token = s.nextInt(1000).toString
+    val token = s.nextInt(10000).toString
     val challenge = new Challenge(token, image)
     val answer = "about"
     tokenAnswer += token -> answer

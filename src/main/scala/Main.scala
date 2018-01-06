@@ -2,7 +2,7 @@ import com.sksamuel.scrimage._
 import java.io._
 
 class CaptchaLibrary {
-  val captchas = List(new BlurCaptcha, new LabelCaptcha)
+  val captchas = List(new BlurCaptcha, new LabelCaptcha, new FilterCaptcha)
   var tokenCaptcha = scala.collection.mutable.Map[String, CaptchaProvider]()
   def init = {}
   def shutdown = {}
@@ -32,9 +32,6 @@ class Answer(val token: String, val input: String)
 object LibreCaptcha {
   def main(args: Array[String]) {
     val captcha = new CaptchaLibrary
-    var a = 0
-    for (a <- 1 to 3)
-    {
       val challenge = captcha.getChallenge()
       println(s"Token: ${challenge.token}")
       challenge.image.output(new File("Captcha.png"))
@@ -42,6 +39,5 @@ object LibreCaptcha {
       val input = scala.io.StdIn.readLine()
       val result = captcha.checkAnswer(challenge.token, input)
       println(s"Result: $result")
-    }
   }
 }
