@@ -12,8 +12,8 @@ class FilterCaptcha extends CaptchaProvider {
     val n = 8
     val answer = Stream.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
     val token = scala.util.Random.nextInt(10000).toString
-    tokenAnswer += synchronized {
-      token -> answer
+    synchronized {
+      tokenAnswer += token -> answer
     }
     val canvas = new BufferedImage(225, 50, BufferedImage.TYPE_INT_RGB)
     val g = canvas.createGraphics()

@@ -46,8 +46,7 @@ class LabelCaptcha extends CaptchaProvider {
       if((unknownAnswers(unknownFile)).contains(userAnswer(1))) {
         unknownAnswers(unknownFile)(userAnswer(1)) += 1
         total(unknownFile) += 1
-      }
-      else {
+      } else {
         unknownAnswers(unknownFile)+=(userAnswer(1)) -> 1
         total(unknownFile) += 1
       }
@@ -60,8 +59,7 @@ class LabelCaptcha extends CaptchaProvider {
         }
       }
       true
-    }
-    else {
+    } else {
       false
     }
   }
