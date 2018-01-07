@@ -19,13 +19,6 @@ class BlurCaptcha extends CaptchaProvider {
     challenge
   }
   def checkAnswer(token: String, input: String): Boolean = {
-    if(tokenAnswer(token)==input)
-    {
-      true
-    }
-    else
-    {
-      false
-    }
+    tokenAnswer(token) == input
   }
 }

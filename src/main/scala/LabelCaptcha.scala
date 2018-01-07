@@ -43,19 +43,16 @@ class LabelCaptcha extends CaptchaProvider {
     val userAnswer = input.split(' ')
     if(userAnswer(0)==expectedAnswer) {
       val unknownFile = tokenImagePair(token).unknown
-      if((unknownAnswers(unknownFile)).contains(userAnswer(1)))
-      {
+      if((unknownAnswers(unknownFile)).contains(userAnswer(1))) {
         unknownAnswers(unknownFile)(userAnswer(1)) += 1
         total(unknownFile) += 1
       }
-      else
-      {
+      else {
         unknownAnswers(unknownFile)+=(userAnswer(1)) -> 1
         total(unknownFile) += 1
       }
       if(total(unknownFile)>=3) {
-        if((unknownAnswers(unknownFile)(userAnswer(1))/total(unknownFile))>=0.9)
-        {
+        if((unknownAnswers(unknownFile)(userAnswer(1))/total(unknownFile))>=0.9) {
           unknownAnswers -= unknownFile
           Files.move(new File("unknown/"+unknownFile).toPath, new File("known/"+userAnswer(1)+".png").toPath, StandardCopyOption.REPLACE_EXISTING)
           knownFiles = new File("known").list.toList
