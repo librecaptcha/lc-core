@@ -16,3 +16,5 @@ lazy val root = (project in file(".")).
     libraryDependencies += "com.sksamuel.scrimage" %% "scrimage-filters" % "2.1.8"
    
 )
+
+fork in run := true
