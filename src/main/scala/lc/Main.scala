@@ -13,13 +13,14 @@ trait ChallengeProvider {
 
 class Captcha {
   val con: Connection = DriverManager.getConnection("jdbc:h2:./captcha", "sa", "")
-  val stmt: Statement = con.createStatement();
-  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, image blob)");
+  val stmt: Statement = con.createStatement()
+  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, image blob)")
+  val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret) VALUES (?, ?, ?)")
+  val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret FROM challenge WHERE token = ?")
   
   def getCaptcha(): Boolean = {
     val provider = new FilterChallenge
     val (token, image) = this.getChallenge(provider)
-    val stmt: Statement = con.createStatement();
     image.output(new File("Captcha.png"))
     println(s"Token: ${token}")
     println("Enter your answer: ")
@@ -30,36 +31,32 @@ class Captcha {
   def getChallenge(provider: ChallengeProvider): (String, Image) = {
     val (image, secret) = provider.returnChallenge()
     val token = scala.util.Random.nextInt(10000).toString
-    var pstmt: PreparedStatement = null
-    pstmt = con.prepareStatement("INSERT INTO challenge(token, id, secret) VALUES (?, ?, ?)")
-    pstmt.setString(1, token)
-    pstmt.setString(2, provider.id)
-    pstmt.setString(3, secret)
+    insertPstmt.setString(1, token)
+    insertPstmt.setString(2, provider.id)
+    insertPstmt.setString(3, secret)
     //TODO: insert image into database
-    pstmt.executeUpdate()
+    insertPstmt.executeUpdate()
     (token, image)
   }
 
   def getAnswer(token: String, answer: String, provider: ChallengeProvider): Boolean = {
-    val stmt: Statement  = con.createStatement();
-    val rs: ResultSet = stmt.executeQuery("SELECT secret FROM challenge WHERE token = "+token);
+    selectPstmt.setString(1, token)
+    val rs: ResultSet = selectPstmt.executeQuery()
     rs.next()
     val secret = rs.getString("secret")
     provider.checkAnswer(secret, answer)
   }
 
   def display(): Unit = {
-    val stmt: Statement = con.createStatement();
-		val rs: ResultSet = stmt.executeQuery("SELECT * FROM challenge");
-		
-		println("token\t\tid\t\tsecret\t\timage");
-		while(rs.next()) {
-			val token = rs.getString("token");
-			val id = rs.getString("id");
-			val secret = rs.getString("secret");
-			val image = rs.getString("image");
-			println(s"${token}\t\t${id}\t\t${secret}\t\t${image}")
-		}
+    val rs: ResultSet = stmt.executeQuery("SELECT * FROM challenge")
+    println("token\t\tid\t\tsecret\t\timage")
+    while(rs.next()) {
+      val token = rs.getString("token")
+      val id = rs.getString("id")
+      val secret = rs.getString("secret")
+      val image = rs.getString("image")
+      println(s"${token}\t\t${id}\t\t${secret}\t\t${image}")
+    }
   }
   
   def closeConnection(): Unit = {
