@@ -1,36 +1,34 @@
+package lc
+
 import com.sksamuel.scrimage._
 import com.sksamuel.scrimage.filter._
 import java.awt.image.BufferedImage
-import java.awt.{Graphics2D,Color,Font}
+import java.awt.Font
+import java.awt.Color
 
-class FilterCaptcha extends CaptchaProvider {
-  val tokenAnswer = scala.collection.mutable.Map[String, String]()
-  def getChallenge(): Challenge = {
+class FilterChallenge extends ChallengeProvider {
+  val id = "filter"
+  def returnChallenge(): (Image, String) = {
     val filterTypes = List(new FilterType1, new FilterType2)
     val r = new scala.util.Random
     val alphabet = "abcdefghijklmnopqrstuvwxyz"
     val n = 8
-    val answer = Stream.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
-    val token = scala.util.Random.nextInt(10000).toString
-    synchronized {
-      tokenAnswer += token -> answer
-    }
+    val secret = Stream.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
     val canvas = new BufferedImage(225, 50, BufferedImage.TYPE_INT_RGB)
     val g = canvas.createGraphics()
     g.setColor(Color.WHITE)
     g.fillRect(0, 0, canvas.getWidth, canvas.getHeight)
     g.setColor(Color.BLACK)
     g.setFont(new Font("Serif", Font.PLAIN, 30))
-    g.drawString(answer, 5, 30)
+    g.drawString(secret, 5, 30)
     g.dispose()
     var image = new Image(canvas, ImageMetadata.empty)
     val s = scala.util.Random.nextInt(2)
     image = filterTypes(s).applyFilter(image)
-    val challenge = new Challenge(token, image)
-    challenge
+    (image, secret)
   }
-  def checkAnswer(token: String, input: String): Boolean = {
-    tokenAnswer(token) == input
+  def checkAnswer(secret: String, answer: String): Boolean = {
+    secret == answer
   }
 }
 
@@ -61,3 +59,4 @@ class FilterType2 extends FilterType {
     image
   }
 }
+
