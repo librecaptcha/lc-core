@@ -1393,6 +1393,14 @@ public class HTTPServer {
          * @return the input stream containing the request body
          */
         public InputStream getBody() { return body; }
+        
+        /**
+        * Returns the body in a String format
+        */
+        public String getJson(){
+          java.util.Scanner s = new java.util.Scanner(body).useDelimiter("\\A");
+          return s.hasNext() ? s.next() : "";
+        }
 
         /**
          * Returns the path component of the request URI, after
