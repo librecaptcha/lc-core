@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage
 import java.awt.Font
 import java.awt.Color
 
-class FilterChallenge extends ChallengeProvider {
+class FilterChallenge extends ChallengeProvider with Serializable{
   val id = "filter"
   def returnChallenge(): (Image, String) = {
     val filterTypes = List(new FilterType1, new FilterType2)

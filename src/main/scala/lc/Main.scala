@@ -24,9 +24,9 @@ trait ChallengeProvider {
 class Captcha {
   val con: Connection = DriverManager.getConnection("jdbc:h2:./captcha", "sa", "")
   val stmt: Statement = con.createStatement()
-  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, image blob)")
-  val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret, image) VALUES (?, ?, ?, ?)")
-  val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret FROM challenge WHERE token = ?")
+  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider other, image blob)")
+  val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret, provider, image) VALUES (?, ?, ?, ?, ?)")
+  val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = ?")
   val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge WHERE token = ?")
 
   def getCaptcha(id: Id): Array[Byte] = {
@@ -59,17 +59,19 @@ class Captcha {
     insertPstmt.setString(1, token)
     insertPstmt.setString(2, provider.id)
     insertPstmt.setString(3, secret)
-    insertPstmt.setBlob(4, blob)
+    insertPstmt.setObject(4, provider)
+    insertPstmt.setBlob(5, blob)
     insertPstmt.executeUpdate()
     id
   }
 
-  def getAnswer(token: String, answer: String, provider: ChallengeProvider): Boolean = {
-    selectPstmt.setString(1, token)
+  def getAnswer(answer: Answer): Boolean = {
+    selectPstmt.setString(1, answer.id)
     val rs: ResultSet = selectPstmt.executeQuery()
     rs.next()
     val secret = rs.getString("secret")
-    provider.checkAnswer(secret, answer)
+    val provider = rs.getObject("provider").asInstanceOf[ChallengeProvider]
+    provider.checkAnswer(secret, answer.answer)
   }
 
   def display(): Unit = {
@@ -92,6 +94,7 @@ class Captcha {
 case class Size(height: Int, width: Int)
 case class Parameters(level: String, media: String, input_type: String, size: Option[Size])
 case class Id(id: String)
+case class Answer(answer: String, id: String)
 
 object LCFramework{
   def main(args: scala.Array[String]) {
@@ -117,10 +120,21 @@ object LCFramework{
     	val json = parse(body)
     	val id = json.extract[Id]
     	val image = captcha.getCaptcha(id)
-    	println(image.toString())
-    	println(image)
     	resp.getHeaders().add("Content-Type","image/png")
     	resp.send(200, image)
+    	0
+    })
+
+    host.addContext("/v1/answer",(req, resp) =>{
+    	val body = req.getJson()
+    	val json = parse(body)
+    	val answer = json.extract[Answer]
+    	val result = captcha.getAnswer(answer)
+    	resp.getHeaders().add("Content-Type","application/json")
+    	if(result){
+    		resp.send(200,"""{"result":"True"}""")
+    	}
+    	resp.send(200,"""{"result":"False"}""")
     	0
     })
     server.start()
