@@ -1,3 +1,4 @@
 *.class
 *.log
+*.png
 /bin/
