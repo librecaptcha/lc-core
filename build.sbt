@@ -13,8 +13,14 @@ lazy val root = (project in file(".")).
 
     libraryDependencies += "com.sksamuel.scrimage" %% "scrimage-io-extra" % "2.1.8",
 
-    libraryDependencies += "com.sksamuel.scrimage" %% "scrimage-filters" % "2.1.8"
+    libraryDependencies += "com.sksamuel.scrimage" %% "scrimage-filters" % "2.1.8",
+    
+    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.1"
    
 )
+
+unmanagedResourceDirectories in Compile += {baseDirectory.value / "lib"}
+javacOptions += "-g:none"
+compileOrder := CompileOrder.JavaThenScala
 
 fork in run := true
