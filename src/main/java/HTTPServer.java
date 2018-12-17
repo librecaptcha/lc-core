@@ -1793,6 +1793,17 @@ public class HTTPServer {
                 out.write(content);
         }
 
+        public void send(int status, byte[] text) throws IOException {
+            //byte[] content = text.getBytes("UTF-8");
+            byte[] content = text;
+            sendHeaders(status, content.length, -1,
+                "W/\"" + Integer.toHexString(text.hashCode()) + "\"",
+                "text/html; charset=utf-8", null);
+            OutputStream out = getBody();
+            if (out != null)
+                out.write(content);
+        }
+
         /**
          * Sends an error response with the given status and detailed message.
          * An HTML body is created containing the status and its description,
