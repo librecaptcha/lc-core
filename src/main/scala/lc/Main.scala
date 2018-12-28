@@ -97,16 +97,14 @@ case class Parameters(level: String, media: String, input_type: String, size: Op
 case class Id(id: String)
 case class Answer(answer: String, id: String)
 
-object LCFramework{
-  def main(args: scala.Array[String]) {
-  	val port = 8888
-    val captcha = new Captcha
-    val server = new HTTPServer(port)
-    val host = server.getVirtualHost(null)
+class Server(port: Int){
+	val captcha = new Captcha()
+	val server = new HTTPServer(port)
+	val host = server.getVirtualHost(null)
 
-    implicit val formats = DefaultFormats
-    
-    host.addContext("/v1/captcha",(req, resp) => {
+	implicit val formats = DefaultFormats
+
+	host.addContext("/v1/captcha",(req, resp) => {
     	val body = req.getJson()
     	val json = parse(body)
     	val param = json.extract[Parameters]
@@ -126,7 +124,7 @@ object LCFramework{
     	0
     })
 
-    host.addContext("/v1/answer",(req, resp) =>{
+    host.addContext("/v1/answer",(req, resp) => {
     	val body = req.getJson()
     	val json = parse(body)
     	val answer = json.extract[Answer]
@@ -136,6 +134,17 @@ object LCFramework{
     	resp.send(200,responseContent)
     	0
     })
+
+    def start(): Unit = {
+    	server.start()
+    }
+
+}
+
+object LCFramework{
+  def main(args: scala.Array[String]) {
+  	
+    val server = new Server(8888)
     server.start()
   } 
 }
