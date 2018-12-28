@@ -51,6 +51,7 @@ class Captcha {
   }
   
   def getChallenge(param: Parameters): Id = {
+  	//TODO: eval params to choose a provider
   	val provider = new FilterChallenge
     val (image, secret) = provider.returnChallenge()
     val blob = convertImage(image)
@@ -131,10 +132,8 @@ object LCFramework{
     	val answer = json.extract[Answer]
     	val result = captcha.getAnswer(answer)
     	resp.getHeaders().add("Content-Type","application/json")
-    	if(result){
-    		resp.send(200,"""{"result":"True"}""")
-    	}
-    	resp.send(200,"""{"result":"False"}""")
+    	val responseContent = if(result) """{"result":"True"}""" else """{"result":"False"}"""
+    	resp.send(200,responseContent)
     	0
     })
     server.start()
