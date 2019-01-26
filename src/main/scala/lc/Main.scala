@@ -12,6 +12,7 @@ import org.json4s.JsonDSL._
 import java.util.Base64
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.{read, write}
+import java.util.concurrent._
 import scala.Array
 
 trait ChallengeProvider {
@@ -66,6 +67,27 @@ class Captcha {
     id
   }
 
+  val task = new Runnable {
+  	val provider = new FilterChallenge
+  	def run(): Unit = {
+	    val (image, secret) = provider.returnChallenge()
+	    val blob = convertImage(image)
+	    val token = scala.util.Random.nextInt(10000).toString
+	    val id = Id(token)
+	    insertPstmt.setString(1, token)
+	    insertPstmt.setString(2, provider.id)
+	    insertPstmt.setString(3, secret)
+	    insertPstmt.setObject(4, provider)
+	    insertPstmt.setBlob(5, blob)
+	    insertPstmt.executeUpdate()
+  	}
+  }
+
+  def beginThread(delay: Int) : Unit = {
+  	val ex = new ScheduledThreadPoolExecutor(1)
+  	val thread = ex.scheduleAtFixedRate(task, 1, delay, TimeUnit.SECONDS)
+  }
+
   def getAnswer(answer: Answer): Boolean = {
     selectPstmt.setString(1, answer.id)
     val rs: ResultSet = selectPstmt.executeQuery()
@@ -83,7 +105,7 @@ class Captcha {
       val id = rs.getString("id")
       val secret = rs.getString("secret")
       val image = rs.getString("image")
-      println(s"${token}\t\t${id}\t\t${secret}\t\t${image}")
+      println(s"${token}\t\t${id}\t\t${secret}\t\t")
     }
   }
   
@@ -143,9 +165,11 @@ class Server(port: Int){
 
 object LCFramework{
   def main(args: scala.Array[String]) {
-  	
+  	val captcha = new Captcha()
     val server = new Server(8888)
     server.start()
+    captcha.beginThread(2)
+    
   } 
 }
 
