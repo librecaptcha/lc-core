@@ -25,10 +25,12 @@ trait ChallengeProvider {
 class Captcha {
   val con: Connection = DriverManager.getConnection("jdbc:h2:./captcha", "sa", "")
   val stmt: Statement = con.createStatement()
-  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider other, image blob)")
+  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, image blob)")
   val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret, provider, image) VALUES (?, ?, ?, ?, ?)")
   val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = ?")
   val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge WHERE token = ?")
+
+  val filters = Map("FilterChallenge" -> new FilterChallenge)
 
   def getCaptcha(id: Id): Array[Byte] = {
   	imagePstmt.setString(1, id.id)
@@ -53,7 +55,8 @@ class Captcha {
   
   def getChallenge(param: Parameters): Id = {
   	//TODO: eval params to choose a provider
-  	val provider = new FilterChallenge
+  	val providerMap = "FilterChallenge"
+  	val provider = filters(providerMap)
     val (image, secret) = provider.returnChallenge()
     val blob = convertImage(image)
     val token = scala.util.Random.nextInt(10000).toString
@@ -61,14 +64,15 @@ class Captcha {
     insertPstmt.setString(1, token)
     insertPstmt.setString(2, provider.id)
     insertPstmt.setString(3, secret)
-    insertPstmt.setObject(4, provider)
+    insertPstmt.setString(4, providerMap)
     insertPstmt.setBlob(5, blob)
     insertPstmt.executeUpdate()
     id
   }
 
   val task = new Runnable {
-  	val provider = new FilterChallenge
+  	val providerMap = "FilterChallenge"
+  	val provider = filters(providerMap)
   	def run(): Unit = {
 	    val (image, secret) = provider.returnChallenge()
 	    val blob = convertImage(image)
@@ -77,7 +81,7 @@ class Captcha {
 	    insertPstmt.setString(1, token)
 	    insertPstmt.setString(2, provider.id)
 	    insertPstmt.setString(3, secret)
-	    insertPstmt.setObject(4, provider)
+	    insertPstmt.setString(4, providerMap)
 	    insertPstmt.setBlob(5, blob)
 	    insertPstmt.executeUpdate()
   	}
@@ -93,8 +97,8 @@ class Captcha {
     val rs: ResultSet = selectPstmt.executeQuery()
     rs.next()
     val secret = rs.getString("secret")
-    val provider = rs.getObject("provider").asInstanceOf[ChallengeProvider]
-    provider.checkAnswer(secret, answer.answer)
+    val provider = rs.getString("provider")
+    filters(provider).checkAnswer(secret, answer.answer)
   }
 
   def display(): Unit = {
@@ -134,7 +138,7 @@ class Server(port: Int){
     	resp.getHeaders().add("Content-Type","application/json")
     	resp.send(200, write(id))
     	0
-    })
+    },"POST")
 
     host.addContext("/v1/media",(req, resp) => {
     	val body = req.getJson()
@@ -144,7 +148,7 @@ class Server(port: Int){
     	resp.getHeaders().add("Content-Type","image/png")
     	resp.send(200, image)
     	0
-    })
+    },"POST")
 
     host.addContext("/v1/answer",(req, resp) => {
     	val body = req.getJson()
@@ -155,7 +159,7 @@ class Server(port: Int){
     	val responseContent = if(result) """{"result":"True"}""" else """{"result":"False"}"""
     	resp.send(200,responseContent)
     	0
-    })
+    },"POST")
 
     def start(): Unit = {
     	server.start()
@@ -168,7 +172,7 @@ object LCFramework{
   	val captcha = new Captcha()
     val server = new Server(8888)
     server.start()
-    captcha.beginThread(2)
+    //captcha.beginThread(2)
     
   } 
 }
