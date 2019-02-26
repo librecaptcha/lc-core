@@ -42,23 +42,13 @@ class Captcha {
   		image =  blob.getBytes(1, blob.length().toInt)
   	image
   }
-
-  def convertImage(image: Image): ByteArrayInputStream = {
-  	val output = new ByteArrayOutputStream()
-  	image.output(new File("Captcha.png"))
-  	val img = ImageIO.read(new File("Captcha.png"))
-  	ImageIO.write(img,"png",output)
-  	val byte_array = output.toByteArray()
-  	val blob = new ByteArrayInputStream(byte_array)
-  	blob
-  }
   
   def getChallenge(param: Parameters): Id = {
   	//TODO: eval params to choose a provider
   	val providerMap = "FilterChallenge"
   	val provider = filters(providerMap)
     val (image, secret) = provider.returnChallenge()
-    val blob = convertImage(image)
+    val blob = new ByteArrayInputStream(image.bytes)
     val token = scala.util.Random.nextInt(10000).toString
     val id = Id(token)
     insertPstmt.setString(1, token)
@@ -75,7 +65,7 @@ class Captcha {
   	val provider = filters(providerMap)
   	def run(): Unit = {
 	    val (image, secret) = provider.returnChallenge()
-	    val blob = convertImage(image)
+	    val blob = new ByteArrayInputStream(image.bytes)
 	    val token = scala.util.Random.nextInt(10000).toString
 	    val id = Id(token)
 	    insertPstmt.setString(1, token)
