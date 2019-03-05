@@ -2,3 +2,5 @@
 *.log
 *.png
 /bin/
+/project/target/
+/target/
