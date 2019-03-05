@@ -19,8 +19,6 @@
  *  For additional info see http://www.freeutils.net/source/jlhttp/
  */
 
-package httpserver;
-
 import java.io.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;

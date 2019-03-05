@@ -3,7 +3,7 @@ package lc
 import com.sksamuel.scrimage._
 import java.sql._
 import java.io._
-import httpserver._
+import HTTPServer._
 import javax.imageio._
 import java.awt.image._
 import org.json4s._

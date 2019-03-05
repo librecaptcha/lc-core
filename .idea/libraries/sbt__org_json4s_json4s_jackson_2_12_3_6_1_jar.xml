@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: org.json4s:json4s-jackson_2.12:3.6.1:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.json4s/json4s-jackson_2.12/jars/json4s-jackson_2.12-3.6.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.json4s/json4s-jackson_2.12/srcs/json4s-jackson_2.12-3.6.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

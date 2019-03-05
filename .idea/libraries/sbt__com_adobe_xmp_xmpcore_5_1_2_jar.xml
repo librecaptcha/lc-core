@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: com.adobe.xmp:xmpcore:5.1.2:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.adobe.xmp/xmpcore/jars/xmpcore-5.1.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.adobe.xmp/xmpcore/srcs/xmpcore-5.1.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

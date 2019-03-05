@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: com.twelvemonkeys.imageio:imageio-core:3.2.1:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.twelvemonkeys.imageio/imageio-core/jars/imageio-core-3.2.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.twelvemonkeys.imageio/imageio-core/srcs/imageio-core-3.2.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

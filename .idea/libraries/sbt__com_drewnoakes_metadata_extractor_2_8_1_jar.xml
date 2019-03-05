@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: com.drewnoakes:metadata-extractor:2.8.1:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.drewnoakes/metadata-extractor/jars/metadata-extractor-2.8.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.drewnoakes/metadata-extractor/srcs/metadata-extractor-2.8.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
