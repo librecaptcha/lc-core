@@ -15,13 +15,6 @@ import org.json4s.jackson.Serialization.{read, write}
 import java.util.concurrent._
 import scala.Array
 
-trait ChallengeProvider {
-  val id: String
-  def returnChallenge(): (Image, String)
-  def checkAnswer(secret: String, answer: String): Boolean
-  //TODO: def configure(): Unit
-}
-
 class Captcha {
   val con: Connection = DriverManager.getConnection("jdbc:h2:./captcha", "sa", "")
   val stmt: Statement = con.createStatement()
@@ -47,13 +40,13 @@ class Captcha {
   	//TODO: eval params to choose a provider
   	val providerMap = "FilterChallenge"
   	val provider = filters(providerMap)
-    val (image, secret) = provider.returnChallenge()
-    val blob = new ByteArrayInputStream(image.bytes)
+    val challenge = provider.returnChallenge()
+    val blob = new ByteArrayInputStream(challenge.content)
     val token = scala.util.Random.nextInt(10000).toString
     val id = Id(token)
     insertPstmt.setString(1, token)
-    insertPstmt.setString(2, provider.id)
-    insertPstmt.setString(3, secret)
+    insertPstmt.setString(2, provider.getId)
+    insertPstmt.setString(3, challenge.secret)
     insertPstmt.setString(4, providerMap)
     insertPstmt.setBlob(5, blob)
     insertPstmt.executeUpdate()
@@ -64,13 +57,13 @@ class Captcha {
   	val providerMap = "FilterChallenge"
   	val provider = filters(providerMap)
   	def run(): Unit = {
-	    val (image, secret) = provider.returnChallenge()
-	    val blob = new ByteArrayInputStream(image.bytes)
+	    val challenge = provider.returnChallenge()
+	    val blob = new ByteArrayInputStream(challenge.content)
 	    val token = scala.util.Random.nextInt(10000).toString
 	    val id = Id(token)
 	    insertPstmt.setString(1, token)
-	    insertPstmt.setString(2, provider.id)
-	    insertPstmt.setString(3, secret)
+	    insertPstmt.setString(2, provider.getId)
+	    insertPstmt.setString(3, challenge.secret)
 	    insertPstmt.setString(4, providerMap)
 	    insertPstmt.setBlob(5, blob)
 	    insertPstmt.executeUpdate()

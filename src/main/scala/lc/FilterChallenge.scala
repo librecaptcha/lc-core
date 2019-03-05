@@ -6,9 +6,9 @@ import java.awt.image.BufferedImage
 import java.awt.Font
 import java.awt.Color
 
-class FilterChallenge extends ChallengeProvider{
-  val id = "filter"
-  def returnChallenge(): (Image, String) = {
+class FilterChallenge extends ChallengeProvider {
+  def getId = "filter"
+  def returnChallenge(): Challenge = {
     val filterTypes = List(new FilterType1, new FilterType2)
     val r = new scala.util.Random
     val alphabet = "abcdefghijklmnopqrstuvwxyz"
@@ -25,7 +25,7 @@ class FilterChallenge extends ChallengeProvider{
     var image = new Image(canvas, ImageMetadata.empty)
     val s = scala.util.Random.nextInt(2)
     image = filterTypes(s).applyFilter(image)
-    (image, secret)
+    new Challenge(image.bytes, "image/png", secret)
   }
   def checkAnswer(secret: String, answer: String): Boolean = {
     secret == answer
