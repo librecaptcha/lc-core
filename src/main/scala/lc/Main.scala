@@ -3,7 +3,10 @@ package lc
 import com.sksamuel.scrimage._
 import java.sql._
 import java.io._
-import HTTPServer._
+import lc.HTTPServer._
+import lc.FontFunCaptcha._
+import lc.GifCaptcha._
+import lc.ShadowTextCaptcha._
 import javax.imageio._
 import java.awt.image._
 import org.json4s._
@@ -23,7 +26,11 @@ class Captcha {
   val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = ?")
   val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge WHERE token = ?")
 
-  val filters = Map("FilterChallenge" -> new FilterChallenge)
+  val filters = Map("FilterChallenge" -> new FilterChallenge,
+                    "FontFunCaptcha" -> new FontFunCaptcha,
+                    "GifCaptcha" -> new GifCaptcha,
+                    "ShadowTextCaptcha" -> new ShadowTextCaptcha
+                    )
 
   def getCaptcha(id: Id): Array[Byte] = {
   	imagePstmt.setString(1, id.id)
@@ -38,12 +45,13 @@ class Captcha {
   
   def getChallenge(param: Parameters): Id = {
   	//TODO: eval params to choose a provider
-  	val providerMap = "FilterChallenge"
+  	val providerMap = "GifCaptcha"
   	val provider = filters(providerMap)
     val challenge = provider.returnChallenge()
     val blob = new ByteArrayInputStream(challenge.content)
     val token = scala.util.Random.nextInt(10000).toString
     val id = Id(token)
+    print("Successfull")
     insertPstmt.setString(1, token)
     insertPstmt.setString(2, provider.getId)
     insertPstmt.setString(3, challenge.secret)
