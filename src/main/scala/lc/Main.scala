@@ -18,8 +18,8 @@ import scala.Array
 class Captcha {
   val con: Connection = DriverManager.getConnection("jdbc:h2:./captcha", "sa", "")
   val stmt: Statement = con.createStatement()
-  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, image blob)")
-  val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret, provider, image) VALUES (?, ?, ?, ?, ?)")
+  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, contentType varchar, image blob)")
+  val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret, provider, contentType, image) VALUES (?, ?, ?, ?, ?, ?)")
   val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = ?")
   val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge WHERE token = ?")
 
@@ -48,7 +48,8 @@ class Captcha {
     insertPstmt.setString(2, provider.getId)
     insertPstmt.setString(3, challenge.secret)
     insertPstmt.setString(4, providerMap)
-    insertPstmt.setBlob(5, blob)
+    insertPstmt.setString(5, challenge.contentType)
+    insertPstmt.setBlob(6, blob)
     insertPstmt.executeUpdate()
     id
   }
@@ -65,7 +66,8 @@ class Captcha {
 	    insertPstmt.setString(2, provider.getId)
 	    insertPstmt.setString(3, challenge.secret)
 	    insertPstmt.setString(4, providerMap)
-	    insertPstmt.setBlob(5, blob)
+	    insertPstmt.setString(5, challenge.contentType)
+	    insertPstmt.setBlob(6, blob)
 	    insertPstmt.executeUpdate()
   	}
   }
@@ -124,14 +126,20 @@ class Server(port: Int){
     },"POST")
 
     host.addContext("/v1/media",(req, resp) => {
-    	val body = req.getJson()
-    	val json = parse(body)
-    	val id = json.extract[Id]
+    	var id = Id(null)
+    	if ("GET" == req.getMethod()){
+    		val params = req.getParams()
+    		id = Id(params.get("id"))
+    	} else {
+    		val body = req.getJson()
+    		val json = parse(body)
+    		id = json.extract[Id]
+    	}
     	val image = captcha.getCaptcha(id)
     	resp.getHeaders().add("Content-Type","image/png")
     	resp.send(200, image)
     	0
-    },"POST")
+    },"POST", "GET")
 
     host.addContext("/v1/answer",(req, resp) => {
     	val body = req.getJson()
