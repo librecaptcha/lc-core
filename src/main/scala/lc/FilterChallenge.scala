@@ -7,7 +7,7 @@ import java.awt.Font
 import java.awt.Color
 
 class FilterChallenge extends ChallengeProvider {
-  def getId = "filter"
+  def getId = "FilterChallenge"
   def returnChallenge(): Challenge = {
     val filterTypes = List(new FilterType1, new FilterType2)
     val r = new scala.util.Random

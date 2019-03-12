@@ -126,14 +126,20 @@ class Server(port: Int){
     },"POST")
 
     host.addContext("/v1/media",(req, resp) => {
-    	val body = req.getJson()
-    	val json = parse(body)
-    	val id = json.extract[Id]
+    	var id = Id(null)
+    	if ("GET" == req.getMethod()){
+    		val params = req.getParams()
+    		id = Id(params.get("id"))
+    	} else {
+    		val body = req.getJson()
+    		val json = parse(body)
+    		id = json.extract[Id]
+    	}
     	val image = captcha.getCaptcha(id)
     	resp.getHeaders().add("Content-Type","image/png")
     	resp.send(200, image)
     	0
-    },"POST")
+    },"POST", "GET")
 
     host.addContext("/v1/answer",(req, resp) => {
     	val body = req.getJson()
