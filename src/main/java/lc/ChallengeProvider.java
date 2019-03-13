@@ -7,4 +7,3 @@ interface ChallengeProvider {
 
   //TODO: def configure(): Unit
 }
-
