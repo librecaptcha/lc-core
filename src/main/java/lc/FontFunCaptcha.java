@@ -25,7 +25,7 @@ public class FontFunCaptcha implements ChallengeProvider{
             FontMetrics fontMetrics = graphics2D.getFontMetrics();
             HelperFunctions.setRenderingHints(graphics2D);
             graphics2D.setColor(Color.decode(colors[rand.nextInt(4)]));
-            graphics2D.drawString(String.valueOf(captchaText.toLowerCase().charAt(i)), (i * 48), fontMetrics.getAscent());
+            graphics2D.drawString(String.valueOf(captchaText.charAt(i)), (i * 48), fontMetrics.getAscent());
         }
         graphics2D.dispose();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -39,10 +39,10 @@ public class FontFunCaptcha implements ChallengeProvider{
 
     public Challenge returnChallenge() {
         String secret = HelperFunctions.randomString(7);
-        return new Challenge(fontFun(secret),"png",secret);
+        return new Challenge(fontFun(secret),"png",secret.toLowerCase());
     }
 
     public boolean checkAnswer(String secret, String answer){
-        return secret.equals(answer);
+        return answer.toLowerCase().equals(secret);
     }
 }

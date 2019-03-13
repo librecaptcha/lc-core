@@ -12,7 +12,7 @@ public class HelperFunctions {
     }
 
     public static String randomString(int n){
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz23456789$#%@&?";
         StringBuilder stringBuilder = new StringBuilder();
         for(int i=0; i<n; i++){
             int index = (int)(characters.length() * Math.random());

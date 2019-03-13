@@ -22,7 +22,7 @@ public class GifCaptcha implements ChallengeProvider{
         return img;
     }
 
-    public byte[] gifCaptcha(String text){
+    private byte[] gifCaptcha(String text){
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ImageOutputStream output = new MemoryCacheImageOutputStream(byteArrayOutputStream);
@@ -42,11 +42,11 @@ public class GifCaptcha implements ChallengeProvider{
 
     public Challenge returnChallenge() {
         String secret = HelperFunctions.randomString(6);
-        return new Challenge(gifCaptcha(secret),"gif",secret);
+        return new Challenge(gifCaptcha(secret),"gif",secret.toLowerCase());
     }
 
     public boolean checkAnswer(String secret, String answer) {
-        return secret.equals(answer);
+        return answer.toLowerCase().equals(secret);
     }
 
     public String getId() {

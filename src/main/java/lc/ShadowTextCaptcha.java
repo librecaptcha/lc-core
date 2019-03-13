@@ -17,10 +17,10 @@ public class ShadowTextCaptcha implements ChallengeProvider{
     }
 
     public boolean checkAnswer(String secret, String answer) {
-        return secret.equals(answer);
+        return answer.toLowerCase().equals(secret);
     }
 
-    public byte[] shadowText(String text){
+    private byte[] shadowText(String text){
         BufferedImage img = new BufferedImage(350, 100, BufferedImage.TYPE_INT_RGB);
         Font font = new Font("Arial",Font.ROMAN_BASELINE ,48);
         Graphics2D graphics2D = img.createGraphics();
@@ -55,6 +55,6 @@ public class ShadowTextCaptcha implements ChallengeProvider{
 
     public Challenge returnChallenge() {
         String secret = HelperFunctions.randomString(6);
-        return new Challenge(shadowText(secret),"png",secret);
+        return new Challenge(shadowText(secret),"png",secret.toLowerCase());
     }
 }
