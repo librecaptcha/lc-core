@@ -45,7 +45,7 @@ class Captcha {
   
   def getChallenge(param: Parameters): Id = {
   	//TODO: eval params to choose a provider
-  	val providerMap = "GifCaptcha"
+  	val providerMap = "FontFunCaptcha"
   	val provider = filters(providerMap)
     val challenge = provider.returnChallenge()
     val blob = new ByteArrayInputStream(challenge.content)
