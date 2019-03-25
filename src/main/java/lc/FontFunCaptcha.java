@@ -5,10 +5,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.nio.file.Paths;
-import java.nio.file.Path;
-import java.nio.file.Files;
-import java.util.stream.Stream;
+import java.io.FilenameFilter;
 
 public class FontFunCaptcha implements ChallengeProvider{
 
@@ -16,17 +13,24 @@ public class FontFunCaptcha implements ChallengeProvider{
         return "FontFunCaptcha";
     }
 
-    private int noOfFiles(String path,String level){
-        try(Stream<Path> files = Files.list(Paths.get(path+level))){
-            return (short)files.count()-1;
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return 0;
+    private String getFontName(String path, String level){
+        File file = new File(path+level+"/");
+        FilenameFilter txtFileFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name)
+            {
+                if(name.endsWith(".ttf"))
+                    return true;
+                else
+                    return false;
+            }
+        };
+        File[] files = file.listFiles(txtFileFilter);
+        return path+level.toLowerCase()+"/"+files[HelperFunctions.randomNumber(0,files.length-1)].getName();
     }
 
-    private Font loadCustomFont(String level, String path){
-        String fontName = path+level.toLowerCase()+"/font"+HelperFunctions.randomNumber(1,noOfFiles(path,level))+".ttf";
+    private Font loadCustomFont(String level, String path) {
+        String fontName = getFontName(path,level);
         try{
             Font font = Font.createFont(Font.TRUETYPE_FONT, new File(fontName));
             font = font.deriveFont(Font.PLAIN, 48f);
