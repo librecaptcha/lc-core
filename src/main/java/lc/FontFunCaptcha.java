@@ -25,8 +25,8 @@ public class FontFunCaptcha implements ChallengeProvider{
         return 0;
     }
 
-    private Font loadCustomFont(String level,String path){
-        String fontName = path+level+"/font"+HelperFunctions.randomNumber(1,noOfFiles(path,level))+".ttf";
+    private Font loadCustomFont(String level, String path){
+        String fontName = path+level.toLowerCase()+"/font"+HelperFunctions.randomNumber(1,noOfFiles(path,level))+".ttf";
         try{
             Font font = Font.createFont(Font.TRUETYPE_FONT, new File(fontName));
             font = font.deriveFont(Font.PLAIN, 48f);
@@ -37,21 +37,12 @@ public class FontFunCaptcha implements ChallengeProvider{
         return null;
     }
 
-    private Font getFont(String level, String path){
-        switch (level.toLowerCase()){
-            case "easy":  return loadCustomFont(level, path);
-            case "medium":  return loadCustomFont(level, path);
-            case "hard":  return loadCustomFont(level, path);
-            default: return null;
-        }
-    }
-
     private byte[] fontFun(String captchaText, String level, String path){
         String[] colors = {"#f68787","#f8a978","#f1eb9a","#a4f6a5"};
         BufferedImage img = new BufferedImage(350, 100, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics2D = img.createGraphics();
         for(int i=0; i< captchaText.length(); i++) {
-            Font font = getFont(level,path);
+            Font font = loadCustomFont(level,path);
             graphics2D.setFont(font);
             FontMetrics fontMetrics = graphics2D.getFontMetrics();
             HelperFunctions.setRenderingHints(graphics2D);
