@@ -26,11 +26,18 @@ class Captcha {
   val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = ?")
   val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge WHERE token = ?")
 
+
   val filters = Map("FilterChallenge" -> new FilterChallenge,
                     "FontFunCaptcha" -> new FontFunCaptcha,
                     "GifCaptcha" -> new GifCaptcha,
-                    "ShadowTextCaptcha" -> new ShadowTextCaptcha
-                    )
+                    "ShadowTextCaptcha" -> new ShadowTextCaptcha)
+
+  def getProvider(): String = {
+    val random = new scala.util.Random
+    val keys = filters.keys
+    val providerMap = keys.toVector(random.nextInt(keys.size))
+    providerMap
+  }
 
   def getCaptcha(id: Id): Array[Byte] = {
   	imagePstmt.setString(1, id.id)
@@ -45,7 +52,7 @@ class Captcha {
   
   def getChallenge(param: Parameters): Id = {
   	//TODO: eval params to choose a provider
-  	val providerMap = "FontFunCaptcha"
+  	val providerMap = getProvider()
   	val provider = filters(providerMap)
     val challenge = provider.returnChallenge()
     val blob = new ByteArrayInputStream(challenge.content)
@@ -63,7 +70,7 @@ class Captcha {
   }
 
   val task = new Runnable {
-  	val providerMap = "FilterChallenge"
+  	val providerMap = getProvider()
   	val provider = filters(providerMap)
   	def run(): Unit = {
 	    val challenge = provider.returnChallenge()
