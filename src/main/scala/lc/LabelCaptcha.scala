@@ -47,16 +47,12 @@ class LabelCaptcha extends ChallengeProvider {
     val imagePair = tokenImagePair(token)
     val expectedAnswer = imagePair.known.split('.')(0)
     val userAnswer = input.split(' ')
-    println(userAnswer)
     if(userAnswer(0)==expectedAnswer) {
-      println("Entered if userAnswer(0)")
       val unknownFile = tokenImagePair(token).unknown
       if((unknownAnswers(unknownFile)).contains(userAnswer(1))) {
-        println("Enterd 2 if")
         unknownAnswers(unknownFile)(userAnswer(1)) += 1
         total(unknownFile) += 1
       } else {
-        println("Enter else")
         unknownAnswers(unknownFile)+=(userAnswer(1)) -> 1
         total(unknownFile) += 1
       }
@@ -68,10 +64,8 @@ class LabelCaptcha extends ChallengeProvider {
           unknownFiles = new File("unknown").list.toList
         }
       }
-      println("ret true")
       true
     } else {
-      println("ret false")
       false
     }
   }
