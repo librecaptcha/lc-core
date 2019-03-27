@@ -30,7 +30,8 @@ class Captcha {
   val filters = Map("FilterChallenge" -> new FilterChallenge,
                     "FontFunCaptcha" -> new FontFunCaptcha,
                     "GifCaptcha" -> new GifCaptcha,
-                    "ShadowTextCaptcha" -> new ShadowTextCaptcha)
+                    "ShadowTextCaptcha" -> new ShadowTextCaptcha,
+                    "LabelCaptcha" -> new LabelCaptcha)
 
   def getProvider(): String = {
     val random = new scala.util.Random
@@ -58,7 +59,6 @@ class Captcha {
     val blob = new ByteArrayInputStream(challenge.content)
     val token = scala.util.Random.nextInt(10000).toString
     val id = Id(token)
-    print("Successfull")
     insertPstmt.setString(1, token)
     insertPstmt.setString(2, provider.getId)
     insertPstmt.setString(3, challenge.secret)
