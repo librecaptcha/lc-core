@@ -15,7 +15,7 @@ lazy val root = (project in file(".")).
 
     libraryDependencies += "com.sksamuel.scrimage" %% "scrimage-filters" % "2.1.8",
     
-    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.1"
+    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.5"
    
 )
 
