@@ -1,3 +1,6 @@
+// This code was adapted from http://elliot.kroo.net/software/java/GifSequenceWriter/
+// It was available under CC By 3.0
+
 package lc;
 import javax.imageio.*;
 import javax.imageio.metadata.*;
@@ -139,13 +142,4 @@ public class GifSequenceWriter {
         rootNode.appendChild(node);
         return(node);
     }
-
-    /**
-     public GifSequenceWriter(
-     BufferedOutputStream outputStream,
-     int imageType,
-     int timeBetweenFramesMS,
-     boolean loopContinuously) {
-
-     */
 }
