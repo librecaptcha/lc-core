@@ -17,16 +17,16 @@ class Drop {
   var color = 0
   var colorChange = 10
   def mkColor = {
-    new Color(color, color,  200)
+    new Color(color, color,  math.min(200, color+100))
   }
 }
 
 class RainDropsCP extends ChallengeProvider {
   private val alphabet = "abcdefghijklmnopqrstuvwxyz"
   private val n = 6
-  private val bgColor = new Color(245, 245, 245)
-  private val textColor = new Color(248, 248, 248)
-  private val textHighlightColor = new Color(208, 208, 255)
+  private val bgColor = new Color(200, 200, 200)
+  private val textColor = new Color(208, 208, 218)
+  private val textHighlightColor = new Color(100, 100, 125)
 
   def getId = "FilterChallenge"
 
@@ -42,13 +42,12 @@ class RainDropsCP extends ChallengeProvider {
   def returnChallenge(): Challenge = {
     val r = new scala.util.Random
     val secret = Stream.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
-    // val secret = "mmmmmm"
     val width = 450
     val height = 100
     val imgType = BufferedImage.TYPE_INT_RGB
-    val xOffset = 1+r.nextInt(2)
+    val xOffset = 2+r.nextInt(3)
     val xBias = (height / 10) - 2
-    val dropsOrig = Array.fill[Drop](600)( new Drop())
+    val dropsOrig = Array.fill[Drop](2000)( new Drop())
     for (d <- dropsOrig) {
       d.x = r.nextInt(width) - (xBias/2)*xOffset
       d.yOffset = 6+r.nextInt(6)
@@ -58,7 +57,8 @@ class RainDropsCP extends ChallengeProvider {
         d.colorChange *= -1
       }
     }
-    val drops = dropsOrig ++ extendDrops(dropsOrig, 2, xOffset) ++ extendDrops(dropsOrig, 4, xOffset)
+    val drops = dropsOrig ++ extendDrops(dropsOrig, 1, xOffset) ++ extendDrops(dropsOrig, 2, xOffset) ++ extendDrops(dropsOrig, 3, xOffset)
+
 
     val baseFont = new Font(Font.MONOSPACED, Font.BOLD, 80)
     val attributes = new java.util.HashMap[TextAttribute, Object]()
@@ -69,8 +69,8 @@ class RainDropsCP extends ChallengeProvider {
     val baos = new ByteArrayOutputStream();
     val ios = new MemoryCacheImageOutputStream(baos);
     val writer = new GifSequenceWriter(ios, imgType, 60, true);
-    for(i <- 0 until 30){
-      val yOffset = 5+r.nextInt(5)
+    for(i <- 0 until 60){
+      // val yOffset = 5+r.nextInt(5)
       val canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
       val g = canvas.createGraphics()
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -83,13 +83,13 @@ class RainDropsCP extends ChallengeProvider {
       for (d <- drops) {
         g.setColor(d.mkColor)
         g.drawLine(d.x, d.y, d.x+xOffset, d.y+d.yOffset)
-        d.x += xOffset
-        d.y += d.yOffset
+        d.x += xOffset/2
+        d.y += d.yOffset/2
         d.color += d.colorChange
-        if (d.x > width+xOffset || d.y > height+d.yOffset) {
-          val ySteps = 1 + height / d.yOffset
+        if (d.x > width || d.y > height) {
+          val ySteps =  (height / d.yOffset) + 1
           d.x -= xOffset*ySteps
-          d.y -= yOffset*ySteps
+          d.y -= d.yOffset*ySteps
 
         }
         if (d.color > 200 || d.color < 21) {
