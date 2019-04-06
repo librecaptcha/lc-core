@@ -18,14 +18,13 @@ import org.json4s.jackson.Serialization.{read, write}
 import java.util.concurrent._
 import scala.Array
 
-class Captcha {
+class Captcha(throttle: Int) {
   val con: Connection = DriverManager.getConnection("jdbc:h2:./captcha", "sa", "")
   val stmt: Statement = con.createStatement()
   stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, contentType varchar, image blob)")
   val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret, provider, contentType, image) VALUES (?, ?, ?, ?, ?, ?)")
   val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = ?")
   val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge WHERE token = ?")
-
 
   val filters = Map("FilterChallenge" -> new FilterChallenge,
                     "FontFunCaptcha" -> new FontFunCaptcha,
@@ -70,26 +69,21 @@ class Captcha {
   }
 
   val task = new Runnable {
-  	val providerMap = getProvider()
-  	val provider = filters(providerMap)
   	def run(): Unit = {
-	    val challenge = provider.returnChallenge()
-	    val blob = new ByteArrayInputStream(challenge.content)
-	    val token = scala.util.Random.nextInt(10000).toString
-	    val id = Id(token)
-	    insertPstmt.setString(1, token)
-	    insertPstmt.setString(2, provider.getId)
-	    insertPstmt.setString(3, challenge.secret)
-	    insertPstmt.setString(4, providerMap)
-	    insertPstmt.setString(5, challenge.contentType)
-	    insertPstmt.setBlob(6, blob)
-	    insertPstmt.executeUpdate()
+      val imageNum = stmt.executeQuery("SELECT COUNT(*) AS total FROM challenge")
+      var throttleIn = throttle
+      if(imageNum.next())
+        throttleIn = (throttle-imageNum.getInt("total")) + ((10*throttle)/100).asInstanceOf[Int]
+      while(0 <= throttleIn-1){
+        getChallenge(Parameters("","","",Option(Size(0,0))))
+        throttleIn -= 1
+      }
   	}
   }
 
   def beginThread(delay: Int) : Unit = {
-  	val ex = new ScheduledThreadPoolExecutor(1)
-  	val thread = ex.scheduleAtFixedRate(task, 1, delay, TimeUnit.SECONDS)
+    val ex = new ScheduledThreadPoolExecutor(1)
+    val thread = ex.scheduleWithFixedDelay(task, 1, delay, TimeUnit.SECONDS)
   }
 
   def getAnswer(answer: Answer): Boolean = {
@@ -124,7 +118,7 @@ case class Id(id: String)
 case class Answer(answer: String, id: String)
 
 class Server(port: Int){
-	val captcha = new Captcha()
+	val captcha = new Captcha(0)
 	val server = new HTTPServer(port)
 	val host = server.getVirtualHost(null)
 
@@ -175,11 +169,10 @@ class Server(port: Int){
 
 object LCFramework{
   def main(args: scala.Array[String]) {
-  	val captcha = new Captcha()
+  	val captcha = new Captcha(50)
     val server = new Server(8888)
     server.start()
-    //captcha.beginThread(2)
-    
+    captcha.beginThread(2)
   } 
 }
 
