@@ -71,9 +71,9 @@ class Captcha(throttle: Int) {
   val task = new Runnable {
   	def run(): Unit = {
       val imageNum = stmt.executeQuery("SELECT COUNT(*) AS total FROM challenge")
-      var throttleIn = throttle
+      var throttleIn = throttle + ((10*throttle)/100).asInstanceOf[Int]
       if(imageNum.next())
-        throttleIn = (throttle-imageNum.getInt("total")) + ((10*throttle)/100).asInstanceOf[Int]
+        throttleIn = (throttleIn-imageNum.getInt("total"))
       while(0 <= throttleIn-1){
         getChallenge(Parameters("","","",Option(Size(0,0))))
         throttleIn -= 1
