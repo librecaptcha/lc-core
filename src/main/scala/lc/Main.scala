@@ -71,10 +71,10 @@ class Captcha(throttle: Int) {
   val task = new Runnable {
   	def run(): Unit = {
       val imageNum = stmt.executeQuery("SELECT COUNT(*) AS total FROM challenge")
-      var throttleIn = throttle + ((10*throttle)/100).asInstanceOf[Int]
+      var throttleIn = (throttle*1.1).toInt
       if(imageNum.next())
         throttleIn = (throttleIn-imageNum.getInt("total"))
-      while(0 <= throttleIn-1){
+      while(0 < throttleIn){
         getChallenge(Parameters("","","",Option(Size(0,0))))
         throttleIn -= 1
       }
@@ -171,8 +171,8 @@ object LCFramework{
   def main(args: scala.Array[String]) {
   	val captcha = new Captcha(50)
     val server = new Server(8888)
-    server.start()
     captcha.beginThread(2)
+    server.start()
   } 
 }
 
