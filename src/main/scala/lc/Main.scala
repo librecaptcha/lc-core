@@ -92,16 +92,15 @@ class Captcha(throttle: Int) {
 
   def getChallenge(param: Parameters): Id = {
     val rs = stmt.executeQuery("SELECT token FROM challenge WHERE solved=FALSE LIMIT 1")
-    var id: String = null
-    if(rs.next()){
-      id = rs.getString("token")
+    val id = if(rs.next()){
+      rs.getString("token")
     } else {
-      id = generateChallenge(param)
+      generateChallenge(param)
     }
     Id(id)
   }
 
-  def getAnswer(answer: Answer): Boolean = {
+  def checkAnswer(answer: Answer): Boolean = {
     selectPstmt.setString(1, answer.id)
     val rs: ResultSet = selectPstmt.executeQuery()
     rs.next()
@@ -169,7 +168,7 @@ class Server(port: Int){
     	val body = req.getJson()
     	val json = parse(body)
     	val answer = json.extract[Answer]
-    	val result = captcha.getAnswer(answer)
+    	val result = captcha.checkAnswer(answer)
     	resp.getHeaders().add("Content-Type","application/json")
     	val responseContent = if(result) """{"result":"True"}""" else """{"result":"False"}"""
     	resp.send(200,responseContent)
