@@ -16,15 +16,18 @@ import java.util.Base64
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.{read, write}
 import java.util.concurrent._
+import java.util.UUID
 import scala.Array
 
 class Captcha(throttle: Int) {
   val con: Connection = DriverManager.getConnection("jdbc:h2:./captcha", "sa", "")
   val stmt: Statement = con.createStatement()
-  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, contentType varchar, image blob, solved boolean default False)")
+  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, contentType varchar, image blob, solved boolean default False, PRIMARY KEY(token))")
+  stmt.execute("CREATE TABLE IF NOT EXISTS mapId(uuid varchar, token varchar, PRIMARY KEY(uuid), FOREIGN KEY(token) REFERENCES challenge(token))")
   val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret, provider, contentType, image) VALUES (?, ?, ?, ?, ?, ?)")
+  val mapPstmt: PreparedStatement = con.prepareStatement("INSERT INTO mapId(uuid, token) VALUES (?, ?)")
   val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = ?")
-  val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge WHERE token = ?")
+  val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge c, mapId m WHERE c.token=m.token AND m.uuid = ?")
   val updatePstmt: PreparedStatement = con.prepareStatement("UPDATE challenge SET solved = True WHERE token = ?")
 
   val filters = Map("FilterChallenge" -> new FilterChallenge,
@@ -98,7 +101,16 @@ class Captcha(throttle: Int) {
     } else {
       id = generateChallenge(param)
     }
-    Id(id)
+    val uuid = getUUID(id)
+    Id(uuid)
+  }
+
+  def getUUID(id: String): String = {
+    val uuid = UUID.randomUUID().toString
+    mapPstmt.setString(1,uuid)
+    mapPstmt.setString(2,id)
+    mapPstmt.executeUpdate()
+    uuid
   }
 
   def getAnswer(answer: Answer): Boolean = {
@@ -184,7 +196,7 @@ class Server(port: Int){
 
 object LCFramework{
   def main(args: scala.Array[String]) {
-  	val captcha = new Captcha(50)
+  	val captcha = new Captcha(2)
     val server = new Server(8888)
     captcha.beginThread(2)
     server.start()
