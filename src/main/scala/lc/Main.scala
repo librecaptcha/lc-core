@@ -24,11 +24,13 @@ class Captcha(throttle: Int) {
   val stmt: Statement = con.createStatement()
   stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, contentType varchar, image blob, solved boolean default False, PRIMARY KEY(token))")
   stmt.execute("CREATE TABLE IF NOT EXISTS mapId(uuid varchar, token varchar, PRIMARY KEY(uuid), FOREIGN KEY(token) REFERENCES challenge(token))")
+  stmt.execute("CREATE TABLE IF NOT EXISTS users(email varchar, hash int)")
   val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret, provider, contentType, image) VALUES (?, ?, ?, ?, ?, ?)")
   val mapPstmt: PreparedStatement = con.prepareStatement("INSERT INTO mapId(uuid, token) VALUES (?, ?)")
   val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = ?")
   val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge c, mapId m WHERE c.token=m.token AND m.uuid = ?")
   val updatePstmt: PreparedStatement = con.prepareStatement("UPDATE challenge SET solved = True WHERE token = ?")
+  val userPstmt: PreparedStatement = con.prepareStatement("INSERT INTO users(email, hash) VALUES (?,?)")
 
   val filters = Map("FilterChallenge" -> new FilterChallenge,
                     "FontFunCaptcha" -> new FontFunCaptcha,
@@ -121,6 +123,16 @@ class Captcha(throttle: Int) {
     filters(provider).checkAnswer(secret, answer.answer)
   }
 
+  def getHash(email: String): Int = {
+    val secret = ""
+    val str = email+secret
+    val hash = str.hashCode()
+    userPstmt.setString(1, email)
+    userPstmt.setInt(2, hash)
+    userPstmt.executeUpdate()
+    hash
+  }
+
   def display(): Unit = {
     val rs: ResultSet = stmt.executeQuery("SELECT * FROM challenge")
     println("token\t\tid\t\tsecret\t\tsolved")
@@ -186,6 +198,17 @@ class Server(port: Int){
     	resp.send(200,responseContent)
     	0
     },"POST")
+
+    host.addContext("/v1/register", new FileContextHandler(new File("client/")))
+
+    host.addContext("/v1/token", (req,resp) => {
+      val params = req.getParams()
+      val hash = captcha.getHash(params.get("email"))
+      val token = Secret(hash)
+      resp.getHeaders().add("Content-Type", "application/json")
+      resp.send(200, write(token))
+      0
+    })
 
     def start(): Unit = {
     	server.start()
