@@ -1,7 +1,6 @@
-*.class
-*.log
-*.png
-*.db
+/*.log
+/*.png
+/*.db
 /bin/
 /project/target/
 /target/
