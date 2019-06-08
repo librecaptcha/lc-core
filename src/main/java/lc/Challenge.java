@@ -10,4 +10,8 @@ public class Challenge {
     this.contentType = contentType;
     this.secret = secret;
   }
+
+  public String toString() {
+    return "Challenge: " + contentType + " content length: " + content.length;
+  }
 }
