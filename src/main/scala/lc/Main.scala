@@ -58,6 +58,12 @@ class Captcha(throttle: Int) {
   	image
   }
   
+  def generateChallengeSamples() = {
+    providers.map {case (key, provider) =>
+      (key, provider.returnChallenge())
+    }
+  }
+
   def generateChallenge(param: Parameters): String = {
   	//TODO: eval params to choose a provider
   	val providerMap = getProvider()
@@ -202,3 +208,17 @@ object LCFramework{
   } 
 }
 
+object MakeSamples {
+  def main(args: scala.Array[String]) {
+    val captcha = new Captcha(2)
+    val samples = captcha.generateChallengeSamples()
+    samples.foreach {case (key, sample) =>
+      val extensionMap = Map("image/png" -> "png", "image/gif" -> "gif")
+      println(key + ": " + sample)
+
+      val outStream = new java.io.FileOutputStream("samples/"+key+"."+extensionMap(sample.contentType))
+      outStream.write(sample.content)
+      outStream.close
+    }
+  }
+}
