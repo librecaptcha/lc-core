@@ -116,7 +116,7 @@ class RainDropsCP extends ChallengeProvider {
     ios.close
 
     // ImageIO.write(canvas,"png",baos);
-    new Challenge(baos.toByteArray, "image/png", secret)
+    new Challenge(baos.toByteArray, "image/gif", secret)
   }
   def checkAnswer(secret: String, answer: String): Boolean = {
     secret == answer
