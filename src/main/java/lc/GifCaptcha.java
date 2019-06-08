@@ -2,6 +2,7 @@ package lc;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -15,6 +16,8 @@ public class GifCaptcha implements ChallengeProvider{
         BufferedImage img = new BufferedImage(250, 100, BufferedImage.TYPE_INT_RGB);
         Font font = new Font("Bradley Hand", Font.ROMAN_BASELINE, 48);
         Graphics2D graphics2D = img.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         graphics2D.setFont(font);
         graphics2D.setColor(new Color((int)(Math.random() * 0x1000000)));
         graphics2D.drawString( text , 45, 45);

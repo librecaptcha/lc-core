@@ -2,6 +2,7 @@ package lc;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.font.TextLayout;
@@ -24,6 +25,9 @@ public class ShadowTextCaptcha implements ChallengeProvider{
         BufferedImage img = new BufferedImage(350, 100, BufferedImage.TYPE_INT_RGB);
         Font font = new Font("Arial",Font.ROMAN_BASELINE ,48);
         Graphics2D graphics2D = img.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
         TextLayout textLayout = new TextLayout(text, font, graphics2D.getFontRenderContext());
         HelperFunctions.setRenderingHints(graphics2D);
         graphics2D.setPaint(Color.WHITE);
