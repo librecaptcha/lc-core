@@ -66,7 +66,7 @@ public class FontFunCaptcha implements ChallengeProvider{
     public Challenge returnChallenge() {
         String secret = HelperFunctions.randomString(7);
         String path = "./lib/fonts/";
-        return new Challenge(fontFun(secret,"medium",path),"png",secret.toLowerCase());
+        return new Challenge(fontFun(secret,"medium",path),"image/png",secret.toLowerCase());
     }
 
     public boolean checkAnswer(String secret, String answer){

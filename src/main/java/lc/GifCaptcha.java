@@ -42,7 +42,7 @@ public class GifCaptcha implements ChallengeProvider{
 
     public Challenge returnChallenge() {
         String secret = HelperFunctions.randomString(6);
-        return new Challenge(gifCaptcha(secret),"gif",secret.toLowerCase());
+        return new Challenge(gifCaptcha(secret),"image/gif",secret.toLowerCase());
     }
 
     public boolean checkAnswer(String secret, String answer) {

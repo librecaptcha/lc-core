@@ -55,6 +55,6 @@ public class ShadowTextCaptcha implements ChallengeProvider{
 
     public Challenge returnChallenge() {
         String secret = HelperFunctions.randomString(6);
-        return new Challenge(shadowText(secret),"png",secret.toLowerCase());
+        return new Challenge(shadowText(secret),"image/png",secret.toLowerCase());
     }
 }
