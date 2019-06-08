@@ -34,6 +34,7 @@ class Captcha(throttle: Int) {
                     "FontFunCaptcha" -> new FontFunCaptcha,
                     "GifCaptcha" -> new GifCaptcha,
                     "ShadowTextCaptcha" -> new ShadowTextCaptcha,
+                    "RainDropsCaptcha" -> new RainDropsCP,
                     "LabelCaptcha" -> new LabelCaptcha)
 
   def getProvider(): String = {
