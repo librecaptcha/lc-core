@@ -175,20 +175,48 @@ case class Secret(token: Int)
 
 class RateLimiter extends DBConn {
   val stmt = getConn()
-  val userActive = collection.mutable.Map[Int, Int]()
+  val userLastActive = collection.mutable.Map[Int, Long]()
+  val userAllowance = collection.mutable.Map[Int, Double]() 
+  val rate = 2.0 
+  val per = 45.0
+  val allowance = rate
 
   def validateUser(user: Int) : Boolean = {
-    validatePstmt.setInt(1, user)
-    val rs = validatePstmt.executeQuery()
-    val validated = if(rs.next()){
-      val hash = rs.getInt("hash")
-      userActive(hash) = 0
+    val allow = if(userLastActive.contains(user)){
       true
     } else {
-      false
+      validatePstmt.setInt(1, user)
+      val rs = validatePstmt.executeQuery()
+      val validated = if(rs.next()){
+        val hash = rs.getInt("hash")
+        userLastActive(hash) = System.currentTimeMillis()
+        userAllowance(hash) = allowance
+        true
+      } else {
+        false
+      }
+      validated
     }
-    validated
+    allow
   }
+
+  def checkLimit(user: Int): Boolean = {
+    synchronized {
+      val current = System.currentTimeMillis()
+      val time_passed = (current - userLastActive(user)) / 1000000000 
+      userLastActive(user) = current
+      userAllowance(user) += time_passed * (rate/per)
+      if(userAllowance(user) > rate){ userAllowance(user) = rate }
+      val allow = if(userAllowance(user) < 1.0){
+        false
+      } else {
+        userAllowance(user) -= 1.0
+        true
+      }
+      allow
+    }
+  }
+
 }
 
 class Server(port: Int){
@@ -203,13 +231,13 @@ class Server(port: Int){
       val accessToken = if(req.getHeaders().get("access-token") != null){
         req.getHeaders().get("access-token").toInt
       } else 0
-      val id = if(true == rateLimiter.validateUser(accessToken)){
+      val id = if(true == rateLimiter.validateUser(accessToken) && true == rateLimiter.checkLimit(accessToken)){
         val body = req.getJson()
       	val json = parse(body)
       	val param = json.extract[Parameters]
         captcha.getChallenge(param)
       } else {
-        "Not a valid user! Please register."
+        "Not a valid user or rate limit reached!"
       }
     	resp.getHeaders().add("Content-Type","application/json")
     	resp.send(200, write(id))
