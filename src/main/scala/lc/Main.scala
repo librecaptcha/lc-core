@@ -182,22 +182,24 @@ class RateLimiter extends DBConn {
   val allowance = rate
 
   def validateUser(user: Int) : Boolean = {
-    val allow = if(userLastActive.contains(user)){
-      true
-    } else {
-      validatePstmt.setInt(1, user)
-      val rs = validatePstmt.executeQuery()
-      val validated = if(rs.next()){
-        val hash = rs.getInt("hash")
-        userLastActive(hash) = System.currentTimeMillis()
-        userAllowance(hash) = allowance
+    synchronized {
+      val allow = if(userLastActive.contains(user)){
         true
       } else {
-        false
+        validatePstmt.setInt(1, user)
+        val rs = validatePstmt.executeQuery()
+        val validated = if(rs.next()){
+          val hash = rs.getInt("hash")
+          userLastActive(hash) = System.currentTimeMillis()
+          userAllowance(hash) = allowance
+          true
+        } else {
+          false
+        }
+        validated
       }
-      validated
+      allow
     }
-    allow
   }
 
   def checkLimit(user: Int): Boolean = {
@@ -228,10 +230,9 @@ class Server(port: Int){
 	implicit val formats = DefaultFormats
 
 	host.addContext("/v1/captcha",(req, resp) => {
-      val accessToken = if(req.getHeaders().get("access-token") != null){
-        req.getHeaders().get("access-token").toInt
-      } else 0
-      val id = if(true == rateLimiter.validateUser(accessToken) && true == rateLimiter.checkLimit(accessToken)){
+      val accessToken = Option(req.getHeaders().get("access-token")).map(_.toInt)
+      val access = accessToken.map(t => rateLimiter.validateUser(t) && rateLimiter.checkLimit(t)).getOrElse(false)
+      val id = if(access){
         val body = req.getJson()
       	val json = parse(body)
       	val param = json.extract[Parameters]
