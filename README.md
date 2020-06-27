@@ -1,14 +1,14 @@
 # LibreCaptcha
 LibreCaptcha is a framework that allows developers to create their own [CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA)s.
 It allows developers to easily create new types of CAPTCHAs by defining a structure for them. Mundane details are handled by the
-framework itself. Details, such as:
+framework itself. Details such as:
   * Background workers to render CAPTCHAs and to store them in a database
-  * Provinding an HTTP interface for serving CAPTCHAs
-  * Managing secrets for the CAPTCHAs (tokens, answers, etc)
+  * Providing an HTTP interface for serving CAPTCHAs
+  * Managing secrets for the CAPTCHAs (tokens, expected answers, etc)
   * Safe re-impressions of CAPTCHA images (by creating unique tokens for every impression)
   * Sandboxed plugin architecture (To be done)
 
-Some sample CAPTCHAs are included in the distribution. We will continue adding more samples to the list. For quick
+Some sample CAPTCHA generators are included in the distribution. We will continue adding more samples to the list. For quick
 deployments the samples themselves might be sufficient. Projects with more resources could create their own CAPTCHAs
 and use the samples as inspiration.
 
