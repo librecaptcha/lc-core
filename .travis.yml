@@ -1,6 +1,6 @@
 language: scala
 jdk: openjdk11
 scala:
-        - 2.12.8
+        - 2.13.2
 script:
         - sbt ++$TRAVIS_SCALA_VERSION compile
