@@ -22,10 +22,10 @@ class FilterChallenge extends ChallengeProvider {
     g.setFont(new Font("Serif", Font.PLAIN, 30))
     g.drawString(secret, 5, 30)
     g.dispose()
-    var image = new Image(canvas, ImageMetadata.empty)
+    var image = ImmutableImage.fromAwt(canvas)
     val s = scala.util.Random.nextInt(2)
     image = filterTypes(s).applyFilter(image)
-    new Challenge(image.bytes, "image/png", secret)
+    new Challenge(image.bytes(new nio.PngWriter()), "image/png", secret)
   }
   def checkAnswer(secret: String, answer: String): Boolean = {
     secret == answer
@@ -33,11 +33,11 @@ class FilterChallenge extends ChallengeProvider {
 }
 
 trait FilterType {
-  def applyFilter(image: Image): Image
+  def applyFilter(image: ImmutableImage): ImmutableImage
 }
 
 class FilterType1 extends FilterType {
-  override def applyFilter(image: Image): Image = {
+  override def applyFilter(image: ImmutableImage): ImmutableImage = {
     val blur = new GaussianBlurFilter(2)
     val smear = new SmearFilter(com.sksamuel.scrimage.filter.SmearType.Circles, 10, 10, 10, 0, 1)
     val diffuse = new DiffuseFilter(2)
@@ -49,7 +49,7 @@ class FilterType1 extends FilterType {
 }
 
 class FilterType2 extends FilterType {
-  override def applyFilter(image: Image): Image = {
+  override def applyFilter(image: ImmutableImage): ImmutableImage = {
     val smear = new SmearFilter(com.sksamuel.scrimage.filter.SmearType.Circles, 10, 10, 10, 0, 1)
     val diffuse = new DiffuseFilter(1)
     val ripple = new RippleFilter(com.sksamuel.scrimage.filter.RippleType.Noise, 1, 1, 0.005.toFloat, 0.005.toFloat)
