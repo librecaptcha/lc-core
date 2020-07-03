@@ -13,7 +13,7 @@ class RateLimiter extends DBConn {
   val stmt = getConn()
   val userLastActive = collection.mutable.Map[Int, Long]()
   val userAllowance = collection.mutable.Map[Int, Double]()
-  val rate = 2.0
+  val rate = 8.0
   val per = 45.0
   val allowance = rate
 
