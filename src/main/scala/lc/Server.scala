@@ -121,6 +121,7 @@ class Server(port: Int){
     })
 
     def start(): Unit = {
+      println("Starting server on port:" + port)
     	server.start()
     }
 
