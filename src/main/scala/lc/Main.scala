@@ -18,12 +18,14 @@ class Captcha(throttle: Int) extends DBConn {
   stmt.execute("CREATE TABLE IF NOT EXISTS mapId(uuid varchar, token varchar, PRIMARY KEY(uuid), FOREIGN KEY(token) REFERENCES challenge(token))")
   stmt.execute("CREATE TABLE IF NOT EXISTS users(email varchar, hash int)")
 
-  val providers = Map("FilterChallenge" -> new FilterChallenge,
-                    "FontFunCaptcha" -> new FontFunCaptcha,
-                    "GifCaptcha" -> new GifCaptcha,
-                    "ShadowTextCaptcha" -> new ShadowTextCaptcha,
-                    "RainDropsCaptcha" -> new RainDropsCP,
-                    "LabelCaptcha" -> new LabelCaptcha)
+  val providers = Map(
+    "FilterChallenge" -> new FilterChallenge,
+    "FontFunCaptcha" -> new FontFunCaptcha,
+    "GifCaptcha" -> new GifCaptcha,
+    "ShadowTextCaptcha" -> new ShadowTextCaptcha,
+    "RainDropsCaptcha" -> new RainDropsCP,
+    "LabelCaptcha" -> new LabelCaptcha
+    )
 
   def getProvider(): String = {
     val random = new scala.util.Random
