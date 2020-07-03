@@ -7,7 +7,7 @@ class DBConn(){
 
   lazy val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret, provider, contentType, image) VALUES (?, ?, ?, ?, ?, ?)")
   lazy val mapPstmt: PreparedStatement = con.prepareStatement("INSERT INTO mapId(uuid, token) VALUES (?, ?)")
-  lazy val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = ?")
+  lazy val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ?)")
   lazy val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge c, mapId m WHERE c.token=m.token AND m.uuid = ?")
   lazy val updatePstmt: PreparedStatement = con.prepareStatement("UPDATE challenge SET solved = True WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ?)")
   lazy val userPstmt: PreparedStatement = con.prepareStatement("INSERT INTO users(email, hash) VALUES (?,?)")
