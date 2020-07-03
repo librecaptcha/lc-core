@@ -41,7 +41,7 @@ class RateLimiter extends DBConn {
   def checkLimit(user: Int): Boolean = {
     synchronized {
       val current = System.currentTimeMillis()
-      val time_passed = (current - userLastActive(user)) / 1000000000
+      val time_passed = (current - userLastActive(user)) / 1000
       userLastActive(user) = current
       userAllowance(user) += time_passed * (rate/per)
       if(userAllowance(user) > rate){ userAllowance(user) = rate }
