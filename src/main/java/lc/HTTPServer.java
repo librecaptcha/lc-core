@@ -1395,9 +1395,11 @@ public class HTTPServer {
         /**
         * Returns the body in a String format
         */
-        public String getJson(){
-          java.util.Scanner s = new java.util.Scanner(body).useDelimiter("\\A");
-          return s.hasNext() ? s.next() : "";
+        public String getJson() {
+          try(final java.util.Scanner s = new java.util.Scanner(body).useDelimiter("\\A")) {
+            final String result = s.hasNext() ? s.next() : "";
+            return result;
+          }
         }
 
         /**
@@ -3034,29 +3036,27 @@ public class HTTPServer {
                 w = name.length();
         w += 2; // with room for added slash and space
         // note: we use apache's format, for consistent user experience
-        Formatter f = new Formatter(Locale.US);
-        f.format("<!DOCTYPE html>%n" +
-            "<html><head><title>Index of %s</title></head>%n" +
-            "<body><h1>Index of %s</h1>%n" +
-            "<pre> Name%" + (w - 5) + "s Last modified      Size<hr>",
-            path, path, "");
-        if (path.length() > 1) // add parent link if not root path
-            f.format(" <a href=\"%s/\">Parent Directory</a>%"
-                + (w + 5) + "s-%n", getParentPath(path), "");
-        for (File file : dir.listFiles()) {
-            try {
-                String name = file.getName() + (file.isDirectory() ? "/" : "");
-                String size = file.isDirectory() ? "- " : toSizeApproxString(file.length());
-                // properly url-encode the link
-                String link = new URI(null, path + name, null).toASCIIString();
-                if (!file.isHidden() && !name.startsWith("."))
-                    f.format(" <a href=\"%s\">%s</a>%-" + (w - name.length()) +
-                        "s&#8206;%td-%<tb-%<tY %<tR%6s%n",
-                        link, name, "", file.lastModified(), size);
-            } catch (URISyntaxException ignore) {}
+        try(Formatter f = new Formatter(Locale.US)) {
+            f.format("<!DOCTYPE html>%n" + "<html><head><title>Index of %s</title></head>%n"
+                    + "<body><h1>Index of %s</h1>%n" + "<pre> Name%" + (w - 5) + "s Last modified      Size<hr>", path,
+                    path, "");
+            if (path.length() > 1) // add parent link if not root path
+                f.format(" <a href=\"%s/\">Parent Directory</a>%" + (w + 5) + "s-%n", getParentPath(path), "");
+            for (File file : dir.listFiles()) {
+                try {
+                    String name = file.getName() + (file.isDirectory() ? "/" : "");
+                    String size = file.isDirectory() ? "- " : toSizeApproxString(file.length());
+                    // properly url-encode the link
+                    String link = new URI(null, path + name, null).toASCIIString();
+                    if (!file.isHidden() && !name.startsWith("."))
+                        f.format(" <a href=\"%s\">%s</a>%-" + (w - name.length()) + "s&#8206;%td-%<tb-%<tY %<tR%6s%n",
+                                link, name, "", file.lastModified(), size);
+                } catch (URISyntaxException ignore) {
+                }
+            }
+            f.format("</pre></body></html>");
+            return f.toString();
         }
-        f.format("</pre></body></html>");
-        return f.toString();
     }
 
     /**
