@@ -68,16 +68,17 @@ class Server(port: Int){
 	host.addContext("/v1/captcha",(req, resp) => {
       val accessToken = Option(req.getHeaders().get("access-token")).map(_.toInt)
       val access = accessToken.map(t => rateLimiter.validateUser(t) && rateLimiter.checkLimit(t)).getOrElse(false)
-      val id = if(access){
+      if(access){
         val body = req.getJson()
       	val json = parse(body)
       	val param = json.extract[Parameters]
-        captcha.getChallenge(param)
+        val id = captcha.getChallenge(param)
+        resp.getHeaders().add("Content-Type","application/json")
+        resp.send(200, write(id))
       } else {
-        "Not a valid user or rate limit reached!"
+        resp.getHeaders().add("Content-Type","application/json")
+        resp.send(400, write("""{"error": "Not a valid user or rate limit reached!"}"""))
       }
-    	resp.getHeaders().add("Content-Type","application/json")
-    	resp.send(200, write(id))
     	0
     },"POST")
 
