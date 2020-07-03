@@ -9,11 +9,11 @@ import java.awt.image.BufferedImage
 import java.awt.{Graphics2D,Color}
 
 class LabelCaptcha extends ChallengeProvider {
-  var knownFiles = new File("known").list.toList
-  var unknownFiles = new File("unknown").list.toList
-  var tokenImagePair = Map[String, ImagePair]()
-  var unknownAnswers = Map[String, Map[String, Int]]()
-  var total = Map[String, Int]()
+  private var knownFiles = new File("known").list.toList
+  private var unknownFiles = new File("unknown").list.toList
+  private var unknownAnswers = Map[String, Map[String, Int]]()
+  private var total = Map[String, Int]()
+
   for(file <- unknownFiles) {
       unknownAnswers += file -> Map[String, Int]()
       total += file -> 0
