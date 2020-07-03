@@ -3,4 +3,10 @@
 /*.db
 /bin/
 /project/target/
+/project/project/
 /target/
+
+# for various captcha
+/known/
+/unknown/
+/lib/fonts/

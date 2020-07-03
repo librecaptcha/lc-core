@@ -1,46 +1,18 @@
 package lc
 
 import com.sksamuel.scrimage._
-import java.sql._
-import java.io._
-import lc.HTTPServer._
-import lc.FontFunCaptcha._
-import lc.GifCaptcha._
-import lc.ShadowTextCaptcha._
-import javax.imageio._
-import java.awt.image._
-import org.json4s._
-import org.json4s.jackson.JsonMethods._
-import org.json4s.JsonDSL._
-import java.util.Base64
-import org.json4s.jackson.Serialization
-import org.json4s.jackson.Serialization.{read, write}
+import java.io.ByteArrayInputStream
 import java.util.concurrent._
 import java.util.UUID
-import scala.Array
+import java.sql.{Blob, ResultSet}
 
-class DBConn(){
-  val con: Connection = DriverManager.getConnection("jdbc:h2:./captcha", "sa", "")
-
-  lazy val insertPstmt: PreparedStatement = con.prepareStatement("INSERT INTO challenge(token, id, secret, provider, contentType, image) VALUES (?, ?, ?, ?, ?, ?)")
-  lazy val mapPstmt: PreparedStatement = con.prepareStatement("INSERT INTO mapId(uuid, token) VALUES (?, ?)")
-  lazy val selectPstmt: PreparedStatement = con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ?)")
-  lazy val imagePstmt: PreparedStatement = con.prepareStatement("SELECT image FROM challenge c, mapId m WHERE c.token=m.token AND m.uuid = ?")
-  lazy val updatePstmt: PreparedStatement = con.prepareStatement("UPDATE challenge SET solved = True WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ?)")
-  lazy val userPstmt: PreparedStatement = con.prepareStatement("INSERT INTO users(email, hash) VALUES (?,?)")
-  lazy val validatePstmt: PreparedStatement = con.prepareStatement("SELECT hash FROM users WHERE hash = ? LIMIT 1")
-
-  def getConn(): Statement = {
-    con.createStatement()
-  }
-
-  def closeConnection(): Unit = {
-	  con.close()
-  } 
-}
+case class Size(height: Int, width: Int)
+case class Parameters(level: String, media: String, input_type: String, size: Option[Size])
+case class Id(id: String)
+case class Answer(answer: String, id: String)
 
 class Captcha(throttle: Int) extends DBConn {
-  
+
   val stmt = getConn()
   stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, contentType varchar, image blob, solved boolean default False, PRIMARY KEY(token))")
   stmt.execute("CREATE TABLE IF NOT EXISTS mapId(uuid varchar, token varchar, PRIMARY KEY(uuid), FOREIGN KEY(token) REFERENCES challenge(token))")
@@ -74,7 +46,7 @@ class Captcha(throttle: Int) extends DBConn {
   		image =  blob.getBytes(1, blob.length().toInt)
   	image
   }
-  
+
   def generateChallengeSamples() = {
     providers.map {case (key, provider) =>
       (key, provider.returnChallenge())
@@ -117,7 +89,7 @@ class Captcha(throttle: Int) extends DBConn {
   }
 
   def getChallenge(param: Parameters): Id = {
-    val rs = stmt.executeQuery("SELECT token FROM challenge WHERE solved=FALSE LIMIT 1")
+    val rs = stmt.executeQuery("SELECT token FROM challenge WHERE solved=FALSE ORDER BY RAND() LIMIT 1")
     val id = if(rs.next()){
       rs.getString("token")
     } else {
@@ -138,10 +110,13 @@ class Captcha(throttle: Int) extends DBConn {
   def checkAnswer(answer: Answer): Boolean = {
     selectPstmt.setString(1, answer.id)
     val rs: ResultSet = selectPstmt.executeQuery()
-    rs.next()
-    val secret = rs.getString("secret")
-    val provider = rs.getString("provider")
-    providers(provider).checkAnswer(secret, answer.answer)
+    if (rs.first()) {
+      val secret = rs.getString("secret")
+      val provider = rs.getString("provider")
+      providers(provider).checkAnswer(secret, answer.answer)
+    } else {
+      false
+    }
   }
 
   def getHash(email: String): Int = {
@@ -167,135 +142,13 @@ class Captcha(throttle: Int) extends DBConn {
   }
 }
 
-case class Size(height: Int, width: Int)
-case class Parameters(level: String, media: String, input_type: String, size: Option[Size])
-case class Id(id: String)
-case class Answer(answer: String, id: String)
-case class Secret(token: Int)
-
-class RateLimiter extends DBConn {
-  val stmt = getConn()
-  val userLastActive = collection.mutable.Map[Int, Long]()
-  val userAllowance = collection.mutable.Map[Int, Double]() 
-  val rate = 2.0 
-  val per = 45.0
-  val allowance = rate
-
-  def validateUser(user: Int) : Boolean = {
-    synchronized {
-      val allow = if(userLastActive.contains(user)){
-        true
-      } else {
-        validatePstmt.setInt(1, user)
-        val rs = validatePstmt.executeQuery()
-        val validated = if(rs.next()){
-          val hash = rs.getInt("hash")
-          userLastActive(hash) = System.currentTimeMillis()
-          userAllowance(hash) = allowance
-          true
-        } else {
-          false
-        }
-        validated
-      }
-      allow
-    }
-  }
-
-  def checkLimit(user: Int): Boolean = {
-    synchronized {
-      val current = System.currentTimeMillis()
-      val time_passed = (current - userLastActive(user)) / 1000000000 
-      userLastActive(user) = current
-      userAllowance(user) += time_passed * (rate/per)
-      if(userAllowance(user) > rate){ userAllowance(user) = rate }
-      val allow = if(userAllowance(user) < 1.0){
-        false
-      } else {
-        userAllowance(user) -= 1.0
-        true
-      }
-      allow
-    }
-  }
-
-}
-
-class Server(port: Int){
-	val captcha = new Captcha(0)
-  val rateLimiter = new RateLimiter()
-	val server = new HTTPServer(port)
-	val host = server.getVirtualHost(null)
-
-	implicit val formats = DefaultFormats
-
-	host.addContext("/v1/captcha",(req, resp) => {
-      val accessToken = Option(req.getHeaders().get("access-token")).map(_.toInt)
-      val access = accessToken.map(t => rateLimiter.validateUser(t) && rateLimiter.checkLimit(t)).getOrElse(false)
-      val id = if(access){
-        val body = req.getJson()
-      	val json = parse(body)
-      	val param = json.extract[Parameters]
-        captcha.getChallenge(param)
-      } else {
-        "Not a valid user or rate limit reached!"
-      }
-    	resp.getHeaders().add("Content-Type","application/json")
-    	resp.send(200, write(id))
-    	0
-    },"POST")
-
-    host.addContext("/v1/media",(req, resp) => {
-    	var id = Id(null)
-    	if ("GET" == req.getMethod()){
-    		val params = req.getParams()
-    		id = Id(params.get("id"))
-    	} else {
-    		val body = req.getJson()
-    		val json = parse(body)
-    		id = json.extract[Id]
-    	}
-    	val image = captcha.getCaptcha(id)
-    	resp.getHeaders().add("Content-Type","image/png")
-    	resp.send(200, image)
-    	0
-    },"POST", "GET")
-
-    host.addContext("/v1/answer",(req, resp) => {
-    	val body = req.getJson()
-    	val json = parse(body)
-    	val answer = json.extract[Answer]
-    	val result = captcha.checkAnswer(answer)
-    	resp.getHeaders().add("Content-Type","application/json")
-    	val responseContent = if(result) """{"result":"True"}""" else """{"result":"False"}"""
-    	resp.send(200,responseContent)
-    	0
-    },"POST")
-
-    host.addContext("/v1/register", new FileContextHandler(new File("client/")))
-
-    host.addContext("/v1/token", (req,resp) => {
-      val params = req.getParams()
-      val hash = captcha.getHash(params.get("email"))
-      val token = Secret(hash)
-      resp.getHeaders().add("Content-Type", "application/json")
-      resp.send(200, write(token))
-      0
-    })
-
-    def start(): Unit = {
-    	server.start()
-    }
-
-}
-
 object LCFramework{
   def main(args: scala.Array[String]) {
   	val captcha = new Captcha(2)
     val server = new Server(8888)
     captcha.beginThread(2)
     server.start()
-  } 
+  }
 }
 
 object MakeSamples {
