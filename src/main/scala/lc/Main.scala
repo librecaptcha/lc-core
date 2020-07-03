@@ -110,10 +110,13 @@ class Captcha(throttle: Int) extends DBConn {
   def checkAnswer(answer: Answer): Boolean = {
     selectPstmt.setString(1, answer.id)
     val rs: ResultSet = selectPstmt.executeQuery()
-    rs.next()
-    val secret = rs.getString("secret")
-    val provider = rs.getString("provider")
-    providers(provider).checkAnswer(secret, answer.answer)
+    if (rs.first()) {
+      val secret = rs.getString("secret")
+      val provider = rs.getString("provider")
+      providers(provider).checkAnswer(secret, answer.answer)
+    } else {
+      false
+    }
   }
 
   def getHash(email: String): Int = {
