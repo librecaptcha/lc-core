@@ -89,7 +89,7 @@ class Captcha(throttle: Int) extends DBConn {
   }
 
   def getChallenge(param: Parameters): Id = {
-    val rs = stmt.executeQuery("SELECT token FROM challenge WHERE solved=FALSE LIMIT 1")
+    val rs = stmt.executeQuery("SELECT token FROM challenge WHERE solved=FALSE ORDER BY RAND() LIMIT 1")
     val id = if(rs.next()){
       rs.getString("token")
     } else {
