@@ -6,6 +6,7 @@ conn.request("GET", "/v1/token?email=test")
 response = conn.getresponse()
 responseStr = response.read()
 user = json.loads(responseStr)
+token = user["token"]
 
 params = """{
 "level": "medium",
@@ -13,20 +14,25 @@ params = """{
 "input_type": "text"
 }"""
 
-conn.request("POST", "/v1/captcha", body=params, headers={'access-token': user["token"]})
+def getCaptcha():
+    conn.request("POST", "/v1/captcha", body=params, headers={'access-token': user["token"]})
+    response = conn.getresponse()
 
-response = conn.getresponse()
+    if response:
+        responseStr = response.read()
+        return json.loads(responseStr)
 
-if response:
-    responseStr = response.read()
-    captcha = json.loads(responseStr)
-    print(captcha)
-    captchaId = captcha["id"]
-    reply = {"answer": "xyz", "id" : captchaId}
+def postAnswer(captchaId, ans):
+    reply = {"answer": ans, "id" : captchaId}
     conn.request("POST", "/v1/answer", json.dumps(reply))
     response = conn.getresponse()
     if response:
-        responseStr = response.read()
+        return response.read()
         print(responseStr)
 
 
+for i in range(0, 10000):
+    captcha = getCaptcha()
+    #print(captcha)
+    captchaId = captcha["id"]
+    print(i, postAnswer(captchaId, "xyz"))
