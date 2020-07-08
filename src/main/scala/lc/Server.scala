@@ -41,7 +41,7 @@ class RateLimiter extends DBConn {
   def checkLimit(user: Int): Boolean = {
     synchronized {
       val current = System.currentTimeMillis()
-      val time_passed = (current - userLastActive(user)) / 1000000000
+      val time_passed = (current - userLastActive(user)) / 1000
       userLastActive(user) = current
       userAllowance(user) += time_passed * (rate/per)
       if(userAllowance(user) > rate){ userAllowance(user) = rate }
@@ -77,7 +77,7 @@ class Server(port: Int){
         resp.send(200, write(id))
       } else {
         resp.getHeaders().add("Content-Type","application/json")
-        resp.send(400, write("""{"error": "Not a valid user or rate limit reached!"}"""))
+        resp.send(401, write("""{"error": "Not a valid user or rate limit reached!"}"""))
       }
     	0
     },"POST")
