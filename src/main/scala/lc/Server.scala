@@ -77,7 +77,7 @@ class Server(port: Int){
         resp.send(200, write(id))
       } else {
         resp.getHeaders().add("Content-Type","application/json")
-        resp.send(400, write("""{"error": "Not a valid user or rate limit reached!"}"""))
+        resp.send(401, write("""{"error": "Not a valid user or rate limit reached!"}"""))
       }
     	0
     },"POST")
