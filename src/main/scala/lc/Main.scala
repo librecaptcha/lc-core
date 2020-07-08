@@ -40,16 +40,21 @@ class Captcha(throttle: Int) extends DBConn {
   def getCaptcha(id: Id): Array[Byte] = {
     var image :Array[Byte] = null
     var blob: Blob = null
-  	imagePstmt.setString(1, id.id)
-  	val rs: ResultSet = imagePstmt.executeQuery()
-  	if(rs.next()){
-      blob = rs.getBlob("image")
-      updatePstmt.setString(1,id.id)
-      updatePstmt.executeUpdate()
+    val imageOpt = imagePstmt.synchronized {
+    	imagePstmt.setString(1, id.id)
+    	val rs: ResultSet = imagePstmt.executeQuery()
+    	if(rs.next()){
+        blob = rs.getBlob("image")
+        updatePstmt.synchronized{
+          updatePstmt.setString(1,id.id)
+          updatePstmt.executeUpdate()
+        }
+      }
+    	if(blob != null)
+    		image =  blob.getBytes(1, blob.length().toInt)
+    	image
     }
-  	if(blob != null)
-  		image =  blob.getBytes(1, blob.length().toInt)
-  	image
+    imageOpt
   }
 
   def generateChallengeSamples() = {
