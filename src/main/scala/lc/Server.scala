@@ -9,12 +9,14 @@ import lc.HTTPServer._
 
 case class Secret(token: Int)
 
-class RateLimiter extends DBConn {
+class RateLimiter(dbConn: DBConn) {
   private val userLastActive = collection.mutable.Map[Int, Long]()
   private val userAllowance = collection.mutable.Map[Int, Double]()
   private val rate = 800000.0
   private val per = 45.0
   private val allowance = rate
+
+  private val validatePstmt = dbConn.con.prepareStatement("SELECT hash FROM users WHERE hash = ? LIMIT 1")
 
   private def validateUser(user: Int) : Boolean = {
     val allow = if(userLastActive.contains(user)){
@@ -61,9 +63,8 @@ class RateLimiter extends DBConn {
   }
 }
 
-class Server(port: Int){
-	val captcha = new Captcha(0)
-  val rateLimiter = new RateLimiter()
+class Server(port: Int, captcha: Captcha, dbConn: DBConn){
+  val rateLimiter = new RateLimiter(dbConn)
 	val server = new HTTPServer(port)
 	val host = server.getVirtualHost(null)
 

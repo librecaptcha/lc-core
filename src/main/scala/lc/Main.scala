@@ -14,13 +14,7 @@ case class Answer(answer: String, id: String)
 
 case class ProviderSecret(provider: String, secret: String)
 
-class Captcha(throttle: Int) extends DBConn {
-
-  val stmt = getStatement()
-  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, contentType varchar, image blob, solved boolean default False, PRIMARY KEY(token))")
-  stmt.execute("CREATE TABLE IF NOT EXISTS mapId(uuid varchar, token varchar, PRIMARY KEY(uuid), FOREIGN KEY(token) REFERENCES challenge(token))")
-  stmt.execute("CREATE TABLE IF NOT EXISTS users(email varchar, hash int)")
-
+object CaptchaProviders {
   val providers = Map(
     "FilterChallenge" -> new FilterChallenge,
     "FontFunCaptcha" -> new FontFunCaptcha,
@@ -29,6 +23,28 @@ class Captcha(throttle: Int) extends DBConn {
     "RainDropsCaptcha" -> new RainDropsCP,
     "LabelCaptcha" -> new LabelCaptcha
     )
+
+  def generateChallengeSamples() = {
+    providers.map {case (key, provider) =>
+      (key, provider.returnChallenge())
+    }
+  }
+}
+
+class Captcha(throttle: Int, dbConn: DBConn) {
+  import CaptchaProviders._
+
+  private val stmt = dbConn.getStatement()
+  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, contentType varchar, image blob, solved boolean default False, PRIMARY KEY(token))")
+  stmt.execute("CREATE TABLE IF NOT EXISTS mapId(uuid varchar, token varchar, PRIMARY KEY(uuid), FOREIGN KEY(token) REFERENCES challenge(token))")
+  stmt.execute("CREATE TABLE IF NOT EXISTS users(email varchar, hash int)")
+
+  private val insertPstmt = dbConn.con.prepareStatement("INSERT INTO challenge(token, id, secret, provider, contentType, image) VALUES (?, ?, ?, ?, ?, ?)")
+  private val mapPstmt = dbConn.con.prepareStatement("INSERT INTO mapId(uuid, token) VALUES (?, ?)")
+  private val selectPstmt = dbConn.con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ?)")
+  private val imagePstmt = dbConn.con.prepareStatement("SELECT image FROM challenge c, mapId m WHERE c.token=m.token AND m.uuid = ?")
+  private val updatePstmt = dbConn.con.prepareStatement("UPDATE challenge SET solved = True WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ?)")
+  private val userPstmt = dbConn.con.prepareStatement("INSERT INTO users(email, hash) VALUES (?,?)")
 
   def getProvider(): String = {
     val random = new scala.util.Random
@@ -55,12 +71,6 @@ class Captcha(throttle: Int) extends DBConn {
     	image
     }
     imageOpt
-  }
-
-  def generateChallengeSamples() = {
-    providers.map {case (key, provider) =>
-      (key, provider.returnChallenge())
-    }
   }
 
   private val uniqueIntCount = new AtomicInteger()
@@ -167,8 +177,9 @@ class Captcha(throttle: Int) extends DBConn {
 
 object LCFramework{
   def main(args: scala.Array[String]) {
-  	val captcha = new Captcha(2)
-    val server = new Server(8888)
+    val dbConn = new DBConn()
+  	val captcha = new Captcha(2, dbConn)
+    val server = new Server(8888, captcha, dbConn)
     captcha.beginThread(2)
     server.start()
   }
@@ -176,8 +187,7 @@ object LCFramework{
 
 object MakeSamples {
   def main(args: scala.Array[String]) {
-    val captcha = new Captcha(2)
-    val samples = captcha.generateChallengeSamples()
+    val samples = CaptchaProviders.generateChallengeSamples()
     samples.foreach {case (key, sample) =>
       val extensionMap = Map("image/png" -> "png", "image/gif" -> "gif")
       println(key + ": " + sample)
