@@ -16,7 +16,7 @@ case class ProviderSecret(provider: String, secret: String)
 
 class Captcha(throttle: Int) extends DBConn {
 
-  val stmt = getConn()
+  val stmt = getStatement()
   stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token varchar, id varchar, secret varchar, provider varchar, contentType varchar, image blob, solved boolean default False, PRIMARY KEY(token))")
   stmt.execute("CREATE TABLE IF NOT EXISTS mapId(uuid varchar, token varchar, PRIMARY KEY(uuid), FOREIGN KEY(token) REFERENCES challenge(token))")
   stmt.execute("CREATE TABLE IF NOT EXISTS users(email varchar, hash int)")

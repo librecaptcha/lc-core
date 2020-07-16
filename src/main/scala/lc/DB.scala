@@ -13,7 +13,7 @@ class DBConn(){
   lazy val userPstmt: PreparedStatement = con.prepareStatement("INSERT INTO users(email, hash) VALUES (?,?)")
   lazy val validatePstmt: PreparedStatement = con.prepareStatement("SELECT hash FROM users WHERE hash = ? LIMIT 1")
 
-  def getConn(): Statement = {
+  def getStatement(): Statement = {
     con.createStatement()
   }
 

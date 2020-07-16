@@ -10,7 +10,6 @@ import lc.HTTPServer._
 case class Secret(token: Int)
 
 class RateLimiter extends DBConn {
-  val stmt = getConn()
   val userLastActive = collection.mutable.Map[Int, Long]()
   val userAllowance = collection.mutable.Map[Int, Double]()
   val rate = 8.0
