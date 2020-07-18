@@ -9,57 +9,62 @@ import lc.HTTPServer._
 
 case class Secret(token: Int)
 
-class RateLimiter extends DBConn {
-  val stmt = getConn()
-  val userLastActive = collection.mutable.Map[Int, Long]()
-  val userAllowance = collection.mutable.Map[Int, Double]()
-  val rate = 8.0
-  val per = 45.0
-  val allowance = rate
+class RateLimiter(dbConn: DBConn) {
+  private val userLastActive = collection.mutable.Map[Int, Long]()
+  private val userAllowance = collection.mutable.Map[Int, Double]()
+  private val rate = 800000.0
+  private val per = 45.0
+  private val allowance = rate
 
-  def validateUser(user: Int) : Boolean = {
-    synchronized {
-      val allow = if(userLastActive.contains(user)){
+  private val validatePstmt = dbConn.con.prepareStatement("SELECT hash FROM users WHERE hash = ? LIMIT 1")
+
+  private def validateUser(user: Int) : Boolean = {
+    val allow = if(userLastActive.contains(user)){
+      true
+    } else {
+      validatePstmt.setInt(1, user)
+      val rs = validatePstmt.executeQuery()
+      val validated = if(rs.next()){
+        val hash = rs.getInt("hash")
+        userLastActive(hash) = System.currentTimeMillis()
+        userAllowance(hash) = allowance
         true
       } else {
-        validatePstmt.setInt(1, user)
-        val rs = validatePstmt.executeQuery()
-        val validated = if(rs.next()){
-          val hash = rs.getInt("hash")
-          userLastActive(hash) = System.currentTimeMillis()
-          userAllowance(hash) = allowance
-          true
-        } else {
-          false
-        }
-        validated
-      }
-      allow
-    }
-  }
-
-  def checkLimit(user: Int): Boolean = {
-    synchronized {
-      val current = System.currentTimeMillis()
-      val time_passed = (current - userLastActive(user)) / 1000
-      userLastActive(user) = current
-      userAllowance(user) += time_passed * (rate/per)
-      if(userAllowance(user) > rate){ userAllowance(user) = rate }
-      val allow = if(userAllowance(user) < 1.0){
         false
-      } else {
-        userAllowance(user) -= 1.0
-        true
       }
-      allow
+      validated
     }
+    allow
   }
 
+  private def checkLimit(user: Int): Boolean = {
+    val current = System.currentTimeMillis()
+    val time_passed = (current - userLastActive(user)) / 1000
+    userLastActive(user) = current
+    userAllowance(user) += time_passed * (rate/per)
+    if(userAllowance(user) > rate){ userAllowance(user) = rate }
+    val allow = if(userAllowance(user) < 1.0){
+      false
+    } else {
+      userAllowance(user) -= 1.0
+      true
+    }
+    allow
+  }
+
+  def checkUserAccess(token: Int) : Boolean = {
+    synchronized {
+      if (validateUser(token)) {
+        return checkLimit(token)
+      } else {
+        return false
+      }
+    }
+  }
 }
 
-class Server(port: Int){
-	val captcha = new Captcha(0)
-  val rateLimiter = new RateLimiter()
+class Server(port: Int, captcha: Captcha, dbConn: DBConn){
+  val rateLimiter = new RateLimiter(dbConn)
 	val server = new HTTPServer(port)
 	val host = server.getVirtualHost(null)
 
@@ -67,7 +72,7 @@ class Server(port: Int){
 
 	host.addContext("/v1/captcha",(req, resp) => {
       val accessToken = Option(req.getHeaders().get("access-token")).map(_.toInt)
-      val access = accessToken.map(t => rateLimiter.validateUser(t) && rateLimiter.checkLimit(t)).getOrElse(false)
+      val access = accessToken.map(rateLimiter.checkUserAccess).getOrElse(false)
       if(access){
         val body = req.getJson()
       	val json = parse(body)
