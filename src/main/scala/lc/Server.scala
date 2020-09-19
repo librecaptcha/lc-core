@@ -109,7 +109,7 @@ class Server(port: Int, captcha: Captcha, dbConn: DBConn){
     	val answer = json.extract[Answer]
     	val result = captcha.checkAnswer(answer)
     	resp.getHeaders().add("Content-Type","application/json")
-    	val responseContent = if(result) """{"result":"True"}""" else """{"result":"False"}"""
+    	val responseContent = s"""{"result":"$result"}"""
     	resp.send(200,responseContent)
     	0
     },"POST")
