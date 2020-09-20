@@ -57,9 +57,10 @@ class Captcha(throttle: Int, dbConn: DBConn) {
   stmt.execute("CREATE TABLE IF NOT EXISTS mapId(uuid varchar, token int, lastServed timestamp, PRIMARY KEY(uuid), FOREIGN KEY(token) REFERENCES challenge(token) ON DELETE CASCADE)")
   stmt.execute("CREATE TABLE IF NOT EXISTS users(email varchar, hash int)")
 
+  private val seed = System.currentTimeMillis.toString.substring(2,6).toInt
   
   def getProvider(): String = {
-    val random = new scala.util.Random
+    val random = new scala.util.Random(seed)
     val keys = providers.keys
     val providerIndex = keys.toVector(random.nextInt(keys.size))
     providerIndex
