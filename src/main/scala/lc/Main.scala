@@ -58,11 +58,15 @@ class Captcha(throttle: Int, dbConn: DBConn) {
   stmt.execute("CREATE TABLE IF NOT EXISTS users(email varchar, hash int)")
 
   private val seed = System.currentTimeMillis.toString.substring(2,6).toInt
+  private val random = new scala.util.Random(seed)
+
+  def getNextRandomInt(max: Int) = random.synchronized {
+    random.nextInt(max)
+  }
   
   def getProvider(): String = {
-    val random = new scala.util.Random(seed)
     val keys = providers.keys
-    val providerIndex = keys.toVector(random.nextInt(keys.size))
+    val providerIndex = keys.toVector(getNextRandomInt(keys.size))
     providerIndex
   }
 
