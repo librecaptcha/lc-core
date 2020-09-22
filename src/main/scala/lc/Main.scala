@@ -39,7 +39,6 @@ class Statements(dbConn: DBConn) {
   val selectPstmt = dbConn.con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ? AND DATEDIFF(MINUTE, DATEADD(MINUTE,2,m.lastServed), CURRENT_TIMESTAMP) <= 0)")
   val imagePstmt = dbConn.con.prepareStatement("SELECT image FROM challenge c, mapId m WHERE c.token=m.token AND m.uuid = ?")
   val updateSolvedPstmt = dbConn.con.prepareStatement("UPDATE challenge SET solved = solved+1 WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ?)")
-  val userPstmt = dbConn.con.prepareStatement("INSERT INTO users(email, hash) VALUES (?,?)")
   val tokenPstmt = dbConn.con.prepareStatement("SELECT token FROM challenge WHERE solved < 10 ORDER BY RAND() LIMIT 1")
   val updateTimestampPstmt = dbConn.con.prepareStatement("UPDATE mapId SET lastServed = CURRENT_TIMESTAMP WHERE uuid = ?")
 }
@@ -55,7 +54,6 @@ class Captcha(throttle: Int, dbConn: DBConn) {
   private val stmt = dbConn.getStatement()
   stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token int auto_increment, id varchar, secret varchar, provider varchar, contentType varchar, image blob, solved int default 0, PRIMARY KEY(token))")
   stmt.execute("CREATE TABLE IF NOT EXISTS mapId(uuid varchar, token int, lastServed timestamp, PRIMARY KEY(uuid), FOREIGN KEY(token) REFERENCES challenge(token) ON DELETE CASCADE)")
-  stmt.execute("CREATE TABLE IF NOT EXISTS users(email varchar, hash int)")
 
   private val seed = System.currentTimeMillis.toString.substring(2,6).toInt
   private val random = new scala.util.Random(seed)
@@ -75,15 +73,12 @@ class Captcha(throttle: Int, dbConn: DBConn) {
     var blob: Blob = null
     try {
       val imagePstmt = Statements.tlStmts.get.imagePstmt
-      val updateTimestampPstmt = Statements.tlStmts.get.updateTimestampPstmt
     	imagePstmt.setString(1, id.id)
-      updateTimestampPstmt.setString(1, id.id)
     	val rs: ResultSet = imagePstmt.executeQuery()
     	if(rs.next()){
           blob = rs.getBlob("image")
     	if(blob != null)
     		image =  blob.getBytes(1, blob.length().toInt)
-      updateTimestampPstmt.executeUpdate()
     	image
     }
     image
@@ -142,13 +137,17 @@ class Captcha(throttle: Int, dbConn: DBConn) {
   def getChallenge(param: Parameters): Id = {
     try {
       val tokenPstmt = Statements.tlStmts.get.tokenPstmt
+      val updateTimestampPstmt = Statements.tlStmts.get.updateTimestampPstmt
       val rs = tokenPstmt.executeQuery()
       val tokenOpt = if(rs.next()) {
         Some(rs.getInt("token"))
       } else {
         None
       }
-      Id(getUUID(tokenOpt.getOrElse(generateChallenge(param))))
+      val uuid = getUUID(tokenOpt.getOrElse(generateChallenge(param)))
+      updateTimestampPstmt.setString(1, uuid)
+      updateTimestampPstmt.executeUpdate()
+      Id(uuid)
     } catch {case e: Exception => 
       println(e)
       val uuid = getUUID(-1)
@@ -206,15 +205,6 @@ class Captcha(throttle: Int, dbConn: DBConn) {
       val token = rss.getInt("token")
       val lastServed = rss.getTimestamp("lastServed")
       println(s"${uuid}\t\t${token}\t\t${lastServed}\n\n")
-    }
-
-
-    val ws: ResultSet = stmt.executeQuery("SELECT * FROM users")
-    println("email\t\thash")
-    while(ws.next()){
-      val email = ws.getString("email")
-      val hash = ws.getInt("hash")
-      println(s"${email}\t\t${hash}\n\n")
     }
   }
 }
