@@ -44,6 +44,55 @@ An image of a word is blurred before being shown to the user.
 ### LabelCaptcha
 An image that has a pair of words is created. The answer to one of the words is known and to that of the other is unknown. The user is tested on the known word, and their answer to the unknown word is recorded. If a sufficient number of users agree on their answer to the unknown word, it is transferred to the list of known words.
 
+***
+
+## HTTP API 
+### - `/captcha`
+  - Parameters:
+    - `level`: `String` - 
+      The difficulty level of a captcha
+       - easy
+       - medium
+       - hard
+    - `input_type`: `String` - 
+      The type of input option for a captcha
+       - text
+       - click (choose)
+    - `media`: `String` - 
+      The type of media of a captcha
+       - image
+       - audio
+       - gif
+    - `size`: `dict` - 
+      The dimensions of a captcha (Optional). It needs two more fields nested in this parameter
+       - `height`: `Int`
+       - `width`: `Int`
+
+  - Return type:
+    - `id`: `String` - The uuid of the captcha generated
+
+
+### - `/media`
+  - Parameters:
+    - `id`: `String` - The uuid of the captcha
+
+  - Return type:
+    - `image`: `Array[Byte]` - The requested media as bytes
+
+
+### - `/answer`
+  - Parameter:
+    - `id`: `String` - The uuid of the captcha that needs to be solved
+    - `answer`: `String` - The answer to the captcha that needs to be validated
+
+  - Return Type:
+    - `result`: `String` - The result after validation/checking of the answer
+      - True - If the answer is correct
+      - False - If the answer is incorrect
+      - Expired - If the time limit to solve the captcha exceeds
+
+***
+
 ## Roadmap
 
 Things to do in the future:
