@@ -47,7 +47,7 @@ An image that has a pair of words is created. The answer to one of the words is 
 ***
 
 ## HTTP API 
-### - `/captcha`
+### - `/captcha`: `POST`
   - Parameters:
     - `level`: `String` - 
       The difficulty level of a captcha
@@ -72,7 +72,7 @@ An image that has a pair of words is created. The answer to one of the words is 
     - `id`: `String` - The uuid of the captcha generated
 
 
-### - `/media`
+### - `/media`: `POST`,`GET` 
   - Parameters:
     - `id`: `String` - The uuid of the captcha
 
@@ -80,7 +80,7 @@ An image that has a pair of words is created. The answer to one of the words is 
     - `image`: `Array[Byte]` - The requested media as bytes
 
 
-### - `/answer`
+### - `/answer`: `POST`
   - Parameter:
     - `id`: `String` - The uuid of the captcha that needs to be solved
     - `answer`: `String` - The answer to the captcha that needs to be validated
