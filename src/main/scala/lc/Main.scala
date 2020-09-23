@@ -142,11 +142,10 @@ class Captcha(throttle: Int, dbConn: DBConn) {
       } else {
         None
       }
-      Id(tokenOpt.getOrElse(generateChallenge(param)))
+      Id(getUUID(tokenOpt.getOrElse(generateChallenge(param))))
     } catch {case e: Exception => 
       println(e)
-      val uuid = getUUID(-1)
-      Id(uuid)
+      Id(getUUID(-1))
     }
   }
 
