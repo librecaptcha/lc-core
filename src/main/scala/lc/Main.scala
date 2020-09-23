@@ -35,12 +35,11 @@ object CaptchaProviders {
 
 class Statements(dbConn: DBConn) {
   val insertPstmt = dbConn.con.prepareStatement("INSERT INTO challenge(id, secret, provider, contentType, image) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS )
-  val mapPstmt = dbConn.con.prepareStatement("INSERT INTO mapId(uuid, token) VALUES (?, ?)")
+  val mapPstmt = dbConn.con.prepareStatement("INSERT INTO mapId(uuid, token, lastServed) VALUES (?, ?, CURRENT_TIMESTAMP)")
   val selectPstmt = dbConn.con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ? AND DATEDIFF(MINUTE, DATEADD(MINUTE,2,m.lastServed), CURRENT_TIMESTAMP) <= 0)")
   val imagePstmt = dbConn.con.prepareStatement("SELECT image FROM challenge c, mapId m WHERE c.token=m.token AND m.uuid = ?")
   val updateSolvedPstmt = dbConn.con.prepareStatement("UPDATE challenge SET solved = solved+1 WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ?)")
   val tokenPstmt = dbConn.con.prepareStatement("SELECT token FROM challenge WHERE solved < 10 ORDER BY RAND() LIMIT 1")
-  val updateTimestampPstmt = dbConn.con.prepareStatement("UPDATE mapId SET lastServed = CURRENT_TIMESTAMP WHERE uuid = ?")
 }
 
 object Statements {
@@ -137,17 +136,13 @@ class Captcha(throttle: Int, dbConn: DBConn) {
   def getChallenge(param: Parameters): Id = {
     try {
       val tokenPstmt = Statements.tlStmts.get.tokenPstmt
-      val updateTimestampPstmt = Statements.tlStmts.get.updateTimestampPstmt
       val rs = tokenPstmt.executeQuery()
       val tokenOpt = if(rs.next()) {
         Some(rs.getInt("token"))
       } else {
         None
       }
-      val uuid = getUUID(tokenOpt.getOrElse(generateChallenge(param)))
-      updateTimestampPstmt.setString(1, uuid)
-      updateTimestampPstmt.executeUpdate()
-      Id(uuid)
+      Id(tokenOpt.getOrElse(generateChallenge(param)))
     } catch {case e: Exception => 
       println(e)
       val uuid = getUUID(-1)
