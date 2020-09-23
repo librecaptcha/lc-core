@@ -9,81 +9,19 @@ import lc.HTTPServer._
 
 case class Secret(token: Int)
 
-class RateLimiter(dbConn: DBConn) {
-  private val userLastActive = collection.mutable.Map[Int, Long]()
-  private val userAllowance = collection.mutable.Map[Int, Double]()
-  private val rate = 800000.0
-  private val per = 45.0
-  private val allowance = rate
-
-  private val validatePstmt = dbConn.con.prepareStatement("SELECT hash FROM users WHERE hash = ? LIMIT 1")
-
-  private def validateUser(user: Int) : Boolean = {
-    val allow = if(userLastActive.contains(user)){
-      true
-    } else {
-      validatePstmt.setInt(1, user)
-      val rs = validatePstmt.executeQuery()
-      val validated = if(rs.next()){
-        val hash = rs.getInt("hash")
-        userLastActive(hash) = System.currentTimeMillis()
-        userAllowance(hash) = allowance
-        true
-      } else {
-        false
-      }
-      validated
-    }
-    allow
-  }
-
-  private def checkLimit(user: Int): Boolean = {
-    val current = System.currentTimeMillis()
-    val time_passed = (current - userLastActive(user)) / 1000
-    userLastActive(user) = current
-    userAllowance(user) += time_passed * (rate/per)
-    if(userAllowance(user) > rate){ userAllowance(user) = rate }
-    val allow = if(userAllowance(user) < 1.0){
-      false
-    } else {
-      userAllowance(user) -= 1.0
-      true
-    }
-    allow
-  }
-
-  def checkUserAccess(token: Int) : Boolean = {
-    synchronized {
-      if (validateUser(token)) {
-        return checkLimit(token)
-      } else {
-        return false
-      }
-    }
-  }
-}
-
 class Server(port: Int, captcha: Captcha, dbConn: DBConn){
-  val rateLimiter = new RateLimiter(dbConn)
 	val server = new HTTPServer(port)
 	val host = server.getVirtualHost(null)
 
 	implicit val formats = DefaultFormats
 
 	host.addContext("/v1/captcha",(req, resp) => {
-      val accessToken = Option(req.getHeaders().get("access-token")).map(_.toInt)
-      val access = accessToken.map(rateLimiter.checkUserAccess).getOrElse(false)
-      if(access){
-        val body = req.getJson()
-      	val json = parse(body)
-      	val param = json.extract[Parameters]
-        val id = captcha.getChallenge(param)
-        resp.getHeaders().add("Content-Type","application/json")
-        resp.send(200, write(id))
-      } else {
-        resp.getHeaders().add("Content-Type","application/json")
-        resp.send(401, write("""{"error": "Not a valid user or rate limit reached!"}"""))
-      }
+      val body = req.getJson()
+    	val json = parse(body)
+    	val param = json.extract[Parameters]
+      val id = captcha.getChallenge(param)
+      resp.getHeaders().add("Content-Type","application/json")
+      resp.send(200, write(id))
     	0
     },"POST")
 
@@ -109,21 +47,11 @@ class Server(port: Int, captcha: Captcha, dbConn: DBConn){
     	val answer = json.extract[Answer]
     	val result = captcha.checkAnswer(answer)
     	resp.getHeaders().add("Content-Type","application/json")
-    	val responseContent = if(result) """{"result":"True"}""" else """{"result":"False"}"""
+    	val responseContent = s"""{"result":"$result"}"""
     	resp.send(200,responseContent)
     	0
     },"POST")
 
-    host.addContext("/v1/register", new FileContextHandler(new File("client/")))
-
-    host.addContext("/v1/token", (req,resp) => {
-      val params = req.getParams()
-      val hash = captcha.getHash(params.get("email"))
-      val token = Secret(hash)
-      resp.getHeaders().add("Content-Type", "application/json")
-      resp.send(200, write(token))
-      0
-    })
 
     def start(): Unit = {
       println("Starting server on port:" + port)
