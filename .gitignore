@@ -1,10 +1,10 @@
 /*.log
 /*.png
-/*.db
+**/*.db
 /bin/
-/project/target/
-/project/project/
+/project/**
 /target/
+**__pycache__
 
 # for various captcha
 /known/
