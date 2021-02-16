@@ -26,14 +26,15 @@ class Server(port: Int, captcha: Captcha, dbConn: DBConn){
     },"POST")
 
     host.addContext("/v1/media",(req, resp) => {
-    	var id = Id(null)
-    	if ("GET" == req.getMethod()){
+    	val id = if ("GET" == req.getMethod()){
     		val params = req.getParams()
-    		id = Id(params.get("id"))
+    		val gid = Id(params.get("id"))
+        gid
     	} else {
     		val body = req.getJson()
     		val json = parse(body)
-    		id = json.extract[Id]
+    		val gid = json.extract[Id]
+        gid
     	}
     	val image = captcha.getCaptcha(id)
     	resp.getHeaders().add("Content-Type","image/png")

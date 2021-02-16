@@ -36,10 +36,13 @@ object CaptchaProviders {
 class Statements(dbConn: DBConn) {
   val insertPstmt = dbConn.con.prepareStatement("INSERT INTO challenge(id, secret, provider, contentType, image) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS )
   val mapPstmt = dbConn.con.prepareStatement("INSERT INTO mapId(uuid, token, lastServed) VALUES (?, ?, CURRENT_TIMESTAMP)")
-  val selectPstmt = dbConn.con.prepareStatement("SELECT secret, provider FROM challenge WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ? AND DATEDIFF(MINUTE, DATEADD(MINUTE,2,m.lastServed), CURRENT_TIMESTAMP) <= 0)")
+  val selectPstmt = dbConn.con.prepareStatement("SELECT c.secret, c.provider FROM challenge c, mapId m WHERE m.token=c.token AND DATEDIFF(MINUTE, CURRENT_TIMESTAMP, DATEADD(MINUTE, 1, m.lastServed)) > 0 AND m.uuid = ?")
   val imagePstmt = dbConn.con.prepareStatement("SELECT image FROM challenge c, mapId m WHERE c.token=m.token AND m.uuid = ?")
-  val updateSolvedPstmt = dbConn.con.prepareStatement("UPDATE challenge SET solved = solved+1 WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ?)")
-  val tokenPstmt = dbConn.con.prepareStatement("SELECT token FROM challenge WHERE solved < 10 ORDER BY RAND() LIMIT 1")
+  val updateAttemptedPstmt = dbConn.con.prepareStatement("UPDATE challenge SET attempted = attempted+1 WHERE token = (SELECT m.token FROM mapId m, challenge c WHERE m.token=c.token AND m.uuid = ?)")
+  val tokenPstmt = dbConn.con.prepareStatement("SELECT token FROM challenge WHERE attempted < 10 ORDER BY RAND() LIMIT 1")
+  val deleteAnswerPstmt = dbConn.con.prepareStatement("DELETE FROM mapId WHERE uuid = ?")
+  val challengeGCPstmt = dbConn.con.prepareStatement("DELETE FROM challenge WHERE attempted >= 10 AND token NOT IN (SELECT token FROM mapId)")
+  val mapIdGCPstmt = dbConn.con.prepareStatement("DELETE FROM mapId WHERE DATEDIFF(MINUTE, CURRENT_TIMESTAMP, DATEADD(MINUTE, 1, lastServed)) < 0")
 }
 
 object Statements {
@@ -51,7 +54,7 @@ class Captcha(throttle: Int, dbConn: DBConn) {
   import CaptchaProviders._
 
   private val stmt = dbConn.getStatement()
-  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token int auto_increment, id varchar, secret varchar, provider varchar, contentType varchar, image blob, solved int default 0, PRIMARY KEY(token))")
+  stmt.execute("CREATE TABLE IF NOT EXISTS challenge(token int auto_increment, id varchar, secret varchar, provider varchar, contentType varchar, image blob, attempted int default 0, PRIMARY KEY(token))")
   stmt.execute("CREATE TABLE IF NOT EXISTS mapId(uuid varchar, token int, lastServed timestamp, PRIMARY KEY(uuid), FOREIGN KEY(token) REFERENCES challenge(token) ON DELETE CASCADE)")
 
   private val seed = System.currentTimeMillis.toString.substring(2,6).toInt
@@ -75,16 +78,16 @@ class Captcha(throttle: Int, dbConn: DBConn) {
     	imagePstmt.setString(1, id.id)
     	val rs: ResultSet = imagePstmt.executeQuery()
     	if(rs.next()){
-          blob = rs.getBlob("image")
-    	if(blob != null)
-    		image =  blob.getBytes(1, blob.length().toInt)
-    	image
+        blob = rs.getBlob("image")
+        if(blob != null){
+    		  image =  blob.getBytes(1, blob.length().toInt)
+        }
+      }
+    image
+    } catch { case e: Exception =>
+      println(e)
+      image
     }
-    image
-  } catch{ case e: Exception =>
-    println(e)
-    image
-  }
   }
 
   private val uniqueIntCount = new AtomicInteger()
@@ -112,19 +115,23 @@ class Captcha(throttle: Int, dbConn: DBConn) {
 
   val task = new Runnable {
   	def run(): Unit = {
-          try {
-      val imageNum = stmt.executeQuery("SELECT COUNT(*) AS total FROM challenge")
-      var throttleIn = (throttle*1.1).toInt
-      if(imageNum.next())
-        throttleIn = (throttleIn-imageNum.getInt("total"))
-      while(0 < throttleIn){
-        generateChallenge(Parameters("","","",Option(Size(0,0))))
-        throttleIn -= 1
-      }
-      
-      val gcStmt = stmt.executeUpdate("DELETE FROM challenge WHERE solved > 10 AND token = (SELECT m.token FROM mapId m, challenge c WHERE c.token = m.token AND m.lastServed = (SELECT MAX(m.lastServed) FROM mapId m, challenge c WHERE c.token=m.token AND DATEDIFF(MINUTE, DATEADD(MINUTE,5,m.lastServed), CURRENT_TIMESTAMP) <= 0))")
+      try {
 
-    } catch { case e: Exception => println(e) }
+        val mapIdGCPstmt = Statements.tlStmts.get.mapIdGCPstmt
+        mapIdGCPstmt.executeUpdate()
+
+        val challengeGCPstmt = Statements.tlStmts.get.challengeGCPstmt
+        challengeGCPstmt.executeUpdate()
+
+        val imageNum = stmt.executeQuery("SELECT COUNT(*) AS total FROM challenge")
+        var throttleIn = (throttle*1.1).toInt
+        if(imageNum.next())
+          throttleIn = (throttleIn-imageNum.getInt("total"))
+        while(0 < throttleIn){
+          generateChallenge(Parameters("","","",Option(Size(0,0))))
+          throttleIn -= 1
+        }
+      } catch { case e: Exception => println(e) }
   	}
   }
 
@@ -142,7 +149,11 @@ class Captcha(throttle: Int, dbConn: DBConn) {
       } else {
         None
       }
-      Id(getUUID(tokenOpt.getOrElse(generateChallenge(param))))
+      val updateAttemptedPstmt = Statements.tlStmts.get.updateAttemptedPstmt
+      val uuid = getUUID(tokenOpt.getOrElse(generateChallenge(param)))
+      updateAttemptedPstmt.setString(1, uuid)
+      updateAttemptedPstmt.executeUpdate()
+      Id(uuid)
     } catch {case e: Exception => 
       println(e)
       Id(getUUID(-1))
@@ -166,30 +177,26 @@ class Captcha(throttle: Int, dbConn: DBConn) {
         val secret = rs.getString("secret")
         val provider = rs.getString("provider")
         val check = providers(provider).checkAnswer(secret, answer.answer)
-        val result = if(check) {
-          val updateSolvedPstmt = Statements.tlStmts.get.updateSolvedPstmt
-          updateSolvedPstmt.setString(1,answer.id)
-          updateSolvedPstmt.executeUpdate()
-          "TRUE"
-        } else {
-          "FALSE"
-        }
+        val result = if(check) "TRUE" else "FALSE"
         result
       } else {
         "EXPIRED"
       }
+      val deleteAnswerPstmt = Statements.tlStmts.get.deleteAnswerPstmt
+      deleteAnswerPstmt.setString(1, answer.id)
+      deleteAnswerPstmt.executeUpdate()
       psOpt
   }
 
   def display(): Unit = {
     val rs: ResultSet = stmt.executeQuery("SELECT * FROM challenge")
-    println("token\t\tid\t\tsecret\t\tsolved")
+    println("token\t\tid\t\tsecret\t\tattempted")
     while(rs.next()) {
       val token = rs.getInt("token")
       val id = rs.getString("id")
       val secret = rs.getString("secret")
-      val solved = rs.getString("solved")
-      println(s"${token}\t\t${id}\t\t${secret}\t\t${solved}\n\n")
+      val attempted = rs.getString("attempted")
+      println(s"${token}\t\t${id}\t\t${secret}\t\t${attempted}\n\n")
     }
 
     val rss: ResultSet = stmt.executeQuery("SELECT * FROM mapId")
