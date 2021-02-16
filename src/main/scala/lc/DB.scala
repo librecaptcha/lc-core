@@ -3,7 +3,7 @@ package lc
 import java.sql._
 
 class DBConn(){
-  val con: Connection = DriverManager.getConnection("jdbc:h2:./captcha", "sa", "")
+  val con: Connection = DriverManager.getConnection("jdbc:h2:./data/H2/captcha", "sa", "")
 
   def getStatement(): Statement = {
     con.createStatement()
