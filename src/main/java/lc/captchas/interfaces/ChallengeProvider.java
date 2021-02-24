@@ -1,6 +1,6 @@
-package lc;
+package lc.captchas.interfaces;
 
-interface ChallengeProvider {
+public interface ChallengeProvider {
   public String getId();
   public Challenge returnChallenge();
   public boolean checkAnswer(String secret, String answer);

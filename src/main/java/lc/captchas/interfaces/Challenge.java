@@ -1,4 +1,4 @@
-package lc;
+package lc.captchas.interfaces;
 
 public class Challenge {
   public final byte[] content;

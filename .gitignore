@@ -5,6 +5,9 @@
 /project/**
 /target/
 **__pycache__
+.bloop
+.metals
+.vscode
 
 # for various captcha
 /known/

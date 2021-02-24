@@ -1,27 +1,26 @@
-package lc
+package lc.server
 
-import java.io.File
-import org.json4s._
-import org.json4s.jackson.JsonMethods._
-import org.json4s.jackson.Serialization.{read, write}
+import org.json4s.DefaultFormats
+import org.json4s.jackson.JsonMethods.parse
+import org.json4s.jackson.Serialization.write
+import lc.core.Captcha
+import lc.core.{Parameters, Id, Answer}
+import lc.server.HTTPServer
 
-import lc.HTTPServer._
 
-case class Secret(token: Int)
-
-class Server(port: Int, captcha: Captcha, dbConn: DBConn){
+class Server(port: Int, captcha: Captcha){
 	val server = new HTTPServer(port)
 	val host = server.getVirtualHost(null)
 
 	implicit val formats = DefaultFormats
 
 	host.addContext("/v1/captcha",(req, resp) => {
-      val body = req.getJson()
+    	val body = req.getJson()
     	val json = parse(body)
     	val param = json.extract[Parameters]
-      val id = captcha.getChallenge(param)
-      resp.getHeaders().add("Content-Type","application/json")
-      resp.send(200, write(id))
+    	val id = captcha.getChallenge(param)
+    	resp.getHeaders().add("Content-Type","application/json")
+    	resp.send(200, write(id))
     	0
     },"POST")
 
@@ -40,8 +39,7 @@ class Server(port: Int, captcha: Captcha, dbConn: DBConn){
     	val answer = json.extract[Answer]
     	val result = captcha.checkAnswer(answer)
     	resp.getHeaders().add("Content-Type","application/json")
-    	val responseContent = s"""{"result":"$result"}"""
-    	resp.send(200,responseContent)
+		resp.send(200, write(result))
     	0
     },"POST")
 

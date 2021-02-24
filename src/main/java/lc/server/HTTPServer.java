@@ -1,4 +1,4 @@
-package lc;/*
+package lc.server;/*
  *  Copyright © 2005-2018 Amichai Rothman
  *
  *  This file is part of JLHTTP - the Java Lightweight HTTP Server.

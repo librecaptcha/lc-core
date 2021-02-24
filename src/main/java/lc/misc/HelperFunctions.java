@@ -1,4 +1,4 @@
-package lc;
+package lc.misc;
 
 import java.awt.*;
 

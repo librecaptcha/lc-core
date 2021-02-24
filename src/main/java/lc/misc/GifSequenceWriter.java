@@ -1,7 +1,7 @@
 // This code was adapted from http://elliot.kroo.net/software/java/GifSequenceWriter/
 // It was available under CC By 3.0
 
-package lc;
+package lc.misc;
 import javax.imageio.*;
 import javax.imageio.metadata.*;
 import javax.imageio.stream.*;

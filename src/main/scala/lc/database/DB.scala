@@ -1,4 +1,4 @@
-package lc
+package lc.database
 
 import java.sql._
 

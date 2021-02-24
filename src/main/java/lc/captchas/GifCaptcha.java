@@ -1,4 +1,4 @@
-package lc;
+package lc.captchas;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -9,6 +9,10 @@ import java.io.IOException;
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
+import lc.captchas.interfaces.Challenge;
+import lc.captchas.interfaces.ChallengeProvider;
+import lc.misc.HelperFunctions;
+import lc.misc.GifSequenceWriter;
 
 public class GifCaptcha implements ChallengeProvider{
 
