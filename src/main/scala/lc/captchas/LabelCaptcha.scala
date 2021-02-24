@@ -1,4 +1,4 @@
-package lc
+package lc.captchas
 
 import java.io.File
 import java.io.ByteArrayOutputStream
@@ -7,6 +7,8 @@ import scala.collection.mutable.Map
 import java.nio.file.{Files,Path,StandardCopyOption}
 import java.awt.image.BufferedImage
 import java.awt.{Graphics2D,Color}
+import lc.captchas.interfaces.ChallengeProvider
+import lc.captchas.interfaces.Challenge
 
 class LabelCaptcha extends ChallengeProvider {
   private var knownFiles = new File("known").list.toList

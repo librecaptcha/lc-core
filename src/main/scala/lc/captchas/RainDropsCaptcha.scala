@@ -1,4 +1,4 @@
-package lc
+package lc.captchas
 
 import java.awt.image.BufferedImage
 import java.awt.RenderingHints
@@ -9,6 +9,9 @@ import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
+import lc.captchas.interfaces.ChallengeProvider
+import lc.captchas.interfaces.Challenge
+import lc.misc.GifSequenceWriter
 
 class Drop {
   var x = 0

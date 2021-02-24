@@ -1,4 +1,4 @@
-package lc;
+package lc.captchas;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -6,6 +6,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
+import lc.captchas.interfaces.Challenge;
+import lc.captchas.interfaces.ChallengeProvider;
+import lc.misc.HelperFunctions;
 
 public class FontFunCaptcha implements ChallengeProvider{
 

@@ -1,4 +1,4 @@
-package lc;
+package lc.captchas;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -10,11 +10,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.io.ByteArrayOutputStream;
+import lc.misc.HelperFunctions;
+import lc.captchas.interfaces.Challenge;
+import lc.captchas.interfaces.ChallengeProvider;
 
 public class ShadowTextCaptcha implements ChallengeProvider{
 
     public String getId() {
-        return "ShadowText";
+        return "ShadowTextCaptcha";
     }
 
     public boolean checkAnswer(String secret, String answer) {

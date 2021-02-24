@@ -1,10 +1,13 @@
-package lc
+package lc.captchas
 
 import com.sksamuel.scrimage._
 import com.sksamuel.scrimage.filter._
 import java.awt.image.BufferedImage
 import java.awt.Font
 import java.awt.Color
+import lc.captchas.interfaces.ChallengeProvider
+import lc.captchas.interfaces.Challenge
+
 
 class FilterChallenge extends ChallengeProvider {
   def getId = "FilterChallenge"
