@@ -1,0 +1,34 @@
+{
+    "randomSeed": 20,
+    "captchaExpiryTimeLimit": 5,
+    "captchas":{
+        "FilterChallenge":{
+            "name": "FilterChallenge",
+            "supportedLevels":["medium", "hard"],
+            "supportedMedia":["image"],
+            "supportedinputType":["text"],
+            "config":{}
+        },
+        "GifCaptcha":{
+            "name": "GifCaptcha",
+            "supportedLevels":["hard"],
+            "supportedMedia":["gif"],
+            "supportedinputType":["text"],
+            "config":{}
+        },
+        "ShadowTextCaptcha":{
+            "name": "ShadowTextCaptcha",
+            "supportedLevels":["easy"],
+            "supportedMedia":["image"],
+            "supportedinputType":["text"],
+            "config": {}
+        },
+        "RainDropsCaptcha":{
+            "name": "RainDropsCaptcha",
+            "supportedLevels":["easy","medium"],
+            "supportedMedia":["image"],
+            "supportedinputType":["text"],
+            "config":{}
+        }
+    }
+}
