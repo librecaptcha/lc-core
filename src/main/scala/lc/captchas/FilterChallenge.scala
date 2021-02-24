@@ -8,7 +8,6 @@ import java.awt.Color
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 
-
 class FilterChallenge extends ChallengeProvider {
   def getId = "FilterChallenge"
   def returnChallenge(): Challenge = {
@@ -16,7 +15,11 @@ class FilterChallenge extends ChallengeProvider {
     val r = new scala.util.Random
     val alphabet = "abcdefghijklmnopqrstuvwxyz"
     val n = 8
-    val secret = Stream.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
+    val secret = Stream
+      .continually(r.nextInt(alphabet.size))
+      .map(alphabet)
+      .take(n)
+      .mkString
     val canvas = new BufferedImage(225, 50, BufferedImage.TYPE_INT_RGB)
     val g = canvas.createGraphics()
     g.setColor(Color.WHITE)
@@ -42,7 +45,14 @@ trait FilterType {
 class FilterType1 extends FilterType {
   override def applyFilter(image: ImmutableImage): ImmutableImage = {
     val blur = new GaussianBlurFilter(2)
-    val smear = new SmearFilter(com.sksamuel.scrimage.filter.SmearType.Circles, 10, 10, 10, 0, 1)
+    val smear = new SmearFilter(
+      com.sksamuel.scrimage.filter.SmearType.Circles,
+      10,
+      10,
+      10,
+      0,
+      1
+    )
     val diffuse = new DiffuseFilter(2)
     blur.apply(image)
     diffuse.apply(image)
@@ -53,13 +63,25 @@ class FilterType1 extends FilterType {
 
 class FilterType2 extends FilterType {
   override def applyFilter(image: ImmutableImage): ImmutableImage = {
-    val smear = new SmearFilter(com.sksamuel.scrimage.filter.SmearType.Circles, 10, 10, 10, 0, 1)
+    val smear = new SmearFilter(
+      com.sksamuel.scrimage.filter.SmearType.Circles,
+      10,
+      10,
+      10,
+      0,
+      1
+    )
     val diffuse = new DiffuseFilter(1)
-    val ripple = new RippleFilter(com.sksamuel.scrimage.filter.RippleType.Noise, 1, 1, 0.005.toFloat, 0.005.toFloat)
+    val ripple = new RippleFilter(
+      com.sksamuel.scrimage.filter.RippleType.Noise,
+      1,
+      1,
+      0.005.toFloat,
+      0.005.toFloat
+    )
     diffuse.apply(image)
     ripple.apply(image)
     smear.apply(image)
     image
   }
 }
-
