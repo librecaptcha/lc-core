@@ -17,8 +17,7 @@ class BackgroundTask(captcha: Captcha, throttle: Int) {
         val challengeGCPstmt = Statements.tlStmts.get.challengeGCPstmt
         challengeGCPstmt.executeUpdate()
 
-        val imageNum =
-          Statements.tlStmts.get.getCountChallengeTable.executeQuery()
+        val imageNum = Statements.tlStmts.get.getCountChallengeTable.executeQuery()
         var throttleIn = (throttle * 1.1).toInt
         if (imageNum.next())
           throttleIn = (throttleIn - imageNum.getInt("total"))

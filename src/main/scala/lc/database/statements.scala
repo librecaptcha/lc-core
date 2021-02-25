@@ -11,7 +11,8 @@ class Statements(dbConn: DBConn) {
   stmt.execute(
     "CREATE TABLE IF NOT EXISTS challenge" +
       "(token int auto_increment, " +
-      "id varchar, secret varchar, " +
+      "id varchar, " +
+      "secret varchar, " +
       "provider varchar, " +
       "contentType varchar, " +
       "image blob, " +
@@ -93,15 +94,17 @@ class Statements(dbConn: DBConn) {
     "SELECT COUNT(*) AS total FROM challenge"
   )
 
-  val getChallengeTable: PreparedStatement =
-    dbConn.con.prepareStatement("SELECT * FROM challenge")
+  val getChallengeTable: PreparedStatement = dbConn.con.prepareStatement(
+    "SELECT * FROM challenge"
+  )
 
-  val getMapIdTable: PreparedStatement =
-    dbConn.con.prepareStatement("SELECT * FROM mapId")
+  val getMapIdTable: PreparedStatement = dbConn.con.prepareStatement(
+    "SELECT * FROM mapId"
+  )
+
 }
 
 object Statements {
   private val dbConn: DBConn = new DBConn()
-  val tlStmts: ThreadLocal[Statements] =
-    ThreadLocal.withInitial(() => new Statements(dbConn))
+  val tlStmts: ThreadLocal[Statements] = ThreadLocal.withInitial(() => new Statements(dbConn))
 }
