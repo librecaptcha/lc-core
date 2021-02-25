@@ -38,10 +38,11 @@ class Statements(dbConn: DBConn) {
   )
 
   val mapPstmt: PreparedStatement =
-    dbConn.con.prepareStatement("INSERT INTO " +
-      "mapId(uuid, token, lastServed) " +
-      "VALUES (?, ?, CURRENT_TIMESTAMP)"
-  )
+    dbConn.con.prepareStatement(
+      "INSERT INTO " +
+        "mapId(uuid, token, lastServed) " +
+        "VALUES (?, ?, CURRENT_TIMESTAMP)"
+    )
 
   val selectPstmt: PreparedStatement = dbConn.con.prepareStatement(
     "SELECT c.secret, c.provider " +
@@ -62,11 +63,11 @@ class Statements(dbConn: DBConn) {
     "UPDATE challenge " +
       "SET attempted = attempted+1 " +
       "WHERE token = (SELECT m.token " +
-                      "FROM mapId m, challenge c " +
-                      "WHERE m.token=c.token AND " +
-                      "m.uuid = ?)"
+      "FROM mapId m, challenge c " +
+      "WHERE m.token=c.token AND " +
+      "m.uuid = ?)"
   )
-  
+
   val tokenPstmt: PreparedStatement = dbConn.con.prepareStatement(
     "SELECT token " +
       "FROM challenge " +
@@ -99,7 +100,7 @@ class Statements(dbConn: DBConn) {
   val getMapIdTable: PreparedStatement = dbConn.con.prepareStatement(
     "SELECT * FROM mapId"
   )
-  
+
 }
 
 object Statements {
