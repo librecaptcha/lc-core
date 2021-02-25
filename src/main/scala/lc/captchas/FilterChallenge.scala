@@ -8,7 +8,6 @@ import java.awt.Color
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 
-
 class FilterChallenge extends ChallengeProvider {
   def getId = "FilterChallenge"
   def returnChallenge(): Challenge = {
@@ -62,4 +61,3 @@ class FilterType2 extends FilterType {
     image
   }
 }
-

@@ -5,9 +5,7 @@ import java.awt.RenderingHints
 import java.awt.Font
 import java.awt.font.TextAttribute
 import java.awt.Color
-import java.io.ByteArrayOutputStream
-import javax.imageio.ImageIO
-import javax.imageio.stream.ImageOutputStream;
+import java.io.ByteArrayOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
@@ -19,8 +17,8 @@ class Drop {
   var yOffset = 0
   var color = 0
   var colorChange = 10
-  def mkColor = {
-    new Color(color, color,  math.min(200, color+100))
+  def mkColor: Color = {
+    new Color(color, color, math.min(200, color + 100))
   }
 }
 
@@ -36,8 +34,8 @@ class RainDropsCP extends ChallengeProvider {
   private def extendDrops(drops: Array[Drop], steps: Int, xOffset: Int) = {
     drops.map(d => {
       val nd = new Drop()
-      nd.x + xOffset*steps
-      nd.y + d.yOffset*steps
+      nd.x + xOffset * steps
+      nd.y + d.yOffset * steps
       nd
     })
   }
@@ -48,20 +46,23 @@ class RainDropsCP extends ChallengeProvider {
     val width = 450
     val height = 100
     val imgType = BufferedImage.TYPE_INT_RGB
-    val xOffset = 2+r.nextInt(3)
+    val xOffset = 2 + r.nextInt(3)
     val xBias = (height / 10) - 2
-    val dropsOrig = Array.fill[Drop](2000)( new Drop())
+    val dropsOrig = Array.fill[Drop](2000)(new Drop())
     for (d <- dropsOrig) {
-      d.x = r.nextInt(width) - (xBias/2)*xOffset
-      d.yOffset = 6+r.nextInt(6)
+      d.x = r.nextInt(width) - (xBias / 2) * xOffset
+      d.yOffset = 6 + r.nextInt(6)
       d.y = r.nextInt(height)
       d.color = r.nextInt(240)
       if (d.color > 128) {
         d.colorChange *= -1
       }
     }
-    val drops = dropsOrig ++ extendDrops(dropsOrig, 1, xOffset) ++ extendDrops(dropsOrig, 2, xOffset) ++ extendDrops(dropsOrig, 3, xOffset)
-
+    val drops = dropsOrig ++ extendDrops(dropsOrig, 1, xOffset) ++ extendDrops(dropsOrig, 2, xOffset) ++ extendDrops(
+      dropsOrig,
+      3,
+      xOffset
+    )
 
     val baseFont = new Font(Font.MONOSPACED, Font.BOLD, 80)
     val attributes = new java.util.HashMap[TextAttribute, Object]()
@@ -72,7 +73,7 @@ class RainDropsCP extends ChallengeProvider {
     val baos = new ByteArrayOutputStream();
     val ios = new MemoryCacheImageOutputStream(baos);
     val writer = new GifSequenceWriter(ios, imgType, 60, true);
-    for(i <- 0 until 60){
+    for (_ <- 0 until 60) {
       // val yOffset = 5+r.nextInt(5)
       val canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
       val g = canvas.createGraphics()
@@ -85,14 +86,14 @@ class RainDropsCP extends ChallengeProvider {
       // paint the rain
       for (d <- drops) {
         g.setColor(d.mkColor)
-        g.drawLine(d.x, d.y, d.x+xOffset, d.y+d.yOffset)
-        d.x += xOffset/2
-        d.y += d.yOffset/2
+        g.drawLine(d.x, d.y, d.x + xOffset, d.y + d.yOffset)
+        d.x += xOffset / 2
+        d.y += d.yOffset / 2
         d.color += d.colorChange
         if (d.x > width || d.y > height) {
-          val ySteps =  (height / d.yOffset) + 1
-          d.x -= xOffset*ySteps
-          d.y -= d.yOffset*ySteps
+          val ySteps = (height / d.yOffset) + 1
+          d.x -= xOffset * ySteps
+          d.y -= d.yOffset * ySteps
 
         }
         if (d.color > 200 || d.color < 21) {
@@ -103,7 +104,7 @@ class RainDropsCP extends ChallengeProvider {
       // center the text
       g.setFont(spacedFont)
       val textWidth = g.getFontMetrics().charsWidth(secret.toCharArray, 0, secret.toCharArray.length)
-      val textX = (width - textWidth)/2
+      val textX = (width - textWidth) / 2
 
       // paint the top outline
       g.setColor(textHighlightColor)
