@@ -77,7 +77,7 @@ class RainDropsCP extends ChallengeProvider {
     val baos = new ByteArrayOutputStream();
     val ios = new MemoryCacheImageOutputStream(baos);
     val writer = new GifSequenceWriter(ios, imgType, 60, true);
-    for (i <- 0 until 60) {
+    for (_ <- 0 until 60) {
       // val yOffset = 5+r.nextInt(5)
       val canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
       val g = canvas.createGraphics()

@@ -13,8 +13,8 @@ import lc.captchas.interfaces.Challenge
 class LabelCaptcha extends ChallengeProvider {
   private var knownFiles = new File("known").list.toList
   private var unknownFiles = new File("unknown").list.toList
-  private var unknownAnswers = Map[String, Map[String, Int]]()
-  private var total = Map[String, Int]()
+  private val unknownAnswers = Map[String, Map[String, Int]]()
+  private val total = Map[String, Int]()
 
   for (file <- unknownFiles) {
     unknownAnswers += file -> Map[String, Int]()
@@ -29,10 +29,9 @@ class LabelCaptcha extends ChallengeProvider {
       val s = scala.util.Random.nextInt(unknownFiles.length)
       val knownImageFile = knownFiles(r)
       val unknownImageFile = unknownFiles(s)
-      new ImagePair(knownImageFile, unknownImageFile)
 
-      var knownImage = ImageIO.read(new File("known/" + knownImageFile))
-      var unknownImage = ImageIO.read(new File("unknown/" + unknownImageFile))
+      val knownImage = ImageIO.read(new File("known/" + knownImageFile))
+      val unknownImage = ImageIO.read(new File("unknown/" + unknownImageFile))
       val mergedImage = merge(knownImage, unknownImage)
 
       val token = encrypt(knownImageFile + "," + unknownImageFile)
