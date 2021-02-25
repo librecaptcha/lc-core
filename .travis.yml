@@ -4,3 +4,4 @@ scala:
         - 2.13.2
 script:
         - sbt ++$TRAVIS_SCALA_VERSION compile
+        - sbt "scalafixAll --check"
