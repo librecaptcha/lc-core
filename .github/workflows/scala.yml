@@ -19,3 +19,5 @@ jobs:
         java-version: 1.8
     - name: Run tests
       run: sbt test
+    - name: Run linter
+      run: sbt "scalafixAll --check"

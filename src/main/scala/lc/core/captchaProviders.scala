@@ -2,6 +2,7 @@ package lc.core
 
 import lc.captchas._
 import lc.captchas.interfaces.ChallengeProvider
+import lc.captchas.interfaces.Challenge
 
 object CaptchaProviders {
   private val providers = Map(
@@ -9,27 +10,29 @@ object CaptchaProviders {
     //"FontFunCaptcha" -> new FontFunCaptcha,
     "GifCaptcha" -> new GifCaptcha,
     "ShadowTextCaptcha" -> new ShadowTextCaptcha,
-    "RainDropsCaptcha" -> new RainDropsCP,
+    "RainDropsCaptcha" -> new RainDropsCP
     //"LabelCaptcha" -> new LabelCaptcha
-    )
+  )
 
-  def generateChallengeSamples() = {
-    providers.map {case (key, provider) =>
-      (key, provider.returnChallenge())
+  def generateChallengeSamples(): Map[String, Challenge] = {
+    providers.map {
+      case (key, provider) =>
+        (key, provider.returnChallenge())
     }
   }
 
-  private val seed = System.currentTimeMillis.toString.substring(2,6).toInt
+  private val seed = System.currentTimeMillis.toString.substring(2, 6).toInt
   private val random = new scala.util.Random(seed)
 
-  private def getNextRandomInt(max: Int) = random.synchronized {
-    random.nextInt(max)
-  }
+  private def getNextRandomInt(max: Int) =
+    random.synchronized {
+      random.nextInt(max)
+    }
 
   def getProviderById(id: String): ChallengeProvider = {
     return providers(id)
   }
-  
+
   def getProvider(): ChallengeProvider = {
     val keys = providers.keys
     val providerIndex = keys.toVector(getNextRandomInt(keys.size))
