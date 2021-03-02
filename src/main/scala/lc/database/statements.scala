@@ -15,6 +15,8 @@ class Statements(dbConn: DBConn) {
       "secret varchar, " +
       "provider varchar, " +
       "contentType varchar, " +
+      "contentLevel varchar, " +
+      "contentInput varchar, " +
       "image blob, " +
       "attempted int default 0, " +
       "PRIMARY KEY(token))"
@@ -32,8 +34,8 @@ class Statements(dbConn: DBConn) {
 
   val insertPstmt: PreparedStatement = dbConn.con.prepareStatement(
     "INSERT INTO " +
-      "challenge(id, secret, provider, contentType, image) " +
-      "VALUES (?, ?, ?, ?, ?)",
+      "challenge(id, secret, provider, contentType, contentLevel, contentInput, image) " +
+      "VALUES (?, ?, ?, ?, ?, ?, ?)",
     Statement.RETURN_GENERATED_KEYS
   )
 
@@ -48,7 +50,7 @@ class Statements(dbConn: DBConn) {
     "SELECT c.secret, c.provider " +
       "FROM challenge c, mapId m " +
       "WHERE m.token=c.token AND " +
-      "DATEDIFF(MINUTE, CURRENT_TIMESTAMP, DATEADD(MINUTE, 1, m.lastServed)) > 0 AND " +
+      "DATEDIFF(MINUTE, CURRENT_TIMESTAMP, DATEADD(MINUTE, 5, m.lastServed)) > 0 AND " +
       "m.uuid = ?"
   )
 
@@ -71,7 +73,10 @@ class Statements(dbConn: DBConn) {
   val tokenPstmt: PreparedStatement = dbConn.con.prepareStatement(
     "SELECT token " +
       "FROM challenge " +
-      "WHERE attempted < 10 " +
+      "WHERE attempted < 10 AND " +
+      "contentLevel = ? AND " +
+      "contentType = ? AND " +
+      "contentInput = ? " +
       "ORDER BY RAND() LIMIT 1"
   )
 
@@ -86,7 +91,7 @@ class Statements(dbConn: DBConn) {
   )
 
   val mapIdGCPstmt: PreparedStatement = dbConn.con.prepareStatement(
-    "DELETE FROM mapId WHERE DATEDIFF(MINUTE, CURRENT_TIMESTAMP, DATEADD(MINUTE, 1, lastServed)) < 0"
+    "DELETE FROM mapId WHERE DATEDIFF(MINUTE, CURRENT_TIMESTAMP, DATEADD(MINUTE, 5, lastServed)) < 0"
   )
 
   val getCountChallengeTable: PreparedStatement = dbConn.con.prepareStatement(
