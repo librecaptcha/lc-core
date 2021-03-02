@@ -3,13 +3,18 @@ package lc
 import lc.core.{Captcha, CaptchaProviders}
 import lc.server.Server
 import lc.background.BackgroundTask
+import lc.core.Config
 
 object LCFramework {
   def main(args: scala.Array[String]): Unit = {
     val captcha = new Captcha()
-    val server = new Server(8888, captcha)
-    val backgroudTask = new BackgroundTask(captcha, 10)
-    backgroudTask.beginThread(2)
+    val server = new Server(port = Config.getPort, captcha = captcha)
+    val backgroundTask = new BackgroundTask(
+      captcha = captcha,
+      throttle = Config.getThrottle,
+      timeLimit = Config.getCaptchaExpiryTimeLimit
+    )
+    backgroundTask.beginThread(delay = Config.getThreadDelay)
     server.start()
   }
 }
