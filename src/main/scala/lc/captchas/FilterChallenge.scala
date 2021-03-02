@@ -10,6 +10,11 @@ import lc.captchas.interfaces.Challenge
 
 class FilterChallenge extends ChallengeProvider {
   def getId = "FilterChallenge"
+
+  def configure(config: String): Unit = {
+    // TODO: add custom config
+  }
+
   def returnChallenge(): Challenge = {
     val filterTypes = List(new FilterType1, new FilterType2)
     val r = new scala.util.Random

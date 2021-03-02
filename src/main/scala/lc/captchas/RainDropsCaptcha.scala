@@ -31,6 +31,10 @@ class RainDropsCP extends ChallengeProvider {
 
   def getId = "FilterChallenge"
 
+  def configure(config: String): Unit = {
+    // TODO: add custom config
+  }
+
   private def extendDrops(drops: Array[Drop], steps: Int, xOffset: Int) = {
     drops.map(d => {
       val nd = new Drop()

@@ -48,6 +48,10 @@ public class GifCaptcha implements ChallengeProvider {
     return null;
   }
 
+  public void configure(String config) {
+    // TODO: Add custom config
+  }
+
   public Challenge returnChallenge() {
     String secret = HelperFunctions.randomString(6);
     return new Challenge(gifCaptcha(secret), "image/gif", secret.toLowerCase());

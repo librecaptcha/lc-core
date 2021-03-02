@@ -20,6 +20,10 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     return "ShadowTextCaptcha";
   }
 
+  public void configure(String config) {
+    // TODO: Add custom config
+  }
+
   public boolean checkAnswer(String secret, String answer) {
     return answer.toLowerCase().equals(secret);
   }

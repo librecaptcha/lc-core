@@ -16,6 +16,10 @@ public class FontFunCaptcha implements ChallengeProvider {
     return "FontFunCaptcha";
   }
 
+  public void configure(String config) {
+    // TODO: Add custom config
+  }
+
   private String getFontName(String path, String level) {
     File file = new File(path + level + "/");
     FilenameFilter txtFileFilter =

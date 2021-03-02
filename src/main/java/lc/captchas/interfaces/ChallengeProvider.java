@@ -7,5 +7,5 @@ public interface ChallengeProvider {
 
   public boolean checkAnswer(String secret, String answer);
 
-  // TODO: def configure(): Unit
+  public void configure(String config);
 }

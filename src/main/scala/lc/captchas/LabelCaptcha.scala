@@ -23,6 +23,10 @@ class LabelCaptcha extends ChallengeProvider {
 
   def getId = "LabelCaptcha"
 
+  def configure(config: String): Unit = {
+    // TODO: add custom config
+  }
+
   def returnChallenge(): Challenge =
     synchronized {
       val r = scala.util.Random.nextInt(knownFiles.length)
