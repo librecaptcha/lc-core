@@ -1,32 +1,35 @@
 {
     "randomSeed": 20,
+    "port": 8888,
     "captchaExpiryTimeLimit": 5,
+    "threadDelay": 2,
+    "throttle": 10,
     "captchas":{
         "FilterChallenge":{
             "name": "FilterChallenge",
             "supportedLevels":["medium", "hard"],
-            "supportedMedia":["image"],
+            "supportedMedia":["image/png"],
             "supportedinputType":["text"],
             "config":{}
         },
         "GifCaptcha":{
             "name": "GifCaptcha",
             "supportedLevels":["hard"],
-            "supportedMedia":["gif"],
+            "supportedMedia":["image/gif"],
             "supportedinputType":["text"],
             "config":{}
         },
         "ShadowTextCaptcha":{
             "name": "ShadowTextCaptcha",
             "supportedLevels":["easy"],
-            "supportedMedia":["image"],
+            "supportedMedia":["image/png"],
             "supportedinputType":["text"],
             "config": {}
         },
         "RainDropsCaptcha":{
             "name": "RainDropsCaptcha",
             "supportedLevels":["easy","medium"],
-            "supportedMedia":["image"],
+            "supportedMedia":["image/gif"],
             "supportedinputType":["text"],
             "config":{}
         }
