@@ -5,6 +5,7 @@ import java.util.UUID
 import java.io.ByteArrayInputStream
 import lc.database.Statements
 import lc.core.CaptchaProviders
+import lc.captchas.interfaces.ChallengeProvider
 
 class Captcha {
 
@@ -30,8 +31,8 @@ class Captcha {
   }
 
   def generateChallenge(param: Parameters): Int = {
-    //TODO: eval params to choose a provider
-    val provider = CaptchaProviders.getProvider()
+    val provider = CaptchaProviders.getProvider(param)
+    if (!provider.isInstanceOf[ChallengeProvider]) return -1
     val providerId = provider.getId()
     val challenge = provider.returnChallenge()
     val blob = new ByteArrayInputStream(challenge.content)
@@ -40,7 +41,9 @@ class Captcha {
     insertPstmt.setString(2, challenge.secret)
     insertPstmt.setString(3, providerId)
     insertPstmt.setString(4, challenge.contentType)
-    insertPstmt.setBlob(5, blob)
+    insertPstmt.setString(5, param.level)
+    insertPstmt.setString(6, param.input_type)
+    insertPstmt.setBlob(7, blob)
     insertPstmt.executeUpdate()
     val rs: ResultSet = insertPstmt.getGeneratedKeys()
     val token = if (rs.next()) {
@@ -50,24 +53,54 @@ class Captcha {
     token.asInstanceOf[Int]
   }
 
+  val supportedinputType = Config.getSupportedinputType
+  val supportedLevels = Config.getSupportedLevels
+  val supportedMedia = Config.getSupportedMedia
+
+  private def validateParam(param: Parameters): Boolean = {
+    if (
+      supportedLevels.contains(param.level) &&
+      supportedMedia.contains(param.media) &&
+      supportedinputType.contains(param.input_type)
+    )
+      return true
+    else
+      return false
+  }
+
   def getChallenge(param: Parameters): Id = {
     try {
-      val tokenPstmt = Statements.tlStmts.get.tokenPstmt
-      val rs = tokenPstmt.executeQuery()
-      val tokenOpt = if (rs.next()) {
-        Some(rs.getInt("token"))
+      val validParam = validateParam(param)
+      val result = if (validParam) {
+        val tokenPstmt = Statements.tlStmts.get.tokenPstmt
+        tokenPstmt.setString(1, param.level)
+        tokenPstmt.setString(2, param.media)
+        tokenPstmt.setString(3, param.input_type)
+        val rs = tokenPstmt.executeQuery()
+        val tokenOpt = if (rs.next()) {
+          Some(rs.getInt("token"))
+        } else {
+          None
+        }
+        val updateAttemptedPstmt = Statements.tlStmts.get.updateAttemptedPstmt
+        val token = tokenOpt.getOrElse(generateChallenge(param))
+        val uuidResult = if (token != -1) {
+          val uuid = getUUID(token)
+          updateAttemptedPstmt.setString(1, uuid)
+          updateAttemptedPstmt.executeUpdate()
+          uuid
+        } else {
+          "No Captcha for the provided parameters"
+        }
+        uuidResult
       } else {
-        None
+        "Invalid Parameters"
       }
-      val updateAttemptedPstmt = Statements.tlStmts.get.updateAttemptedPstmt
-      val uuid = getUUID(tokenOpt.getOrElse(generateChallenge(param)))
-      updateAttemptedPstmt.setString(1, uuid)
-      updateAttemptedPstmt.executeUpdate()
-      Id(uuid)
+      Id(result)
     } catch {
       case e: Exception =>
         println(e)
-        Id(getUUID(-1))
+        Id("Something went wrong")
     }
   }
 
