@@ -12,6 +12,7 @@ class BackgroundTask(captcha: Captcha, throttle: Int, timeLimit: Int) {
       try {
 
         val mapIdGCPstmt = Statements.tlStmts.get.mapIdGCPstmt
+        mapIdGCPstmt.setInt(1, timeLimit)
         mapIdGCPstmt.executeUpdate()
 
         val challengeGCPstmt = Statements.tlStmts.get.challengeGCPstmt

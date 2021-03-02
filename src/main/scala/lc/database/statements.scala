@@ -50,7 +50,7 @@ class Statements(dbConn: DBConn) {
     "SELECT c.secret, c.provider " +
       "FROM challenge c, mapId m " +
       "WHERE m.token=c.token AND " +
-      "DATEDIFF(MINUTE, CURRENT_TIMESTAMP, DATEADD(MINUTE, 5, m.lastServed)) > 0 AND " +
+      "DATEDIFF(MINUTE, CURRENT_TIMESTAMP, DATEADD(MINUTE, ?, m.lastServed)) > 0 AND " +
       "m.uuid = ?"
   )
 
@@ -91,7 +91,7 @@ class Statements(dbConn: DBConn) {
   )
 
   val mapIdGCPstmt: PreparedStatement = dbConn.con.prepareStatement(
-    "DELETE FROM mapId WHERE DATEDIFF(MINUTE, CURRENT_TIMESTAMP, DATEADD(MINUTE, 5, lastServed)) < 0"
+    "DELETE FROM mapId WHERE DATEDIFF(MINUTE, CURRENT_TIMESTAMP, DATEADD(MINUTE, ?, lastServed)) < 0"
   )
 
   val getCountChallengeTable: PreparedStatement = dbConn.con.prepareStatement(

@@ -115,7 +115,8 @@ class Captcha {
 
   def checkAnswer(answer: Answer): Result = {
     val selectPstmt = Statements.tlStmts.get.selectPstmt
-    selectPstmt.setString(1, answer.id)
+    selectPstmt.setInt(1, Config.getCaptchaExpiryTimeLimit)
+    selectPstmt.setString(2, answer.id)
     val rs: ResultSet = selectPstmt.executeQuery()
     val psOpt = if (rs.first()) {
       val secret = rs.getString("secret")
