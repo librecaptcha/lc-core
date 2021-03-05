@@ -3,8 +3,7 @@ package lc.core
 import lc.captchas._
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
-import org.json4s.{DefaultFormats, JObject, JField, JArray, JString}
-import org.json4s.jackson.Serialization.write
+import scala.collection.mutable.Map
 
 object CaptchaProviders {
   private val providers = Map(
@@ -23,10 +22,9 @@ object CaptchaProviders {
     }
   }
 
-  implicit val formats: DefaultFormats.type = DefaultFormats
-  private val seed = Config.getSeed
+  private val seed = Config.seed
   private val random = new scala.util.Random(seed)
-  private val config = Config.getCaptchaConfig
+  private val config = Config.captchaConfigMap
 
   private def getNextRandomInt(max: Int): Int =
     random.synchronized {
@@ -37,26 +35,21 @@ object CaptchaProviders {
     return providers(id)
   }
 
-  private def filterProviderByParam(param: Parameters): List[(String, String)] = {
+  private def filterProviderByParam(param: Parameters): Iterable[(List[String], List[String])] = {
     for {
-      JObject(child) <- config
-      JField("name", JString(name)) <- child
-      JField("supportedLevels", JArray(supportedLevels)) <- child
-      JField("supportedMedia", JArray(supportedMedia)) <- child
-      JField("supportedinputType", JArray(supportedinputType)) <- child
-      JField("config", config) <- child
-      if supportedLevels.contains(JString(param.level))
-      if supportedMedia.contains(JString(param.media))
-      if supportedinputType.contains(JString(param.input_type))
-    } yield (name, write(config))
+      configValue <- config.values
+      if configValue("supportedLevels").contains(param.level)
+      if configValue("supportedMedia").contains(param.media)
+      if configValue("supportedinputType").contains(param.input_type)
+    } yield (configValue("name"), configValue("config"))
   }
 
   def getProvider(param: Parameters): ChallengeProvider = {
-    val providerConfig = filterProviderByParam(param)
+    val providerConfig = filterProviderByParam(param).toList
     val randomIndex = getNextRandomInt(providerConfig.length)
     val providerIndex = providerConfig(randomIndex)._1
-    val selectedProvider = providers(providerIndex)
-    selectedProvider.configure(providerConfig(randomIndex)._2)
+    val selectedProvider = providers(providerIndex(0))
+    selectedProvider.configure(providerConfig(randomIndex)._2(0))
     selectedProvider
   }
 }

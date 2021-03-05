@@ -3,6 +3,7 @@ package lc.core
 import scala.io.Source.fromFile
 import org.json4s.{DefaultFormats, JValue, JObject, JField}
 import org.json4s.jackson.JsonMethods.parse
+import scala.collection.immutable.HashMap
 
 object Config {
 
@@ -14,16 +15,17 @@ object Config {
     finally configFile.close
   private val configJson = parse(configString)
 
-  private val port = (configJson \ "port").extract[Int]
-  private val throttle = (configJson \ "throttle").extract[Int]
-  private val seed = (configJson \ "randomSeed").extract[Int]
-  private val captchaExpiryTimeLimit = (configJson \ "captchaExpiryTimeLimit").extract[Int]
-  private val threadDelay = (configJson \ "threadDelay").extract[Int]
-  private val capthcaConfig = (configJson \ "captchas")
+  val port: Int = (configJson \ "port").extract[Int]
+  val throttle: Int = (configJson \ "throttle").extract[Int]
+  val seed: Int = (configJson \ "randomSeed").extract[Int]
+  val captchaExpiryTimeLimit: Int = (configJson \ "captchaExpiryTimeLimit").extract[Int]
+  val threadDelay: Int = (configJson \ "threadDelay").extract[Int]
+  private val captchaConfig = (configJson \ "captchas")
+  val captchaConfigMap: Map[String,HashMap[String,List[String]]] = captchaConfig.values.asInstanceOf[Map[String, HashMap[String, List[String]]]]
 
-  private val supportedLevels = getAllValues(configJson, "supportedLevels")
-  private val supportedMedia = getAllValues(configJson, "supportedMedia")
-  private val supportedinputType = getAllValues(configJson, "supportedinputType")
+  val supportedLevels: Set[String] = getAllValues(configJson, "supportedLevels")
+  val supportedMedia: Set[String] = getAllValues(configJson, "supportedMedia")
+  val supportedinputType: Set[String] = getAllValues(configJson, "supportedinputType")
 
   private def getAllValues(config: JValue, param: String): Set[String] = {
     val configValues = (config \\ param)
@@ -39,42 +41,6 @@ object Config {
       }
     }
     valueSet
-  }
-
-  def getPort(): Int = {
-    port
-  }
-
-  def getThrottle(): Int = {
-    throttle
-  }
-
-  def getSeed(): Int = {
-    seed
-  }
-
-  def getCaptchaExpiryTimeLimit(): Int = {
-    captchaExpiryTimeLimit
-  }
-
-  def getThreadDelay(): Int = {
-    threadDelay
-  }
-
-  def getCaptchaConfig(): JValue = {
-    capthcaConfig
-  }
-
-  def getSupportedLevels(): Set[String] = {
-    supportedLevels
-  }
-
-  def getSupportedMedia(): Set[String] = {
-    supportedMedia
-  }
-
-  def getSupportedinputType(): Set[String] = {
-    supportedinputType
   }
 
 }

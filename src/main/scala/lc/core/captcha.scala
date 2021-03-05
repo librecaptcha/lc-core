@@ -53,9 +53,9 @@ class Captcha {
     token.asInstanceOf[Int]
   }
 
-  val supportedinputType = Config.getSupportedinputType
-  val supportedLevels = Config.getSupportedLevels
-  val supportedMedia = Config.getSupportedMedia
+  val supportedinputType = Config.supportedinputType
+  val supportedLevels = Config.supportedLevels
+  val supportedMedia = Config.supportedMedia
 
   private def validateParam(param: Parameters): Boolean = {
     if (
@@ -115,7 +115,7 @@ class Captcha {
 
   def checkAnswer(answer: Answer): Result = {
     val selectPstmt = Statements.tlStmts.get.selectPstmt
-    selectPstmt.setInt(1, Config.getCaptchaExpiryTimeLimit)
+    selectPstmt.setInt(1, Config.captchaExpiryTimeLimit)
     selectPstmt.setString(2, answer.id)
     val rs: ResultSet = selectPstmt.executeQuery()
     val psOpt = if (rs.first()) {
