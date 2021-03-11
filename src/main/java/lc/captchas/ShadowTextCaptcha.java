@@ -10,6 +10,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.List;
+
 import lc.misc.HelperFunctions;
 import lc.captchas.interfaces.Challenge;
 import lc.captchas.interfaces.ChallengeProvider;
@@ -22,6 +25,15 @@ public class ShadowTextCaptcha implements ChallengeProvider {
 
   public void configure(String config) {
     // TODO: Add custom config
+  }
+
+  public HashMap<String, List<String>> supportedParameters() {
+    HashMap<String, List<String>> supportedParams = new HashMap<String, List<String>>();
+    supportedParams.put("supportedLevels", List.of("easy"));
+    supportedParams.put("supportedMedia", List.of("image/png"));
+    supportedParams.put("supportedInputType", List.of("text"));
+
+    return supportedParams;
   }
 
   public boolean checkAnswer(String secret, String answer) {
