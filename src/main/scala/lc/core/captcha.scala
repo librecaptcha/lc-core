@@ -53,25 +53,25 @@ class Captcha {
     token.asInstanceOf[Int]
   }
 
-  val supportedinputType = Config.supportedinputType
-  val supportedLevels = Config.supportedLevels
-  val supportedMedia = Config.supportedMedia
+  val allowedInputType = Config.allowedInputType
+  val allowedLevels = Config.allowedLevels
+  val allowedMedia = Config.allowedMedia
 
   private def validateParam(param: Parameters): Boolean = {
     if (
-      supportedLevels.contains(param.level) &&
-      supportedMedia.contains(param.media) &&
-      supportedinputType.contains(param.input_type)
+      allowedLevels.contains(param.level) &&
+      allowedMedia.contains(param.media) &&
+      allowedInputType.contains(param.input_type)
     )
       return true
     else
       return false
   }
 
-  def getChallenge(param: Parameters): Id = {
+  def getChallenge(param: Parameters): ChallengeResult = {
     try {
       val validParam = validateParam(param)
-      val result = if (validParam) {
+      if (validParam) {
         val tokenPstmt = Statements.tlStmts.get.tokenPstmt
         tokenPstmt.setString(1, param.level)
         tokenPstmt.setString(2, param.media)
@@ -84,23 +84,22 @@ class Captcha {
         }
         val updateAttemptedPstmt = Statements.tlStmts.get.updateAttemptedPstmt
         val token = tokenOpt.getOrElse(generateChallenge(param))
-        val uuidResult = if (token != -1) {
+        val result = if (token != -1) {
           val uuid = getUUID(token)
           updateAttemptedPstmt.setString(1, uuid)
           updateAttemptedPstmt.executeUpdate()
-          uuid
+          Id(uuid)
         } else {
-          "No Captcha for the provided parameters"
+          Error(ErrorMessageEnum.NO_CAPTCHA.toString)
         }
-        uuidResult
+        result
       } else {
-        "Invalid Parameters"
+        Error(ErrorMessageEnum.INVALID_PARAM.toString)
       }
-      Id(result)
     } catch {
       case e: Exception =>
         println(e)
-        Id("Something went wrong")
+        Error(ErrorMessageEnum.SMW.toString)
     }
   }
 
@@ -122,10 +121,10 @@ class Captcha {
       val secret = rs.getString("secret")
       val provider = rs.getString("provider")
       val check = CaptchaProviders.getProviderById(provider).checkAnswer(secret, answer.answer)
-      val result = if (check) "TRUE" else "FALSE"
+      val result = if (check) ResultEnum.TRUE.toString else ResultEnum.FALSE.toString
       result
     } else {
-      "EXPIRED"
+      ResultEnum.EXPIRED.toString
     }
     val deleteAnswerPstmt = Statements.tlStmts.get.deleteAnswerPstmt
     deleteAnswerPstmt.setString(1, answer.id)
