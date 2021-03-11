@@ -1,9 +1,8 @@
 package lc.core
 
 import scala.io.Source.fromFile
-import org.json4s.{DefaultFormats, JValue, JObject, JField}
+import org.json4s.{DefaultFormats, JValue, JObject, JField, JString}
 import org.json4s.jackson.JsonMethods.parse
-import scala.collection.immutable.HashMap
 
 object Config {
 
@@ -20,12 +19,15 @@ object Config {
   val seed: Int = (configJson \ "randomSeed").extract[Int]
   val captchaExpiryTimeLimit: Int = (configJson \ "captchaExpiryTimeLimit").extract[Int]
   val threadDelay: Int = (configJson \ "threadDelay").extract[Int]
-  private val captchaConfig = (configJson \ "captchas")
-  val captchaConfigMap: Map[String,HashMap[String,List[String]]] = captchaConfig.values.asInstanceOf[Map[String, HashMap[String, List[String]]]]
 
-  val supportedLevels: Set[String] = getAllValues(configJson, "supportedLevels")
-  val supportedMedia: Set[String] = getAllValues(configJson, "supportedMedia")
-  val supportedinputType: Set[String] = getAllValues(configJson, "supportedinputType")
+  private val captchaConfigJson = (configJson \ "captchas")
+  val captchaConfigTransform: JValue = captchaConfigJson transformField {
+    case JField("config", JObject(config)) => ("config", JString(config.toString))
+  }
+  val captchaConfig: List[CaptchaConfig] = captchaConfigTransform.extract[List[CaptchaConfig]]
+  val allowedLevels: Set[String] = getAllValues(configJson, ParametersEnum.ALLOWEDLEVELS.toString)
+  val allowedMedia: Set[String] = getAllValues(configJson, ParametersEnum.ALLOWEDMEDIA.toString)
+  val allowedInputType: Set[String] = getAllValues(configJson, ParametersEnum.ALLOWEDINPUTTYPE.toString)
 
   private def getAllValues(config: JValue, param: String): Set[String] = {
     val configValues = (config \\ param)
