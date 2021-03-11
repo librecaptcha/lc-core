@@ -7,9 +7,26 @@ import java.awt.Font
 import java.awt.Color
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
+import scala.jdk.CollectionConverters.MapHasAsJava
+import java.util.{List => JavaList, Map => JavaMap}
 
 class FilterChallenge extends ChallengeProvider {
   def getId = "FilterChallenge"
+
+  def configure(config: String): Unit = {
+    // TODO: add custom config
+  }
+
+  def supportedParameters(): JavaMap[String, JavaList[String]] = {
+    val supportedParams = Map(
+      "supportedLevels" -> JavaList.of("medium", "hard"),
+      "supportedMedia" -> JavaList.of("image/png"),
+      "supportedInputType" -> JavaList.of("text")
+    ).asJava
+
+    supportedParams
+  }
+
   def returnChallenge(): Challenge = {
     val filterTypes = List(new FilterType1, new FilterType2)
     val r = new scala.util.Random

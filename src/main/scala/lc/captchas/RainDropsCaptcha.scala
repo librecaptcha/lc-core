@@ -10,6 +10,8 @@ import javax.imageio.stream.MemoryCacheImageOutputStream;
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 import lc.misc.GifSequenceWriter
+import scala.jdk.CollectionConverters.MapHasAsJava
+import java.util.{List => JavaList, Map => JavaMap}
 
 class Drop {
   var x = 0
@@ -30,6 +32,20 @@ class RainDropsCP extends ChallengeProvider {
   private val textHighlightColor = new Color(100, 100, 125)
 
   def getId = "FilterChallenge"
+
+  def configure(config: String): Unit = {
+    // TODO: add custom config
+  }
+
+  def supportedParameters(): JavaMap[String, JavaList[String]] = {
+    val supportedParams = Map(
+      "supportedLevels" -> JavaList.of("medium", "easy"),
+      "supportedMedia" -> JavaList.of("image/gif"),
+      "supportedInputType" -> JavaList.of("text")
+    ).asJava
+
+    supportedParams
+  }
 
   private def extendDrops(drops: Array[Drop], steps: Int, xOffset: Int) = {
     drops.map(d => {

@@ -1,34 +1,37 @@
 {
     "randomSeed": 20,
+    "port": 8888,
     "captchaExpiryTimeLimit": 5,
-    "captchas":{
-        "FilterChallenge":{
+    "threadDelay": 2,
+    "throttle": 10,
+    "captchas":[
+        {
             "name": "FilterChallenge",
-            "supportedLevels":["medium", "hard"],
-            "supportedMedia":["image"],
-            "supportedinputType":["text"],
+            "allowedLevels":["medium", "hard"],
+            "allowedMedia":["image/png"],
+            "allowedInputType":["text"],
             "config":{}
         },
-        "GifCaptcha":{
+        {
             "name": "GifCaptcha",
-            "supportedLevels":["hard"],
-            "supportedMedia":["gif"],
-            "supportedinputType":["text"],
+            "allowedLevels":["hard"],
+            "allowedMedia":["image/gif"],
+            "allowedInputType":["text"],
             "config":{}
         },
-        "ShadowTextCaptcha":{
+        {
             "name": "ShadowTextCaptcha",
-            "supportedLevels":["easy"],
-            "supportedMedia":["image"],
-            "supportedinputType":["text"],
+            "allowedLevels":["easy"],
+            "allowedMedia":["image/png"],
+            "allowedInputType":["text"],
             "config": {}
         },
-        "RainDropsCaptcha":{
+        {
             "name": "RainDropsCaptcha",
-            "supportedLevels":["easy","medium"],
-            "supportedMedia":["image"],
-            "supportedinputType":["text"],
+            "allowedLevels":["easy","medium"],
+            "allowedMedia":["image/gif"],
+            "allowedInputType":["text"],
             "config":{}
         }
-    }
+    ]
 }

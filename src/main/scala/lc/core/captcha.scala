@@ -5,6 +5,7 @@ import java.util.UUID
 import java.io.ByteArrayInputStream
 import lc.database.Statements
 import lc.core.CaptchaProviders
+import lc.captchas.interfaces.ChallengeProvider
 
 class Captcha {
 
@@ -30,8 +31,8 @@ class Captcha {
   }
 
   def generateChallenge(param: Parameters): Int = {
-    //TODO: eval params to choose a provider
-    val provider = CaptchaProviders.getProvider()
+    val provider = CaptchaProviders.getProvider(param)
+    if (!provider.isInstanceOf[ChallengeProvider]) return -1
     val providerId = provider.getId()
     val challenge = provider.returnChallenge()
     val blob = new ByteArrayInputStream(challenge.content)
@@ -40,7 +41,9 @@ class Captcha {
     insertPstmt.setString(2, challenge.secret)
     insertPstmt.setString(3, providerId)
     insertPstmt.setString(4, challenge.contentType)
-    insertPstmt.setBlob(5, blob)
+    insertPstmt.setString(5, param.level)
+    insertPstmt.setString(6, param.input_type)
+    insertPstmt.setBlob(7, blob)
     insertPstmt.executeUpdate()
     val rs: ResultSet = insertPstmt.getGeneratedKeys()
     val token = if (rs.next()) {
@@ -50,24 +53,53 @@ class Captcha {
     token.asInstanceOf[Int]
   }
 
-  def getChallenge(param: Parameters): Id = {
+  val allowedInputType = Config.allowedInputType
+  val allowedLevels = Config.allowedLevels
+  val allowedMedia = Config.allowedMedia
+
+  private def validateParam(param: Parameters): Boolean = {
+    if (
+      allowedLevels.contains(param.level) &&
+      allowedMedia.contains(param.media) &&
+      allowedInputType.contains(param.input_type)
+    )
+      return true
+    else
+      return false
+  }
+
+  def getChallenge(param: Parameters): ChallengeResult = {
     try {
-      val tokenPstmt = Statements.tlStmts.get.tokenPstmt
-      val rs = tokenPstmt.executeQuery()
-      val tokenOpt = if (rs.next()) {
-        Some(rs.getInt("token"))
+      val validParam = validateParam(param)
+      if (validParam) {
+        val tokenPstmt = Statements.tlStmts.get.tokenPstmt
+        tokenPstmt.setString(1, param.level)
+        tokenPstmt.setString(2, param.media)
+        tokenPstmt.setString(3, param.input_type)
+        val rs = tokenPstmt.executeQuery()
+        val tokenOpt = if (rs.next()) {
+          Some(rs.getInt("token"))
+        } else {
+          None
+        }
+        val updateAttemptedPstmt = Statements.tlStmts.get.updateAttemptedPstmt
+        val token = tokenOpt.getOrElse(generateChallenge(param))
+        val result = if (token != -1) {
+          val uuid = getUUID(token)
+          updateAttemptedPstmt.setString(1, uuid)
+          updateAttemptedPstmt.executeUpdate()
+          Id(uuid)
+        } else {
+          Error(ErrorMessageEnum.NO_CAPTCHA.toString)
+        }
+        result
       } else {
-        None
+        Error(ErrorMessageEnum.INVALID_PARAM.toString)
       }
-      val updateAttemptedPstmt = Statements.tlStmts.get.updateAttemptedPstmt
-      val uuid = getUUID(tokenOpt.getOrElse(generateChallenge(param)))
-      updateAttemptedPstmt.setString(1, uuid)
-      updateAttemptedPstmt.executeUpdate()
-      Id(uuid)
     } catch {
       case e: Exception =>
         println(e)
-        Id(getUUID(-1))
+        Error(ErrorMessageEnum.SMW.toString)
     }
   }
 
@@ -82,16 +114,17 @@ class Captcha {
 
   def checkAnswer(answer: Answer): Result = {
     val selectPstmt = Statements.tlStmts.get.selectPstmt
-    selectPstmt.setString(1, answer.id)
+    selectPstmt.setInt(1, Config.captchaExpiryTimeLimit)
+    selectPstmt.setString(2, answer.id)
     val rs: ResultSet = selectPstmt.executeQuery()
     val psOpt = if (rs.first()) {
       val secret = rs.getString("secret")
       val provider = rs.getString("provider")
       val check = CaptchaProviders.getProviderById(provider).checkAnswer(secret, answer.answer)
-      val result = if (check) "TRUE" else "FALSE"
+      val result = if (check) ResultEnum.TRUE.toString else ResultEnum.FALSE.toString
       result
     } else {
-      "EXPIRED"
+      ResultEnum.EXPIRED.toString
     }
     val deleteAnswerPstmt = Statements.tlStmts.get.deleteAnswerPstmt
     deleteAnswerPstmt.setString(1, answer.id)
