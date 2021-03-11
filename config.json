@@ -4,34 +4,34 @@
     "captchaExpiryTimeLimit": 5,
     "threadDelay": 2,
     "throttle": 10,
-    "captchas":{
-        "FilterChallenge":{
+    "captchas":[
+        {
             "name": "FilterChallenge",
-            "supportedLevels":["medium", "hard"],
-            "supportedMedia":["image/png"],
-            "supportedinputType":["text"],
+            "allowedLevels":["medium", "hard"],
+            "allowedMedia":["image/png"],
+            "allowedInputType":["text"],
             "config":{}
         },
-        "GifCaptcha":{
+        {
             "name": "GifCaptcha",
-            "supportedLevels":["hard"],
-            "supportedMedia":["image/gif"],
-            "supportedinputType":["text"],
+            "allowedLevels":["hard"],
+            "allowedMedia":["image/gif"],
+            "allowedInputType":["text"],
             "config":{}
         },
-        "ShadowTextCaptcha":{
+        {
             "name": "ShadowTextCaptcha",
-            "supportedLevels":["easy"],
-            "supportedMedia":["image/png"],
-            "supportedinputType":["text"],
+            "allowedLevels":["easy"],
+            "allowedMedia":["image/png"],
+            "allowedInputType":["text"],
             "config": {}
         },
-        "RainDropsCaptcha":{
+        {
             "name": "RainDropsCaptcha",
-            "supportedLevels":["easy","medium"],
-            "supportedMedia":["image/gif"],
-            "supportedinputType":["text"],
+            "allowedLevels":["easy","medium"],
+            "allowedMedia":["image/gif"],
+            "allowedInputType":["text"],
             "config":{}
         }
-    }
+    ]
 }
