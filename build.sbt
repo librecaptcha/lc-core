@@ -21,7 +21,6 @@ scalacOptions ++= List(
   "-Ywarn-unused"
 )
 javacOptions += "-g:none"
-scalafmtOnCompile := true
 compileOrder := CompileOrder.JavaThenScala
 
 fork in run := true
