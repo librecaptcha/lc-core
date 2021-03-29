@@ -10,6 +10,15 @@ object ParametersEnum extends Enumeration {
   val ALLOWEDLEVELS: Value = Value("allowedLevels")
   val ALLOWEDMEDIA: Value = Value("allowedMedia")
   val ALLOWEDINPUTTYPE: Value = Value("allowedInputType")
+
+  val NAME: Value = Value("name")
+  val RANDOM_SEED: Value = Value("randomSeed")
+  val PORT: Value = Value("port")
+  val CAPTCHA_EXPIRY_TIME_LIMIT: Value = Value("captchaExpiryTimeLimit")
+  val THROTTLE: Value = Value("throttle")
+  val THREAD_DELAY: Value = Value("threadDelay")
+  val CONFIG: Value = Value("config")
+
 }
 
 object ResultEnum extends Enumeration {
