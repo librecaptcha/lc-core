@@ -22,7 +22,7 @@ FROM sbt-builder as builder
 COPY src/ src/
 RUN sbt assembly
 
-FROM adoptopenjdk/openjdk16:alpine  AS base-core
+FROM adoptopenjdk/openjdk16:alpine-jre  AS base-core
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 RUN apk add --update ttf-dejavu
 ENV PATH=$PATH:${JAVA_HOME}/bin
