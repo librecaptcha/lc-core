@@ -1,8 +1,7 @@
-FROM alpine:latest AS base-builder
+FROM adoptopenjdk/openjdk16:alpine AS base-builder
 ARG SBT_VERSION=1.3.13
 RUN apk add --no-cache bash
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
-RUN apk add openjdk11-jre
 ENV PATH=$PATH:${JAVA_HOME}/bin
 RUN \
 	wget -O sbt-$SBT_VERSION.tgz https://github.com/sbt/sbt/releases/download/v$SBT_VERSION/sbt-$SBT_VERSION.tgz && \
@@ -12,18 +11,20 @@ RUN \
 ENV PATH=$PATH:/sbt/bin/
 
 
-FROM base-builder AS builder
+FROM base-builder AS sbt-builder
 WORKDIR /build
 COPY lib/ lib/
 COPY project/plugins.sbt project/
 COPY build.sbt .
+RUN sbt assembly
+
+FROM sbt-builder as builder
 COPY src/ src/
 RUN sbt assembly
 
-
-FROM alpine:latest AS base-core
+FROM adoptopenjdk/openjdk16:alpine  AS base-core
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
-RUN apk add openjdk11-jre
+RUN apk add --update ttf-dejavu
 ENV PATH=$PATH:${JAVA_HOME}/bin
 
 
