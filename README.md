@@ -85,13 +85,13 @@ An image that has a pair of words is created. The answer to one of the words is 
     - `input_type`: `String` - 
       The type of input option for a captcha
        - text
-       - click (choose)
+       - (More to come)
     - `media`: `String` - 
       The type of media of a captcha
-       - image
-       - audio
-       - gif
-    - `size`: `dict` - 
+       - image/png
+       - image/gif
+       - (More to come)
+    - `size`: `Map` - 
       The dimensions of a captcha (Optional). It needs two more fields nested in this parameter
        - `height`: `Int`
        - `width`: `Int`
@@ -100,7 +100,7 @@ An image that has a pair of words is created. The answer to one of the words is 
     - `id`: `String` - The uuid of the captcha generated
 
 
-### - `/v1/media`: `POST`,`GET` 
+### - `/v1/media`: `GET` 
   - Parameters:
     - `id`: `String` - The uuid of the captcha
 
