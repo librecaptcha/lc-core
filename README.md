@@ -28,6 +28,12 @@ docker run -v lcdata:/lc-core/data librecaptcha/lc-core:latest
 
 A default `config.json` is automatically created in the mounted volume.
 
+To test the installation, try:
+
+```
+curl -d '{"media":"image/png","level":"easy","input_type":"text"}' localhost:8888/v1/captcha
+```
+
 ## Configuration
 If a `config.json` file is not present in the `data/` folder, the app creates one, and this can be modified
 to customize the app features, such as which CAPTCHAs are enabled and their difficulty settings.
