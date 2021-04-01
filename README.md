@@ -1,16 +1,17 @@
 # LibreCaptcha
 LibreCaptcha is a framework that allows developers to create their own [CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA)s.
-It allows developers to easily create new types of CAPTCHAs by defining a structure for them. Mundane details are handled by the
-framework itself. Details such as:
-  * Background workers to render CAPTCHAs and to store them in a database
-  * Providing an HTTP interface for serving CAPTCHAs
+The framework defines the API for a CAPTCHA generator and takes care of mundane details
+such as:
+  * An HTTP interface for serving CAPTCHAs
+  * Background workers to pre-compute CAPTCHAs and to store them in a database
   * Managing secrets for the CAPTCHAs (tokens, expected answers, etc)
   * Safe re-impressions of CAPTCHA images (by creating unique tokens for every impression)
-  * Sandboxed plugin architecture (To be done)
+  * Garbage collection of stale CAPTCHAs
+  * Sandboxed plugin architecture (TBD)
 
-Some sample CAPTCHA generators are included in the distribution. We will continue adding more samples to the list. For quick
-deployments the samples themselves might be sufficient. Projects with more resources could create their own CAPTCHAs
-and use the samples as inspiration.
+Some sample CAPTCHA generators are included in the distribution (see below). We will continue adding more samples to the list. For quick
+deployments the samples themselves might be sufficient. Projects with more resources might want create their own CAPTCHAs
+and use the samples as inspiration. See the [CAPTCHA creation guide](https://github.com/librecaptcha/lc-core/wiki/Creating-your-own-CAPTCHA-provider).
 
 ## Quick start with Docker
 Using `docker-compose`:
@@ -33,6 +34,7 @@ To test the installation, try:
 ```
 curl -d '{"media":"image/png","level":"easy","input_type":"text"}' localhost:8888/v1/captcha
 ```
+This should return an id that can be used in further API calls. The API endpoints are described below.
 
 ## Configuration
 If a `config.json` file is not present in the `data/` folder, the app creates one, and this can be modified
@@ -61,7 +63,7 @@ And, the more the variety of CAPTCHAS, the harder it is for bots to crack CAPTCH
 
 ![FilterCaptcha Sample](./samples/FilterChallenge.png)
 
-An image of a random string of alphabets is created. Then a series of image filters that add effecs such as Smear, Diffuse, and Ripple are applied to the image to make it less readable.
+An image of a random string of alphabets is created. Then a series of image filters that add effects such as Smear, Diffuse, and Ripple are applied to the image to make it less readable.
 
 ### RainDropsCaptcha
 ![RaindDrops Sample](./samples/RainDropsCaptcha.gif)
