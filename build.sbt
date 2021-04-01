@@ -10,9 +10,9 @@ lazy val root = (project in file(".")).settings(
     )
   ),
   name := "LibreCaptcha",
-  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.0.5",
-  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.0.5",
-  libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.9"
+  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.0.17",
+  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.0.17",
+  libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.11"
 )
 
 unmanagedResourceDirectories in Compile += { baseDirectory.value / "lib" }
