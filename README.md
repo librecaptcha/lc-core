@@ -32,9 +32,16 @@ A default `config.json` is automatically created in the mounted volume.
 To test the installation, try:
 
 ```
-curl -d '{"media":"image/png","level":"easy","input_type":"text"}' localhost:8888/v1/captcha
+> $ curl -d '{"media":"image/png","level":"easy","input_type":"text"}' localhost:8888/v1/captcha
+{"id":"3bf928ce-a1e7-4616-b34f-8252d777855d"}
+
+> $ curl "localhost:8888/v1/media?id=3bf928ce-a1e7-4616-b34f-8252d777855d" -o sample.png
+
+> $ file sample.png
+sample.png: PNG image data, 350 x 100, 8-bit/color RGB, non-interlaced
 ```
-This should return an id that can be used in further API calls. The API endpoints are described below.
+
+The API endpoints are described below.
 
 ## Configuration
 If a `config.json` file is not present in the `data/` folder, the app creates one, and this can be modified
