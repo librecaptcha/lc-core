@@ -18,7 +18,8 @@ lazy val root = (project in file(".")).settings(
 unmanagedResourceDirectories in Compile += { baseDirectory.value / "lib" }
 scalacOptions ++= List(
   "-Yrangepos",
-  "-Ywarn-unused"
+  "-Ywarn-unused",
+  "-deprecation"
 )
 javacOptions += "-g:none"
 compileOrder := CompileOrder.JavaThenScala
