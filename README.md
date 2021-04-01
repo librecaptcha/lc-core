@@ -12,6 +12,26 @@ Some sample CAPTCHA generators are included in the distribution. We will continu
 deployments the samples themselves might be sufficient. Projects with more resources could create their own CAPTCHAs
 and use the samples as inspiration.
 
+## Quick start with Docker
+Using `docker-compose`:
+
+```
+git clone https://github.com/librecaptcha/lc-core.git
+docker-compose up
+```
+
+Using `docker`:
+
+```
+docker run -v lcdata:/lc-core/data librecaptcha/lc-core:latest
+```
+
+A default `config.json` is automatically created in the mounted volume.
+
+## Configuration
+If a `config.json` file is not present in the `data/` folder, the app creates one, and this can be modified
+to customize the app features, such as which CAPTCHAs are enabled and their difficulty settings.
+
 ## Why LibreCaptcha?
 
 ### Eliminate dependency on a third-party
@@ -47,7 +67,7 @@ An image that has a pair of words is created. The answer to one of the words is 
 ***
 
 ## HTTP API 
-### - `/captcha`: `POST`
+### - `/v1/captcha`: `POST`
   - Parameters:
     - `level`: `String` - 
       The difficulty level of a captcha
@@ -72,7 +92,7 @@ An image that has a pair of words is created. The answer to one of the words is 
     - `id`: `String` - The uuid of the captcha generated
 
 
-### - `/media`: `POST`,`GET` 
+### - `/v1/media`: `POST`,`GET` 
   - Parameters:
     - `id`: `String` - The uuid of the captcha
 
@@ -80,7 +100,7 @@ An image that has a pair of words is created. The answer to one of the words is 
     - `image`: `Array[Byte]` - The requested media as bytes
 
 
-### - `/answer`: `POST`
+### - `/v1/answer`: `POST`
   - Parameter:
     - `id`: `String` - The uuid of the captcha that needs to be solved
     - `answer`: `String` - The answer to the captcha that needs to be validated
