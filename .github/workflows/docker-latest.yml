@@ -15,7 +15,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-        java-version: 1.16
+          java-version: 1.16
 
       - name: Assemble Jar
         run: sbt assembly
