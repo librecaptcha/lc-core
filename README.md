@@ -32,6 +32,8 @@ A default `config.json` is automatically created in the mounted volume.
 If a `config.json` file is not present in the `data/` folder, the app creates one, and this can be modified
 to customize the app features, such as which CAPTCHAs are enabled and their difficulty settings.
 
+More details can be found [in the wiki](https://github.com/librecaptcha/lc-core/wiki/Configuration)
+
 ## Why LibreCaptcha?
 
 ### Eliminate dependency on a third-party
