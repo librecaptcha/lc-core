@@ -58,7 +58,7 @@ class RainDropsCP extends ChallengeProvider {
 
   def returnChallenge(): Challenge = {
     val r = new scala.util.Random
-    val secret = Stream.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
+    val secret = LazyList.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
     val width = 450
     val height = 100
     val imgType = BufferedImage.TYPE_INT_RGB

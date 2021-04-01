@@ -32,7 +32,7 @@ class FilterChallenge extends ChallengeProvider {
     val r = new scala.util.Random
     val alphabet = "abcdefghijklmnopqrstuvwxyz"
     val n = 8
-    val secret = Stream.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
+    val secret = LazyList.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
     val canvas = new BufferedImage(225, 50, BufferedImage.TYPE_INT_RGB)
     val g = canvas.createGraphics()
     g.setColor(Color.WHITE)
