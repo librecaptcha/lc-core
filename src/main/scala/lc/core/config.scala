@@ -2,23 +2,37 @@ package lc.core
 
 import scala.io.Source.fromFile
 import org.json4s.{DefaultFormats, JValue, JObject, JField, JString}
-import org.json4s.jackson.JsonMethods.parse
+import org.json4s.jackson.JsonMethods.{parse, render, pretty}
+import org.json4s.JsonDSL._
+import java.io.{FileNotFoundException, File, PrintWriter}
 
 object Config {
 
   implicit val formats: DefaultFormats.type = DefaultFormats
 
-  private val configFile = fromFile("config.json")
+  private val configFilePath = "data/config.json"
   private val configString =
-    try configFile.mkString
-    finally configFile.close
+    try {
+      val configFile = fromFile(configFilePath)
+      val configFileContent = configFile.mkString
+      configFile.close
+      configFileContent
+    } catch {
+      case _: FileNotFoundException =>
+        val configFileContent = getDefaultConfig()
+        val configFile = new PrintWriter(new File(configFilePath))
+        configFile.write(configFileContent)
+        configFile.close
+        configFileContent
+    }
+
   private val configJson = parse(configString)
 
-  val port: Int = (configJson \ "port").extract[Int]
-  val throttle: Int = (configJson \ "throttle").extract[Int]
-  val seed: Int = (configJson \ "randomSeed").extract[Int]
-  val captchaExpiryTimeLimit: Int = (configJson \ "captchaExpiryTimeLimit").extract[Int]
-  val threadDelay: Int = (configJson \ "threadDelay").extract[Int]
+  val port: Int = (configJson \ AttributesEnum.PORT.toString).extract[Int]
+  val throttle: Int = (configJson \ AttributesEnum.THROTTLE.toString).extract[Int]
+  val seed: Int = (configJson \ AttributesEnum.RANDOM_SEED.toString).extract[Int]
+  val captchaExpiryTimeLimit: Int = (configJson \ AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString).extract[Int]
+  val threadDelay: Int = (configJson \ AttributesEnum.THREAD_DELAY.toString).extract[Int]
 
   private val captchaConfigJson = (configJson \ "captchas")
   val captchaConfigTransform: JValue = captchaConfigJson transformField {
@@ -43,6 +57,47 @@ object Config {
       }
     }
     valueSet
+  }
+
+  private def getDefaultConfig(): String = {
+    val defaultConfigMap = 
+      (AttributesEnum.RANDOM_SEED.toString -> 20) ~
+      (AttributesEnum.PORT.toString -> 8888) ~
+      (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
+      (AttributesEnum.THROTTLE.toString -> 10) ~
+      (AttributesEnum.THREAD_DELAY.toString -> 2) ~
+      ("captchas" -> List(
+        (
+          (AttributesEnum.NAME.toString -> "FilterChallenge") ~
+          (ParametersEnum.ALLOWEDLEVELS.toString -> List("medium", "hard")) ~
+          (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
+          (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+          (AttributesEnum.CONFIG.toString -> JObject())
+        ),
+        (
+          (AttributesEnum.NAME.toString -> "GifCaptcha") ~
+          (ParametersEnum.ALLOWEDLEVELS.toString -> List("hard")) ~
+          (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
+          (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+          (AttributesEnum.CONFIG.toString -> JObject())
+        ),
+        (
+          (AttributesEnum.NAME.toString -> "ShadowTextCaptcha") ~
+          (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy")) ~
+          (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
+          (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+          (AttributesEnum.CONFIG.toString -> JObject())
+        ),
+        (
+          (AttributesEnum.NAME.toString -> "RainDropsCaptcha") ~
+          (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy", "medium")) ~
+          (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
+          (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+          (AttributesEnum.CONFIG.toString -> JObject())
+        )
+      ))
+
+    pretty(render(defaultConfigMap))
   }
 
 }

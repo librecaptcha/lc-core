@@ -22,5 +22,8 @@ scalacOptions ++= List(
 )
 javacOptions += "-g:none"
 compileOrder := CompileOrder.JavaThenScala
+mainClass in assembly := Some("lc.LCFramework")
+mainClass in (Compile, run) := Some("lc.LCFramework")
+assemblyJarName in assembly := "LibreCaptcha.jar"
 
 fork in run := true
