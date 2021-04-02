@@ -1,3 +1,5 @@
+set -ex
+
 python3 -m venv testEnv
 source ./testEnv/activate
 pip install locust
