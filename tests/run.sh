@@ -1,7 +1,7 @@
 set -ex
 
 python3 -m venv testEnv
-source ./testEnv/activate
+source ./testEnv/bin/activate
 pip install locust
 java -jar target/scala-2.13/LibreCaptcha.jar &
 JAVA_PID=$!
