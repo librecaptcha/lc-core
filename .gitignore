@@ -9,6 +9,9 @@
 .metals
 .vscode
 
+# for python test env
+/testEnv/
+
 # for various captcha
 /known/
 /unknown/

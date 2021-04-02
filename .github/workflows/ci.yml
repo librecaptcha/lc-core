@@ -1,8 +1,7 @@
-name: Scala CI
+name: Core CI
 
 on:
   push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -18,6 +17,8 @@ jobs:
       with:
         java-version: 1.11
     - name: Run tests
-      run: sbt test
+      run: sbt test assembly
     - name: Run linter
       run: sbt "scalafixAll --check"
+    - name: Run locust tests
+      run: ./tests/run.sh
