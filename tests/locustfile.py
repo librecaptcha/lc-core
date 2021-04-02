@@ -1,6 +1,22 @@
 from locust import task, between, SequentialTaskSet
 from locust.contrib.fasthttp import FastHttpUser
+from locust import events
 import json
+import logging
+
+@events.quitting.add_listener
+def _(environment, **kw):
+    if environment.stats.total.fail_ratio > 0.02:
+        logging.error("Test failed due to failure ratio > 2%")
+        environment.process_exit_code = 1
+    elif environment.stats.total.avg_response_time > 300:
+        logging.error("Test failed due to average response time ratio > 300 ms")
+        environment.process_exit_code = 1
+    elif environment.stats.total.get_response_time_percentile(0.95) > 800:
+        logging.error("Test failed due to 95th percentile response time > 800 ms")
+        environment.process_exit_code = 1
+    else:
+        environment.process_exit_code = 0
 
 class QuickStartUser(SequentialTaskSet):
     wait_time = between(0.1,1)
