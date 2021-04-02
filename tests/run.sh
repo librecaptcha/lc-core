@@ -5,6 +5,6 @@ java -jar target/scala-2.13/LibreCaptcha.jar &
 JAVA_PID=$!
 sleep 4
 
-locust -f tests/locustfile.py
+locust --headless -u 1000 -r 100 -f tests/locustfile.py
 
 kill $JAVA_PID
