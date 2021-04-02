@@ -13,6 +13,19 @@ Some sample CAPTCHA generators are included in the distribution (see below). We 
 deployments the samples themselves might be sufficient. Projects with more resources might want create their own CAPTCHAs
 and use the samples as inspiration. See the [CAPTCHA creation guide](https://github.com/librecaptcha/lc-core/wiki/Creating-your-own-CAPTCHA-provider).
 
+## Quick start with Java
+
+1. Download the `jar` file from the latest release
+2. Type `java -jar LibreCaptch.jar`
+
+We recommend a Java 11+ runtime as that's what we compile the code with.
+
+Alternatively,
+1. Install [sbt](https://www.scala-sbt.org/)
+2. Clone this repository
+3. Type `sbt run` within the repository
+
+
 ## Quick start with Docker
 Using `docker-compose`:
 
