@@ -13,6 +13,12 @@ Some sample CAPTCHA generators are included in the distribution (see below). We 
 deployments the samples themselves might be sufficient. Projects with more resources might want create their own CAPTCHAs
 and use the samples as inspiration. See the [CAPTCHA creation guide](https://github.com/librecaptcha/lc-core/wiki/Creating-your-own-CAPTCHA-provider).
 
+## Current Status
+The framework is stable, but since it is our first public release, we recommend using it only on small to medium scale
+web apps.
+
+The sample CAPTCHAs are also just that, samples. They have not been tested against bots or CAPTCHA crackers yet.
+
 ## Quick start with Java
 
 1. Download the `jar` file from the latest release
