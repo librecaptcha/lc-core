@@ -20,3 +20,5 @@ jobs:
       run: sbt test assembly
     - name: Run linter
       run: sbt "scalafixAll --check"
+    - name: Run locust tests
+      run: ./tests/run.sh
