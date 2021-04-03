@@ -37,6 +37,7 @@ object ErrorMessageEnum extends Enumeration {
   type ErrorMessage = Value
 
   val SMW: Value = Value("Oops, something went worng!")
-  val INVALID_PARAM: Value = Value("Invalid Pramaters")
+  val INVALID_PARAM: Value = Value("Parameters invalid or missing")
   val NO_CAPTCHA: Value = Value("No captcha for the provided parameters")
+  val BAD_METHOD: Value = Value("Bad request method")
 }
