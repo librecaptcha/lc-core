@@ -1,38 +1,42 @@
 package lc.core
 
-import java.sql.{Blob, ResultSet}
+import java.sql.ResultSet
 import java.util.UUID
 import java.io.ByteArrayInputStream
 import lc.database.Statements
 import lc.core.CaptchaProviders
-import lc.captchas.interfaces.ChallengeProvider
+import java.nio.file.{Files, Paths}
+
 
 class Captcha {
 
   def getCaptcha(id: Id): Array[Byte] = {
-    var image: Array[Byte] = null
-    var blob: Blob = null
     try {
+      val imagePath = "data/404.jpg"
       val imagePstmt = Statements.tlStmts.get.imagePstmt
       imagePstmt.setString(1, id.id)
       val rs: ResultSet = imagePstmt.executeQuery()
-      if (rs.next()) {
-        blob = rs.getBlob("image")
-        if (blob != null) {
-          image = blob.getBytes(1, blob.length().toInt)
+      val image = if (rs.next()) {
+        val blob = rs.getBlob("image")
+        val imageBytes = if (blob != null) {
+          blob.getBytes(1, blob.length().toInt)
+        } else {
+          Files.readAllBytes(Paths.get(imagePath))
         }
+        imageBytes
+      } else {
+        Files.readAllBytes(Paths.get(imagePath))
       }
       image
     } catch {
-      case e: Exception =>
-        println(e)
-        image
+      case exception: Exception =>
+        println(exception.getStackTrace)
+        throw new Exception(exception.getMessage)
     }
   }
 
   def generateChallenge(param: Parameters): Int = {
     val provider = CaptchaProviders.getProvider(param)
-    if (!provider.isInstanceOf[ChallengeProvider]) return -1
     val providerId = provider.getId()
     val challenge = provider.returnChallenge()
     val blob = new ByteArrayInputStream(challenge.content)
@@ -57,49 +61,28 @@ class Captcha {
   val allowedLevels = Config.allowedLevels
   val allowedMedia = Config.allowedMedia
 
-  private def validateParam(param: Parameters): Boolean = {
-    if (
-      allowedLevels.contains(param.level) &&
-      allowedMedia.contains(param.media) &&
-      allowedInputType.contains(param.input_type)
-    )
-      return true
-    else
-      return false
-  }
-
-  def getChallenge(param: Parameters): ChallengeResult = {
+  def getChallenge(param: Parameters): Id = {
     try {
-      val validParam = validateParam(param)
-      if (validParam) {
-        val tokenPstmt = Statements.tlStmts.get.tokenPstmt
-        tokenPstmt.setString(1, param.level)
-        tokenPstmt.setString(2, param.media)
-        tokenPstmt.setString(3, param.input_type)
-        val rs = tokenPstmt.executeQuery()
-        val tokenOpt = if (rs.next()) {
-          Some(rs.getInt("token"))
-        } else {
-          None
-        }
-        val updateAttemptedPstmt = Statements.tlStmts.get.updateAttemptedPstmt
-        val token = tokenOpt.getOrElse(generateChallenge(param))
-        val result = if (token != -1) {
-          val uuid = getUUID(token)
-          updateAttemptedPstmt.setString(1, uuid)
-          updateAttemptedPstmt.executeUpdate()
-          Id(uuid)
-        } else {
-          Error(ErrorMessageEnum.NO_CAPTCHA.toString)
-        }
-        result
+      val tokenPstmt = Statements.tlStmts.get.tokenPstmt
+      tokenPstmt.setString(1, param.level)
+      tokenPstmt.setString(2, param.media)
+      tokenPstmt.setString(3, param.input_type)
+      val rs = tokenPstmt.executeQuery()
+      val tokenOpt = if (rs.next()) {
+        Some(rs.getInt("token"))
       } else {
-        Error(ErrorMessageEnum.INVALID_PARAM.toString)
+        None
       }
+      val updateAttemptedPstmt = Statements.tlStmts.get.updateAttemptedPstmt
+      val token = tokenOpt.getOrElse(generateChallenge(param))
+      val uuid = getUUID(token)
+      updateAttemptedPstmt.setString(1, uuid)
+      updateAttemptedPstmt.executeUpdate()
+      Id(uuid)
     } catch {
-      case e: Exception =>
-        println(e)
-        Error(ErrorMessageEnum.SMW.toString)
+      case exception: Exception =>
+        println(exception.getStackTrace)
+        throw new Exception(exception.getMessage)
     }
   }
 
@@ -113,23 +96,30 @@ class Captcha {
   }
 
   def checkAnswer(answer: Answer): Result = {
-    val selectPstmt = Statements.tlStmts.get.selectPstmt
-    selectPstmt.setInt(1, Config.captchaExpiryTimeLimit)
-    selectPstmt.setString(2, answer.id)
-    val rs: ResultSet = selectPstmt.executeQuery()
-    val psOpt = if (rs.first()) {
-      val secret = rs.getString("secret")
-      val provider = rs.getString("provider")
-      val check = CaptchaProviders.getProviderById(provider).checkAnswer(secret, answer.answer)
-      val result = if (check) ResultEnum.TRUE.toString else ResultEnum.FALSE.toString
-      result
-    } else {
-      ResultEnum.EXPIRED.toString
+    try{
+      val selectPstmt = Statements.tlStmts.get.selectPstmt
+      selectPstmt.setInt(1, Config.captchaExpiryTimeLimit)
+      selectPstmt.setString(2, answer.id)
+      val rs: ResultSet = selectPstmt.executeQuery()
+      val psOpt = if (rs.first()) {
+        val secret = rs.getString("secret")
+        val provider = rs.getString("provider")
+        val check = CaptchaProviders.getProviderById(provider).checkAnswer(secret, answer.answer)
+        val result = if (check) ResultEnum.TRUE.toString else ResultEnum.FALSE.toString
+        result
+      } else {
+        ResultEnum.EXPIRED.toString
+      }
+      val deleteAnswerPstmt = Statements.tlStmts.get.deleteAnswerPstmt
+      deleteAnswerPstmt.setString(1, answer.id)
+      deleteAnswerPstmt.executeUpdate()
+      Result(psOpt)
+    } catch {
+      case exception: Exception => {
+        println(exception.getStackTrace)
+        throw new Exception(exception.getMessage)
+      }
     }
-    val deleteAnswerPstmt = Statements.tlStmts.get.deleteAnswerPstmt
-    deleteAnswerPstmt.setString(1, answer.id)
-    deleteAnswerPstmt.executeUpdate()
-    Result(psOpt)
   }
 
   def display(): Unit = {
