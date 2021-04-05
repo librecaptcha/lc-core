@@ -16,8 +16,6 @@ class Server(port: Int) {
 
   implicit val formats: DefaultFormats.type = DefaultFormats
 
-  val captcha = new Captcha()
-
   private def getRequestJson(ex: HttpExchange): JValue = {
     val requestBody = ex.getRequestBody
     val bytes = requestBody.readAllBytes
@@ -73,7 +71,7 @@ class Server(port: Int) {
         try{
           val json = getRequestJson(ex)
           val param = json.extract[Parameters]
-          val id = captcha.getChallenge(param)
+          val id = Captcha.getChallenge(param)
           Response(200, write(id))
         } catch {
           case exception: Exception =>{
@@ -92,7 +90,7 @@ class Server(port: Int) {
         try{
           val param = getPathParameter(ex)
           val id = Id(param)
-          val image = captcha.getCaptcha(id)
+          val image = Captcha.getCaptcha(id)
           val imageString = Base64.getEncoder().encodeToString(image)
           Response(200, imageString)
         } catch {
@@ -112,7 +110,7 @@ class Server(port: Int) {
         try{
           val json = getRequestJson(ex)
           val answer = json.extract[Answer]
-          val result = captcha.checkAnswer(answer)
+          val result = Captcha.checkAnswer(answer)
           Response(200, write(result))
         } catch {
           case exception: Exception => {

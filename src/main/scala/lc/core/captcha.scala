@@ -8,7 +8,7 @@ import lc.core.CaptchaProviders
 import java.nio.file.{Files, Paths}
 
 
-class Captcha {
+object Captcha {
 
   def getCaptcha(id: Id): Array[Byte] = {
     try {
@@ -53,7 +53,7 @@ class Captcha {
     val token = if (rs.next()) {
       rs.getInt("token")
     }
-    println("Added new challenge: " + token.toString)
+    //println("Added new challenge: " + token.toString)
     token.asInstanceOf[Int]
   }
 
