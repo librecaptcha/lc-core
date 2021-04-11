@@ -5,12 +5,11 @@ import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
 import lc.core.Captcha
 import lc.core.{Parameters, Size}
 
-class BackgroundTask(captcha: Captcha, throttle: Int, timeLimit: Int) {
+class BackgroundTask(throttle: Int, timeLimit: Int) {
 
   private val task = new Runnable {
     def run(): Unit = {
       try {
-
         val mapIdGCPstmt = Statements.tlStmts.get.mapIdGCPstmt
         mapIdGCPstmt.setInt(1, timeLimit)
         mapIdGCPstmt.executeUpdate()
@@ -23,10 +22,10 @@ class BackgroundTask(captcha: Captcha, throttle: Int, timeLimit: Int) {
         if (imageNum.next())
           throttleIn = (throttleIn - imageNum.getInt("total"))
         while (0 < throttleIn) {
-          captcha.generateChallenge(Parameters("medium", "image/png", "text", Option(Size(0, 0))))
+          Captcha.generateChallenge(Parameters("medium", "image/png", "text", Option(Size(0, 0))))
           throttleIn -= 1
         }
-      } catch { case e: Exception => println(e) }
+      } catch { case exception: Exception => println(exception.getStackTrace()) }
     }
   }
 

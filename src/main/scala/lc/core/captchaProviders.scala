@@ -56,6 +56,7 @@ object CaptchaProviders {
 
   def getProvider(param: Parameters): ChallengeProvider = {
     val providerConfig = filterProviderByParam(param).toList
+    if (providerConfig.length == 0) throw new NoSuchElementException(ErrorMessageEnum.NO_CAPTCHA.toString) 
     val randomIndex = getNextRandomInt(providerConfig.length)
     val providerIndex = providerConfig(randomIndex)._1
     val selectedProvider = providers(providerIndex)

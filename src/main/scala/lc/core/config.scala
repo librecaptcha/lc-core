@@ -18,12 +18,17 @@ object Config {
       configFile.close
       configFileContent
     } catch {
-      case _: FileNotFoundException =>
+      case _: FileNotFoundException => {
         val configFileContent = getDefaultConfig()
         val configFile = new PrintWriter(new File(configFilePath))
         configFile.write(configFileContent)
         configFile.close
         configFileContent
+      }
+      case exception: Exception => {
+        println(exception.getStackTrace)
+        throw new Exception(exception.getMessage)
+      }
     }
 
   private val configJson = parse(configString)

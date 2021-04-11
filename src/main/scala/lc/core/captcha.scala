@@ -1,13 +1,14 @@
 package lc.core
 
-import java.sql.{Blob, ResultSet}
+import java.sql.ResultSet
 import java.util.UUID
 import java.io.ByteArrayInputStream
 import lc.database.Statements
 import lc.core.CaptchaProviders
-import lc.captchas.interfaces.ChallengeProvider
+import java.sql.Blob
 
-class Captcha {
+
+object Captcha {
 
   def getCaptcha(id: Id): Array[Byte] = {
     var image: Array[Byte] = null
@@ -32,7 +33,6 @@ class Captcha {
 
   def generateChallenge(param: Parameters): Int = {
     val provider = CaptchaProviders.getProvider(param)
-    if (!provider.isInstanceOf[ChallengeProvider]) return -1
     val providerId = provider.getId()
     val challenge = provider.returnChallenge()
     val blob = new ByteArrayInputStream(challenge.content)
@@ -68,7 +68,7 @@ class Captcha {
       return false
   }
 
-  def getChallenge(param: Parameters): ChallengeResult = {
+   def getChallenge(param: Parameters): ChallengeResult = {
     try {
       val validParam = validateParam(param)
       if (validParam) {
