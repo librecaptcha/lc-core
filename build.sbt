@@ -13,7 +13,7 @@ lazy val root = (project in file(".")).settings(
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.0.12",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.0.12",
   libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.11",
-  libraryDependencies += "eu.lucaventuri" % "fibry" % "2.4.2"
+  libraryDependencies += "com.sun.net.httpserver" % "http" % "20070405"
 )
 
 unmanagedResourceDirectories in Compile += { baseDirectory.value / "lib" }

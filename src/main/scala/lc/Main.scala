@@ -12,8 +12,8 @@ object LCFramework {
       timeLimit = Config.captchaExpiryTimeLimit
     )
     backgroundTask.beginThread(delay = Config.threadDelay)
-    new Server(port = Config.port)
-    println("Starting server on port:" + Config.port)
+    val server = new Server(port = Config.port)
+    server.start()
   }
 }
 
