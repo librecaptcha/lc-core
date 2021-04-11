@@ -10,11 +10,10 @@ import org.json4s.JsonAST.JValue
 import com.sun.net.httpserver.{HttpServer, HttpExchange}
 import java.net.InetSocketAddress
 
-
 class Server(port: Int) {
 
   implicit val formats: DefaultFormats.type = DefaultFormats
-  val server = HttpServer.create(new InetSocketAddress(port), 32)
+  val server: HttpServer = HttpServer.create(new InetSocketAddress(port), 32)
 
   private def getRequestJson(ex: HttpExchange): JValue = {
     val requestBody = ex.getRequestBody
@@ -24,7 +23,7 @@ class Server(port: Int) {
   }
 
   private def getPathParameter(ex: HttpExchange): String = {
-    try{
+    try {
       val uri = ex.getRequestURI.toString
       val param = uri.split("\\?")(1)
       param.split("=")(1)
@@ -54,18 +53,21 @@ class Server(port: Int) {
     val message = ("message" -> ErrorMessageEnum.BAD_METHOD.toString)
     Response(405, write(message).getBytes)
   }
-  
+
   private def makeApiWorker(path: String, f: (String, HttpExchange) => Response): Unit = {
-    server.createContext(path, ex => {
-      val requestMethod = ex.getRequestMethod
-      val response = try {
-          f(requestMethod, ex)
-      } catch {
-        case exception: Exception =>{
-          getException(exception)
-        }
-      }
-      sendResponse(statusCode = response.statusCode, response = response.message, ex = ex)
+    server.createContext(
+      path,
+      ex => {
+        val requestMethod = ex.getRequestMethod
+        val response =
+          try {
+            f(requestMethod, ex)
+          } catch {
+            case exception: Exception => {
+              getException(exception)
+            }
+          }
+        sendResponse(statusCode = response.statusCode, response = response.message, ex = ex)
       }
     )
   }
@@ -75,37 +77,46 @@ class Server(port: Int) {
     server.start()
   }
 
-  makeApiWorker("/v1/captcha", (method: String, ex: HttpExchange) => {
-    if (method == "POST"){
-      val json = getRequestJson(ex)
-      val param = json.extract[Parameters]
-      val id = Captcha.getChallenge(param)
-      Response(200, write(id).getBytes)
-    } else {
-      getBadRequestError()
+  makeApiWorker(
+    "/v1/captcha",
+    (method: String, ex: HttpExchange) => {
+      if (method == "POST") {
+        val json = getRequestJson(ex)
+        val param = json.extract[Parameters]
+        val id = Captcha.getChallenge(param)
+        Response(200, write(id).getBytes)
+      } else {
+        getBadRequestError()
+      }
     }
-  })
+  )
 
-  makeApiWorker("/v1/media", (method: String, ex: HttpExchange) => {
-    if (method == "GET"){
-      val param = getPathParameter(ex)
-      val id = Id(param)
-      val image = Captcha.getCaptcha(id)
-      Response(200, image)
-    } else {
-      getBadRequestError()
+  makeApiWorker(
+    "/v1/media",
+    (method: String, ex: HttpExchange) => {
+      if (method == "GET") {
+        val param = getPathParameter(ex)
+        val id = Id(param)
+        val image = Captcha.getCaptcha(id)
+        Response(200, image)
+      } else {
+        getBadRequestError()
+      }
     }
-  })
+  )
 
-  makeApiWorker("/v1/answer", (method: String, ex: HttpExchange) => {
-    if (method == "POST"){
-      val json = getRequestJson(ex)
-      val answer = json.extract[Answer]
-      val result = Captcha.checkAnswer(answer)
-      Response(200, write(result).getBytes)
-    } else {
-      getBadRequestError()
+  makeApiWorker(
+    "/v1/answer",
+    (method: String, ex: HttpExchange) => {
+      if (method == "POST") {
+        val json = getRequestJson(ex)
+        val answer = json.extract[Answer]
+        val result = Captcha.checkAnswer(answer)
+        Response(200, write(result).getBytes)
+      } else {
+        getBadRequestError()
+      }
     }
-  })
-    
+  )
+
 }
