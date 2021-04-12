@@ -14,20 +14,21 @@ class Server(port: Int) {
 
   implicit val formats: DefaultFormats.type = DefaultFormats
   val server: HttpServer = HttpServer.create(new InetSocketAddress(port), 32)
+  server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool())
 
   private def getRequestJson(ex: HttpExchange): JValue = {
     val requestBody = ex.getRequestBody
     val bytes = requestBody.readAllBytes
-    val string = bytes.map(_.toChar).mkString
+    val string = new String(bytes)
     parse(string)
   }
 
+  private val eqPattern = java.util.regex.Pattern.compile("=")
   private def getPathParameter(ex: HttpExchange): Either[String, Error] = {
     try {
-      val uri = ex.getRequestURI.toString
-      val pathParam = uri.split("\\?")(1)
-      val param = pathParam.split("=")
-      if (param(0) == "id") {
+      val query = ex.getRequestURI.getQuery
+      val param = eqPattern.split(query)
+      if(param(0) == "id"){
         Left(param(1))
       } else {
         Right(Error(ErrorMessageEnum.INVALID_PARAM.toString + "=> id"))

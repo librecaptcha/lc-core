@@ -15,7 +15,7 @@ lazy val root = (project in file(".")).settings(
   libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.11"
 )
 
-unmanagedResourceDirectories in Compile += { baseDirectory.value / "lib" }
+Compile / unmanagedResourceDirectories += { baseDirectory.value / "lib" }
 scalacOptions ++= List(
   "-Yrangepos",
   "-Ywarn-unused",
@@ -23,8 +23,8 @@ scalacOptions ++= List(
 )
 javacOptions += "-g:none"
 compileOrder := CompileOrder.JavaThenScala
-mainClass in assembly := Some("lc.LCFramework")
-mainClass in (Compile, run) := Some("lc.LCFramework")
-assemblyJarName in assembly := "LibreCaptcha.jar"
+assembly / mainClass := Some("lc.LCFramework")
+Compile / run / mainClass := Some("lc.LCFramework")
+assembly / assemblyJarName  := "LibreCaptcha.jar"
 
-fork in run := true
+run / fork := true

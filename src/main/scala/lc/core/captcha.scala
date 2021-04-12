@@ -42,7 +42,7 @@ object Captcha {
     val token = if (rs.next()) {
       rs.getInt("token")
     }
-    println("Added new challenge: " + token.toString)
+    // println("Added new challenge: " + token.toString)
     token.asInstanceOf[Int]
   }
 

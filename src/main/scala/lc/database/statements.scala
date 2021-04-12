@@ -4,7 +4,7 @@ import lc.database.DBConn
 import java.sql.Statement
 import java.sql.PreparedStatement
 
-class Statements(dbConn: DBConn) {
+class Statements(dbConn: DBConn, maxAttempts: Int) {
 
   private val stmt = dbConn.getStatement()
 
@@ -71,13 +71,14 @@ class Statements(dbConn: DBConn) {
   )
 
   val tokenPstmt: PreparedStatement = dbConn.con.prepareStatement(
-    "SELECT token " +
-      "FROM challenge " +
-      "WHERE attempted < 10 AND " +
-      "contentLevel = ? AND " +
-      "contentType = ? AND " +
-      "contentInput = ? " +
-      "ORDER BY RAND() LIMIT 1"
+    s"""
+      SELECT token
+        FROM challenge
+        WHERE attempted < $maxAttempts AND
+        contentLevel = ? AND
+        contentType = ? AND
+        contentInput = ?
+        ORDER BY RAND() LIMIT 1"""
   )
 
   val deleteAnswerPstmt: PreparedStatement = dbConn.con.prepareStatement(
@@ -85,9 +86,9 @@ class Statements(dbConn: DBConn) {
   )
 
   val challengeGCPstmt: PreparedStatement = dbConn.con.prepareStatement(
-    "DELETE FROM challenge " +
-      "WHERE attempted >= 10 AND " +
-      "token NOT IN (SELECT token FROM mapId)"
+    s"""DELETE FROM challenge
+      WHERE attempted >= $maxAttempts AND
+      token NOT IN (SELECT token FROM mapId)"""
   )
 
   val mapIdGCPstmt: PreparedStatement = dbConn.con.prepareStatement(
@@ -109,6 +110,14 @@ class Statements(dbConn: DBConn) {
 }
 
 object Statements {
+  /* Note: h2 documentation recommends using a separate DB connection per thread
+     But in practice, as of version 1.4.200, multiple connections occassionally shows error on the console of the form
+     ```
+     org.h2.jdbc.JdbcSQLNonTransientException: General error: "java.lang.NullPointerException"; SQL statement:
+     SELECT image FROM challenge c, mapId m WHERE c.token=m.token AND m.uuid = ? [50000-200]
+     ```
+     */
   private val dbConn: DBConn = new DBConn()
-  val tlStmts: ThreadLocal[Statements] = ThreadLocal.withInitial(() => new Statements(dbConn))
+  private val maxAttempts = 10
+  val tlStmts: ThreadLocal[Statements] = ThreadLocal.withInitial(() => new Statements(dbConn, maxAttempts))
 }
