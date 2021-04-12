@@ -5,20 +5,17 @@ import java.util.UUID
 import java.io.ByteArrayInputStream
 import lc.database.Statements
 import lc.core.CaptchaProviders
-import java.sql.Blob
-
 
 object Captcha {
 
   def getCaptcha(id: Id): Array[Byte] = {
     var image: Array[Byte] = null
-    var blob: Blob = null
     try {
       val imagePstmt = Statements.tlStmts.get.imagePstmt
       imagePstmt.setString(1, id.id)
       val rs: ResultSet = imagePstmt.executeQuery()
       if (rs.next()) {
-        blob = rs.getBlob("image")
+        val blob = rs.getBlob("image")
         if (blob != null) {
           image = blob.getBytes(1, blob.length().toInt)
         }
