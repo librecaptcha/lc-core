@@ -11,7 +11,8 @@ object CaptchaProviders {
     //"FontFunCaptcha" -> new FontFunCaptcha,
     "GifCaptcha" -> new GifCaptcha,
     "ShadowTextCaptcha" -> new ShadowTextCaptcha,
-    "RainDropsCaptcha" -> new RainDropsCP
+    "RainDropsCaptcha" -> new RainDropsCP,
+    "DebugCaptcha" -> new DebugCaptcha,
     //"LabelCaptcha" -> new LabelCaptcha
   )
 
