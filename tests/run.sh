@@ -10,6 +10,14 @@ sleep 4
 locust --headless -u 300 -r 100 --run-time 4m --stop-timeout 30 -f tests/locustfile.py
 status=$?
 
-kill $JAVA_PID
+if [ $status != 0 ]; then
+  kill $JAVA_PID
+  exit $status
+fi
 
+echo Run functional test
+locust --headless -u 1 -r 1 --run-time 1m --stop-timeout 30 -f tests/locustfile-functional.py
+status=$?
+
+kill $JAVA_PID
 exit $status
