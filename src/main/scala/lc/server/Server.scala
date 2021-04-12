@@ -19,15 +19,15 @@ class Server(port: Int) {
   private def getRequestJson(ex: HttpExchange): JValue = {
     val requestBody = ex.getRequestBody
     val bytes = requestBody.readAllBytes
-    val string = bytes.map(_.toChar).mkString
+    val string = new String(bytes)
     parse(string)
   }
 
+  private val eqPattern = java.util.regex.Pattern.compile("=")
   private def getPathParameter(ex: HttpExchange): String = {
     try {
-      val uri = ex.getRequestURI.toString
-      val param = uri.split("\\?")(1)
-      param.split("=")(1)
+      val query = ex.getRequestURI.getQuery
+      eqPattern.split(query)(1)
     } catch {
       case exception: ArrayIndexOutOfBoundsException => {
         println(exception.getStackTrace)
