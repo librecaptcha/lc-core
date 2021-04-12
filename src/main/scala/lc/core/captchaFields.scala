@@ -38,6 +38,8 @@ object ErrorMessageEnum extends Enumeration {
 
   val SMW: Value = Value("Oops, something went worng!")
   val INVALID_PARAM: Value = Value("Parameters invalid or missing")
-  val NO_CAPTCHA: Value = Value("No captcha for the provided parameters")
+  val IMG_MISSING: Value = Value("Image missing")
+  val IMG_NOT_FOUND: Value = Value("Image not found")
+  val NO_CAPTCHA: Value = Value("No captcha for the provided parameters. Change config options.")
   val BAD_METHOD: Value = Value("Bad request method")
 }
