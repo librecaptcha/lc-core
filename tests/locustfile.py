@@ -19,7 +19,7 @@ def _(environment, **kw):
         environment.process_exit_code = 0
 
 class QuickStartUser(SequentialTaskSet):
-    wait_time = between(0.1,1)
+    wait_time = between(0.1,0.2)
 
     @task
     def captcha(self):
@@ -52,6 +52,6 @@ class QuickStartUser(SequentialTaskSet):
 
 
 class User(FastHttpUser):
-    wait_time = between(0.1,1)
+    wait_time = between(0.1,0.2)
     tasks = [QuickStartUser]
     host = "http://localhost:8888"
