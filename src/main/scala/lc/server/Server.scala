@@ -14,7 +14,7 @@ class Server(port: Int) {
 
   implicit val formats: DefaultFormats.type = DefaultFormats
   val server: HttpServer = HttpServer.create(new InetSocketAddress(port), 32)
-  server.setExecutor(new java.util.concurrent.ForkJoinPool(Runtime.getRuntime().availableProcessors()*4))
+  server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool())
 
   private def getRequestJson(ex: HttpExchange): JValue = {
     val requestBody = ex.getRequestBody
