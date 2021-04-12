@@ -65,42 +65,42 @@ object Config {
   }
 
   private def getDefaultConfig(): String = {
-    val defaultConfigMap = 
+    val defaultConfigMap =
       (AttributesEnum.RANDOM_SEED.toString -> 20) ~
-      (AttributesEnum.PORT.toString -> 8888) ~
-      (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
-      (AttributesEnum.THROTTLE.toString -> 10) ~
-      (AttributesEnum.THREAD_DELAY.toString -> 2) ~
-      ("captchas" -> List(
-        (
-          (AttributesEnum.NAME.toString -> "FilterChallenge") ~
-          (ParametersEnum.ALLOWEDLEVELS.toString -> List("medium", "hard")) ~
-          (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
-          (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
-          (AttributesEnum.CONFIG.toString -> JObject())
-        ),
-        (
-          (AttributesEnum.NAME.toString -> "GifCaptcha") ~
-          (ParametersEnum.ALLOWEDLEVELS.toString -> List("hard")) ~
-          (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
-          (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
-          (AttributesEnum.CONFIG.toString -> JObject())
-        ),
-        (
-          (AttributesEnum.NAME.toString -> "ShadowTextCaptcha") ~
-          (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy")) ~
-          (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
-          (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
-          (AttributesEnum.CONFIG.toString -> JObject())
-        ),
-        (
-          (AttributesEnum.NAME.toString -> "RainDropsCaptcha") ~
-          (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy", "medium")) ~
-          (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
-          (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
-          (AttributesEnum.CONFIG.toString -> JObject())
-        )
-      ))
+        (AttributesEnum.PORT.toString -> 8888) ~
+        (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
+        (AttributesEnum.THROTTLE.toString -> 10) ~
+        (AttributesEnum.THREAD_DELAY.toString -> 2) ~
+        ("captchas" -> List(
+          (
+            (AttributesEnum.NAME.toString -> "FilterChallenge") ~
+              (ParametersEnum.ALLOWEDLEVELS.toString -> List("medium", "hard")) ~
+              (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
+              (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (AttributesEnum.CONFIG.toString -> JObject())
+          ),
+          (
+            (AttributesEnum.NAME.toString -> "GifCaptcha") ~
+              (ParametersEnum.ALLOWEDLEVELS.toString -> List("hard")) ~
+              (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
+              (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (AttributesEnum.CONFIG.toString -> JObject())
+          ),
+          (
+            (AttributesEnum.NAME.toString -> "ShadowTextCaptcha") ~
+              (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy")) ~
+              (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
+              (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (AttributesEnum.CONFIG.toString -> JObject())
+          ),
+          (
+            (AttributesEnum.NAME.toString -> "RainDropsCaptcha") ~
+              (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy", "medium")) ~
+              (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
+              (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (AttributesEnum.CONFIG.toString -> JObject())
+          )
+        ))
 
     pretty(render(defaultConfigMap))
   }
