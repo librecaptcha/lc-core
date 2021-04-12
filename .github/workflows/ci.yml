@@ -21,4 +21,4 @@ jobs:
     - name: Run linter
       run: sbt "scalafixAll --check"
     - name: Run locust tests
-      run: ./tests/run.sh
+      run: apt-get update && apt-get -y upgrade && apt-get install -y gocr && ./tests/run.sh
