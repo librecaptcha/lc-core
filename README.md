@@ -22,7 +22,9 @@ The sample CAPTCHAs are also just that, samples. They have not been tested again
 ## Quick start with Java
 
 1. Download the `jar` file from the latest release
-2. Type `java -jar LibreCaptch.jar`
+2. Type `mkdir data/`.
+   (The data directory is used to store a config file that you can tweak, and for storing the Database)
+2. Type `java -jar LibreCaptcha.jar`
 
 We recommend a Java 11+ runtime as that's what we compile the code with.
 
@@ -48,6 +50,7 @@ docker run -v lcdata:/lc-core/data librecaptcha/lc-core:latest
 
 A default `config.json` is automatically created in the mounted volume.
 
+## Quick test
 To test the installation, try:
 
 ```
@@ -60,7 +63,7 @@ To test the installation, try:
 sample.png: PNG image data, 350 x 100, 8-bit/color RGB, non-interlaced
 ```
 
-The API endpoints are described below.
+The API endpoints are described at the end of this file.
 
 ## Configuration
 If a `config.json` file is not present in the `data/` folder, the app creates one, and this can be modified
@@ -98,7 +101,12 @@ An image of a random string of alphabets is created. Then a series of image filt
 An image of a word is blurred before being shown to the user.
 
 ### LabelCaptcha
-An image that has a pair of words is created. The answer to one of the words is known and to that of the other is unknown. The user is tested on the known word, and their answer to the unknown word is recorded. If a sufficient number of users agree on their answer to the unknown word, it is transferred to the list of known words.
+This providers takes in two sets of images. One with known labels, and the other unknown.
+The created image has a pair of words one from each set.
+The user is tested on the known word, and their answer to the unknown word is recorded.
+If a sufficient number of users agree on their answer to the unknown word, it is transferred to the list of known words.
+
+(There is a known issue with this provider; see issue #68 )
 
 ***
 
