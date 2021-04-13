@@ -58,7 +58,7 @@ class DebugCaptcha extends ChallengeProvider {
   }
 
   def returnChallenge(): Challenge = {
-    val secret = HelperFunctions.randomString(6, HelperFunctions.alphabets)
+    val secret = HelperFunctions.randomString(6, HelperFunctions.safeAlphabets)
     new Challenge(simpleText(secret), "image/png", secret.toLowerCase())
   }
 }

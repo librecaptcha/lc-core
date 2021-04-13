@@ -11,13 +11,15 @@ public class HelperFunctions {
         RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
   }
 
-  public static final String alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  public static final String numbers = "23456789";
+  public static final String safeAlphabets = "ABCDEFGHJKMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  public static final String allAlphabets = safeAlphabets + "ILl";
+  public static final String safeNumbers = "23456789";
+  public static final String allNumbers = safeNumbers + "1";
   public static final String specialCharacters = "$#%@&?";
-  public static final String allCharacters = alphabets + numbers + specialCharacters;
+  public static final String safeCharacters = safeAlphabets + safeNumbers + specialCharacters;
 
   public static String randomString(final int n) {
-    return randomString(n, allCharacters);
+    return randomString(n, safeCharacters);
   }
 
   public static String randomString(final int n, final String characters) {
