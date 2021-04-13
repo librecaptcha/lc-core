@@ -54,7 +54,8 @@ class QuickStartUser(SequentialTaskSet):
        mediaFileName = "tests/test-%s.png" % uuid
        with open(mediaFileName, "wb") as f:
            f.write(media)
-       ocrResult = subprocess.Popen("gocr %s" % mediaFileName, shell=True, stdout=subprocess.PIPE)
+       #ocrResult = subprocess.Popen("gocr %s" % mediaFileName, shell=True, stdout=subprocess.PIPE)
+       ocrResult = subprocess.Popen("tesseract %s stdout -l eng" % mediaFileName, shell=True, stdout=subprocess.PIPE)
        ocrAnswer = ocrResult.stdout.readlines()[0].strip().decode()
        return ocrAnswer
 

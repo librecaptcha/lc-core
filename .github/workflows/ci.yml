@@ -21,4 +21,4 @@ jobs:
     - name: Run linter
       run: sbt "scalafixAll --check"
     - name: Run locust tests
-      run: sudo apt-get install -y gocr && ./tests/run.sh
+      run: sudo apt-get install -y tesseract-ocr && ./tests/run.sh
