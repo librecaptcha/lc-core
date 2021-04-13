@@ -11,9 +11,19 @@ public class HelperFunctions {
         RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
   }
 
-  public static String randomString(int n) {
-    String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz23456789$#%@&?";
-    StringBuilder stringBuilder = new StringBuilder();
+  public static final String safeAlphabets = "ABCDEFGHJKMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  public static final String allAlphabets = safeAlphabets + "ILl";
+  public static final String safeNumbers = "23456789";
+  public static final String allNumbers = safeNumbers + "1";
+  public static final String specialCharacters = "$#%@&?";
+  public static final String safeCharacters = safeAlphabets + safeNumbers + specialCharacters;
+
+  public static String randomString(final int n) {
+    return randomString(n, safeCharacters);
+  }
+
+  public static String randomString(final int n, final String characters) {
+    final StringBuilder stringBuilder = new StringBuilder();
     for (int i = 0; i < n; i++) {
       int index = (int) (characters.length() * Math.random());
       stringBuilder.append(characters.charAt(index));

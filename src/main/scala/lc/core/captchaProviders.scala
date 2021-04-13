@@ -11,7 +11,8 @@ object CaptchaProviders {
     //"FontFunCaptcha" -> new FontFunCaptcha,
     "GifCaptcha" -> new GifCaptcha,
     "ShadowTextCaptcha" -> new ShadowTextCaptcha,
-    "RainDropsCaptcha" -> new RainDropsCP
+    "RainDropsCaptcha" -> new RainDropsCP,
+    "DebugCaptcha" -> new DebugCaptcha,
     //"LabelCaptcha" -> new LabelCaptcha
   )
 
@@ -56,7 +57,7 @@ object CaptchaProviders {
 
   def getProvider(param: Parameters): ChallengeProvider = {
     val providerConfig = filterProviderByParam(param).toList
-    if (providerConfig.length == 0) throw new NoSuchElementException(ErrorMessageEnum.NO_CAPTCHA.toString) 
+    if (providerConfig.length == 0) throw new NoSuchElementException(ErrorMessageEnum.NO_CAPTCHA.toString)
     val randomIndex = getNextRandomInt(providerConfig.length)
     val providerIndex = providerConfig(randomIndex)._1
     val selectedProvider = providers(providerIndex)
