@@ -44,25 +44,9 @@ object Config {
     case JField("config", JObject(config)) => ("config", JString(config.toString))
   }
   val captchaConfig: List[CaptchaConfig] = captchaConfigTransform.extract[List[CaptchaConfig]]
-  val allowedLevels: Set[String] = getAllValues(configJson, ParametersEnum.ALLOWEDLEVELS.toString)
-  val allowedMedia: Set[String] = getAllValues(configJson, ParametersEnum.ALLOWEDMEDIA.toString)
-  val allowedInputType: Set[String] = getAllValues(configJson, ParametersEnum.ALLOWEDINPUTTYPE.toString)
-
-  private def getAllValues(config: JValue, param: String): Set[String] = {
-    val configValues = (config \\ param)
-    val result = for {
-      JObject(child) <- configValues
-      JField(param) <- child
-    } yield (param)
-
-    var valueSet = Set[String]()
-    for (valueList <- result) {
-      for (value <- valueList._2.children) {
-        valueSet += value.values.toString
-      }
-    }
-    valueSet
-  }
+  val allowedLevels: Set[String] = captchaConfig.flatMap(_.allowedLevels).toSet
+  val allowedMedia: Set[String] = captchaConfig.flatMap(_.allowedMedia).toSet
+  val allowedInputType: Set[String] = captchaConfig.flatMap(_.allowedInputType).toSet
 
   private def getDefaultConfig(): String = {
     val defaultConfigMap = 
