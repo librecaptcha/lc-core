@@ -7,14 +7,12 @@ import subprocess
 
 @events.quitting.add_listener
 def _(environment, **kw):
-    if environment.stats.total.fail_ratio > 0.02:
-        logging.error("Test failed due to failure ratio > 2%")
+    totalStats = environment.stats.total
+    if totalStats.fail_ratio > 0.20:
+        logging.error("Test failed due to failure ratio " + totalStats.fail_ratio + " > 20%")
         environment.process_exit_code = 1
-    elif environment.stats.total.avg_response_time > 300:
-        logging.error("Test failed due to average response time ratio > 300 ms")
-        environment.process_exit_code = 1
-    elif environment.stats.total.get_response_time_percentile(0.95) > 800:
-        logging.error("Test failed due to 95th percentile response time > 800 ms")
+    elif totalStats.get_response_time_percentile(0.80) > 800:
+        logging.error("Test failed due to 80th percentile response time > 800 ms")
         environment.process_exit_code = 1
     else:
         environment.process_exit_code = 0
