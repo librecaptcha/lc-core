@@ -13,7 +13,7 @@ import lc.misc.HelperFunctions
 import lc.captchas.interfaces.Challenge
 import lc.captchas.interfaces.ChallengeProvider
 
-/** This captcha is only for debuggin purposes. It creates very simple captchas that are delibertely easy to solve with OCR engines */
+/** This captcha is only for debugging purposes. It creates very simple captchas that are deliberately easy to solve with OCR engines */
 class DebugCaptcha extends ChallengeProvider {
 
   def getId(): String = {
