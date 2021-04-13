@@ -24,42 +24,40 @@ class QuickStartUser(SequentialTaskSet):
 
     @task
     def captcha(self):
-        # TODO: Iterate over parameters for a more comprehensive test
         captcha_params = {"level":"debug","media":"image/png","input_type":"text"}
 
-        resp = self.client.post(path="/v1/captcha", json=captcha_params, name="/captcha")
-        if resp.status_code != 200:
-            print("\nError on /captcha endpoint: ")
-            print(resp)
-            print(resp.text)
-            print("----------------END.CAPTCHA-------------------\n\n")
-        
-        uuid = resp.json().get("id")
+        with self.client.post(path="/v1/captcha", json=captcha_params, name="/captcha", catch_response = True) as resp:
+          if resp.status_code != 200:
+            resp.failure("Status was not 200: " + resp.text)
+          captchaJson = resp.json()
+          uuid = captchaJson.get("id")
+          if not uuid:
+            resp.failure("uuid not returned on /captcha endpoint: " + resp.text)
 
-        resp = self.client.get(path="/v1/media?id=%s" % uuid, name="/media", stream=True)
-        if resp.status_code != 200:
-            print("\nError on /media endpoint: ")
-            print(resp)
-            print(resp.text)
-            print("----------------END.MEDIA-------------------\n\n")
+        with self.client.get(path="/v1/media?id=%s" % uuid, name="/media", stream=True, catch_response = True) as resp:
+          if resp.status_code != 200:
+            resp.failure("Status was not 200: " + resp.text)
 
-        media = resp.content
-        mediaFileName = "tests/test-%s.png" % uuid
-        with open(mediaFileName, "wb") as f:
-            f.write(media)
-        ocrResult = subprocess.Popen("gocr %s" % mediaFileName, shell=True, stdout=subprocess.PIPE)
-        ocrAnswer = ocrResult.stdout.readlines()[0].strip().decode()
+          media = resp.content
+
+        ocrAnswer = self.solve(uuid, media)
 
         answerBody = {"answer": ocrAnswer,"id": uuid}
         with self.client.post(path='/v1/answer', json=answerBody, name="/answer", catch_response=True) as resp:
           if resp.status_code != 200:
-              print("\nError on /answer endpoint: ")
-              print(resp)
-              print(resp.text)
-              print("----------------END.ANSWER-------------------\n\n")
+              resp.failure("Status was not 200: " + resp.text)
           else:
             if resp.json().get("result") != "True":
               resp.failure("Answer was not accepted")
+
+    def solve(self, uuid, media):
+       mediaFileName = "tests/test-%s.png" % uuid
+       with open(mediaFileName, "wb") as f:
+           f.write(media)
+       ocrResult = subprocess.Popen("gocr %s" % mediaFileName, shell=True, stdout=subprocess.PIPE)
+       ocrAnswer = ocrResult.stdout.readlines()[0].strip().decode()
+       return ocrAnswer
+
 
 
 class User(FastHttpUser):
