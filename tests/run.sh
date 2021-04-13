@@ -7,7 +7,7 @@ java -jar target/scala-2.13/LibreCaptcha.jar &
 JAVA_PID=$!
 sleep 4
 
-locust --headless -u 300 -r 100 --run-time 4m --stop-timeout 30 -f tests/locustfile.py
+locust --only-summary --headless -u 300 -r 100 --run-time 4m --stop-timeout 30 -f tests/locustfile.py
 status=$?
 
 if [ $status != 0 ]; then
@@ -25,7 +25,7 @@ java -jar target/scala-2.13/LibreCaptcha.jar &
 JAVA_PID=$!
 sleep 4
 
-locust --headless -u 1 -r 1 --run-time 1m --stop-timeout 30 -f tests/locustfile-functional.py
+locust --only-summary --headless -u 1 -r 1 --run-time 1m --stop-timeout 30 -f tests/locustfile-functional.py
 status=$?
 mv data/config.json.bak data/config.json
 
