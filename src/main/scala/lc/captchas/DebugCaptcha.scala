@@ -38,7 +38,7 @@ class DebugCaptcha extends ChallengeProvider {
 
   private def simpleText(text: String): Array[Byte] = {
     val img = new BufferedImage(350, 100, BufferedImage.TYPE_INT_RGB)
-    val font = new Font("Arial", Font.ROMAN_BASELINE, 48)
+    val font = new Font("Arial", Font.ROMAN_BASELINE, 56)
     val graphics2D = img.createGraphics()
     val textLayout = new TextLayout(text, font, graphics2D.getFontRenderContext())
     HelperFunctions.setRenderingHints(graphics2D)
