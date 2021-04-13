@@ -46,7 +46,7 @@ class QuickStartUser(SequentialTaskSet):
               resp.failure("Status was not 200: " + resp.text)
           else:
             if resp.json().get("result") != "True":
-              resp.failure("Answer was not accepted")
+              resp.failure("Answer was not accepted: " + ocrAnswer)
 
     def solve(self, uuid, media):
        mediaFileName = "tests/test-%s.png" % uuid
