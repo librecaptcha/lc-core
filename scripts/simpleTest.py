@@ -1,7 +1,9 @@
 import http.client
 import json
 import subprocess
+import os
 
+tempDir = os.getenv('XDG_RUNTIME_DIR', '.')
 conn = http.client.HTTPConnection('localhost', 8888)
 
 params = """{
@@ -24,9 +26,10 @@ def getAndSolve(idStr):
 
     if response:
         responseBytes = response.read()
-        with open("captcha.png", "wb") as f:
+        fileName = tempDir + "/captcha.png"
+        with open(fileName, "wb") as f:
             f.write(responseBytes)
-        ocrResult = subprocess.Popen("gocr captcha.png", shell=True, stdout=subprocess.PIPE)
+        ocrResult = subprocess.Popen("gocr " + fileName, shell=True, stdout=subprocess.PIPE)
         ocrAnswer = ocrResult.stdout.readlines()[0].strip().decode()
         return ocrAnswer
 
