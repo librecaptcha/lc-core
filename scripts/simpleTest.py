@@ -7,7 +7,7 @@ tempDir = os.getenv('XDG_RUNTIME_DIR', '.')
 conn = http.client.HTTPConnection('localhost', 8888)
 
 params = """{
-"level": "medium",
+"level": "debug",
 "media": "image/png",
 "input_type": "text"
 }"""
