@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage
 import java.awt.Color
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
-import scala.jdk.CollectionConverters.MapHasAsJava
 import java.util.{List => JavaList, Map => JavaMap}
 
 class LabelCaptcha extends ChallengeProvider {
@@ -30,13 +29,11 @@ class LabelCaptcha extends ChallengeProvider {
   }
 
   def supportedParameters(): JavaMap[String, JavaList[String]] = {
-    val supportedParams = Map(
-      "supportedLevels" -> JavaList.of("hard"),
-      "supportedMedia" -> JavaList.of("image/png"),
-      "supportedInputType" -> JavaList.of("text")
-    ).asJava
-
-    supportedParams
+    JavaMap.of(
+      "supportedLevels", JavaList.of("hard"),
+      "supportedMedia", JavaList.of("image/png"),
+      "supportedInputType", JavaList.of("text")
+    )
   }
 
   def returnChallenge(): Challenge =

@@ -33,7 +33,11 @@ class DebugCaptcha extends ChallengeProvider {
   }
 
   def checkAnswer(secret: String, answer: String): Boolean = {
-    answer.toLowerCase().equals(secret)
+    val matches = answer.toLowerCase().replaceAll(" ", "").equals(secret)
+    if (!matches) {
+      println(s"Didn't match, answer: '$answer' to secret '$secret'")
+    }
+    matches
   }
 
   private def simpleText(text: String): Array[Byte] = {
