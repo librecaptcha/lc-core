@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 import lc.misc.HelperFunctions;
@@ -27,13 +27,12 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     // TODO: Add custom config
   }
 
-  public HashMap<String, List<String>> supportedParameters() {
-    HashMap<String, List<String>> supportedParams = new HashMap<String, List<String>>();
-    supportedParams.put("supportedLevels", List.of("easy"));
-    supportedParams.put("supportedMedia", List.of("image/png"));
-    supportedParams.put("supportedInputType", List.of("text"));
-
-    return supportedParams;
+  public Map<String, List<String>> supportedParameters() {
+    return Map.of(
+      "supportedLevels", List.of("easy"),
+      "supportedMedia", List.of("image/png"),
+      "supportedInputType", List.of("text")
+    );
   }
 
   public boolean checkAnswer(String secret, String answer) {

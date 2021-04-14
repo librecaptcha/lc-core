@@ -6,7 +6,7 @@ import java.awt.RenderingHints;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 import javax.imageio.stream.ImageOutputStream;
@@ -55,13 +55,12 @@ public class GifCaptcha implements ChallengeProvider {
     // TODO: Add custom config
   }
 
-  public HashMap<String, List<String>> supportedParameters() {
-    HashMap<String, List<String>> supportedParams = new HashMap<String, List<String>>();
-    supportedParams.put("supportedLevels", List.of("hard"));
-    supportedParams.put("supportedMedia", List.of("image/gif"));
-    supportedParams.put("supportedInputType", List.of("text"));
-
-    return supportedParams;
+  public Map<String, List<String>> supportedParameters() {
+    return Map.of(
+      "supportedLevels", List.of("hard"),
+      "supportedMedia", List.of("image/gif"),
+      "supportedInputType", List.of("text")
+    );
   }
 
   public Challenge returnChallenge() {

@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import lc.captchas.interfaces.Challenge;
 import lc.captchas.interfaces.ChallengeProvider;
@@ -18,13 +18,12 @@ public class FontFunCaptcha implements ChallengeProvider {
     return "FontFunCaptcha";
   }
 
-  public HashMap<String, List<String>> supportedParameters() {
-    HashMap<String, List<String>> supportedParams = new HashMap<String, List<String>>();
-    supportedParams.put("supportedLevels", List.of("medium"));
-    supportedParams.put("supportedMedia", List.of("image/png"));
-    supportedParams.put("supportedInputType", List.of("text"));
-
-    return supportedParams;
+  public Map<String, List<String>> supportedParameters() {
+    return Map.of(
+      "supportedLevels", List.of("medium"),
+      "supportedMedia", List.of("image/png"),
+      "supportedInputType", List.of("text")
+    );
   }
 
   public void configure(String config) {
