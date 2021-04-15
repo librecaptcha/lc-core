@@ -12,7 +12,7 @@ object CaptchaProviders {
     "GifCaptcha" -> new GifCaptcha,
     "ShadowTextCaptcha" -> new ShadowTextCaptcha,
     "RainDropsCaptcha" -> new RainDropsCP,
-    "DebugCaptcha" -> new DebugCaptcha,
+    "DebugCaptcha" -> new DebugCaptcha
     //"LabelCaptcha" -> new LabelCaptcha
   )
 

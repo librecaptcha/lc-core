@@ -25,7 +25,7 @@ class BackgroundTask(throttle: Int, timeLimit: Int) {
           Captcha.generateChallenge(Parameters("medium", "image/png", "text", Option(Size(0, 0))))
           throttleIn -= 1
         }
-      } catch { case exception: Exception => println(exception.getStackTrace()) }
+      } catch { case exception: Exception => println(exception) }
     }
   }
 
