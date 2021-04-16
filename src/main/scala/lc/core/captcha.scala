@@ -12,17 +12,16 @@ import java.sql.Blob
 object Captcha {
 
   def getCaptcha(id: Id): Either[Error, Image] = {
-    try {
-      val blob = getImage(id.id).get
-      if (blob != null) {
-        Right(Image(blob.getBytes(1, blob.length().toInt)))
-      } else {
-        Left(Error(ErrorMessageEnum.IMG_MISSING.toString))
+    val blob = getImage(id.id)
+    blob match {
+      case Some(value) => {
+        if (blob != null) {
+          Right(Image(value.getBytes(1, value.length().toInt)))
+        } else {
+          Left(Error(ErrorMessageEnum.IMG_MISSING.toString))
+        }
       }
-    } catch {
-      case _: NoSuchElementException => {
-        Left(Error(ErrorMessageEnum.IMG_NOT_FOUND.toString))
-      }
+      case None => Left(Error(ErrorMessageEnum.IMG_NOT_FOUND.toString))
     }
   }
 
@@ -37,14 +36,19 @@ object Captcha {
     }
   }
 
-  def generateChallenge(param: Parameters): Int = {
+  def generateChallenge(param: Parameters): Option[Int] = {
     val provider = CaptchaProviders.getProvider(param)
-    val providerId = provider.getId()
-    val challenge = provider.returnChallenge()
-    val blob = new ByteArrayInputStream(challenge.content)
-    val token = insertCaptcha(provider, challenge, providerId, param, blob).get
-    // println("Added new challenge: " + token.toString)
-    token.asInstanceOf[Int]
+    provider match {
+      case Some(value) => {
+        val providerId = value.getId()
+        val challenge = value.returnChallenge()
+        val blob = new ByteArrayInputStream(challenge.content)
+        val token = insertCaptcha(value, challenge, providerId, param, blob)
+        // println("Added new challenge: " + token.toString)
+        token.map(_.toInt)
+      }
+      case None => None
+    }
   }
 
   private def insertCaptcha(
@@ -85,21 +89,22 @@ object Captcha {
   }
 
   def getChallenge(param: Parameters): Either[Error, Id] = {
-    try {
-      val validParam = validateParam(param)
-      if (validParam.isEmpty) {
-        val tokenOpt = getToken(param)
-        val token = tokenOpt.getOrElse(generateChallenge(param))
-        val uuid = getUUID(token)
-        updateAttempted(uuid)
-        Right(Id(uuid))
-      } else {
-        Left(Error(ErrorMessageEnum.INVALID_PARAM.toString + " => " + validParam.mkString(", ")))
+    val validParam = validateParam(param)
+    if (validParam.isEmpty) {
+      val tokenOpt = getToken(param)
+      val token = tokenOpt.orElse(generateChallenge(param))
+      token match {
+        case Some(value) => {
+          val uuid = getUUID(value)
+          updateAttempted(uuid)
+          Right(Id(uuid))
+        }
+        case None => {
+          Left(Error(ErrorMessageEnum.NO_CAPTCHA.toString))
+        }
       }
-    } catch {
-      case _: NoSuchElementException => {
-        Left(Error(ErrorMessageEnum.NO_CAPTCHA.toString))
-      }
+    } else {
+      Left(Error(ErrorMessageEnum.INVALID_PARAM.toString + " => " + validParam.mkString(", ")))
     }
   }
 
@@ -132,15 +137,15 @@ object Captcha {
   }
 
   def checkAnswer(answer: Answer): Either[Error, Success] = {
-    try {
-      val (provider, secret) = getSecret(answer.id).get
-      val check = CaptchaProviders.getProviderById(provider).checkAnswer(secret, answer.answer)
-      deleteCaptcha(answer.id)
-      val result = if (check) ResultEnum.TRUE.toString else ResultEnum.FALSE.toString
-      Right(Success(result))
-    } catch {
-      case _: NoSuchElementException => {
-        Right(Success(ResultEnum.EXPIRED.toString))
+    val challenge = getSecret(answer.id)
+    challenge match {
+      case None => Right(Success(ResultEnum.EXPIRED.toString))
+      case Some(value) => {
+        val (provider, secret) = value
+        val check = CaptchaProviders.getProviderById(provider).checkAnswer(secret, answer.answer)
+        deleteCaptcha(answer.id)
+        val result = if (check) ResultEnum.TRUE.toString else ResultEnum.FALSE.toString
+        Right(Success(result))
       }
     }
   }
