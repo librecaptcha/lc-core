@@ -1,18 +1,16 @@
 package lc.server
 
-import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
-import org.json4s.jackson.Serialization.write
 import lc.core.Captcha
 import lc.core.ErrorMessageEnum
-import lc.core.{Parameters, Id, Answer, Response}
+import lc.core.{Parameters, Id, Answer, Response, Error, ByteConvert}
 import org.json4s.JsonAST.JValue
 import com.sun.net.httpserver.{HttpServer, HttpExchange}
 import java.net.InetSocketAddress
+import lc.core.Config.formats
 
 class Server(port: Int) {
 
-  implicit val formats: DefaultFormats.type = DefaultFormats
   val server: HttpServer = HttpServer.create(new InetSocketAddress(port), 32)
   server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool())
 
@@ -24,14 +22,19 @@ class Server(port: Int) {
   }
 
   private val eqPattern = java.util.regex.Pattern.compile("=")
-  private def getPathParameter(ex: HttpExchange): String = {
+  private def getPathParameter(ex: HttpExchange): Either[String, String] = {
     try {
       val query = ex.getRequestURI.getQuery
-      eqPattern.split(query)(1)
+      val param = eqPattern.split(query)
+      if (param(0) == "id") {
+        Right(param(1))
+      } else {
+        Left(ErrorMessageEnum.INVALID_PARAM.toString + "=> id")
+      }
     } catch {
       case exception: ArrayIndexOutOfBoundsException => {
-        println(exception.getStackTrace)
-        throw new Exception(ErrorMessageEnum.INVALID_PARAM.toString)
+        println(exception)
+        Left(ErrorMessageEnum.INVALID_PARAM.toString + "=> id")
       }
     }
   }
@@ -44,15 +47,25 @@ class Server(port: Int) {
   }
 
   private def getException(exception: Exception): Response = {
-    println(exception.printStackTrace)
-    val message = ("message" -> exception.getMessage)
-    val messageByte = write(message).getBytes
-    Response(500, messageByte)
+    println(exception)
+    val message = Error(exception.getMessage)
+    Response(500, message.toBytes())
   }
 
   private def getBadRequestError(): Response = {
-    val message = ("message" -> ErrorMessageEnum.BAD_METHOD.toString)
-    Response(405, write(message).getBytes)
+    val message = Error(ErrorMessageEnum.BAD_METHOD.toString)
+    Response(405, message.toBytes())
+  }
+
+  private def getResponse(response: Either[Error, ByteConvert]): Response = {
+    response match {
+      case Right(value) => {
+        Response(200, value.toBytes())
+      }
+      case Left(value) => {
+        Response(500, value.toBytes())
+      }
+    }
   }
 
   private def makeApiWorker(path: String, f: (String, HttpExchange) => Response): Unit = {
@@ -85,7 +98,7 @@ class Server(port: Int) {
         val json = getRequestJson(ex)
         val param = json.extract[Parameters]
         val id = Captcha.getChallenge(param)
-        Response(200, write(id).getBytes)
+        getResponse(id)
       } else {
         getBadRequestError()
       }
@@ -97,9 +110,14 @@ class Server(port: Int) {
     (method: String, ex: HttpExchange) => {
       if (method == "GET") {
         val param = getPathParameter(ex)
-        val id = Id(param)
-        val image = Captcha.getCaptcha(id)
-        Response(200, image)
+        val result = param match {
+          case Right(value) => {
+            val id = Id(value)
+            Captcha.getCaptcha(id)
+          }
+          case Left(value) => Left(Error(value))
+        }
+        getResponse(result)
       } else {
         getBadRequestError()
       }
@@ -113,7 +131,7 @@ class Server(port: Int) {
         val json = getRequestJson(ex)
         val answer = json.extract[Answer]
         val result = Captcha.checkAnswer(answer)
-        Response(200, write(result).getBytes)
+        getResponse(result)
       } else {
         getBadRequestError()
       }
