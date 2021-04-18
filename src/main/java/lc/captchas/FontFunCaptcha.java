@@ -20,10 +20,9 @@ public class FontFunCaptcha implements ChallengeProvider {
 
   public Map<String, List<String>> supportedParameters() {
     return Map.of(
-      "supportedLevels", List.of("medium"),
-      "supportedMedia", List.of("image/png"),
-      "supportedInputType", List.of("text")
-    );
+        "supportedLevels", List.of("medium"),
+        "supportedMedia", List.of("image/png"),
+        "supportedInputType", List.of("text"));
   }
 
   public void configure(String config) {
