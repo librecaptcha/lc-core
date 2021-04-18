@@ -29,10 +29,9 @@ public class ShadowTextCaptcha implements ChallengeProvider {
 
   public Map<String, List<String>> supportedParameters() {
     return Map.of(
-      "supportedLevels", List.of("easy"),
-      "supportedMedia", List.of("image/png"),
-      "supportedInputType", List.of("text")
-    );
+        "supportedLevels", List.of("easy"),
+        "supportedMedia", List.of("image/png"),
+        "supportedInputType", List.of("text"));
   }
 
   public boolean checkAnswer(String secret, String answer) {

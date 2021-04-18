@@ -57,10 +57,9 @@ public class GifCaptcha implements ChallengeProvider {
 
   public Map<String, List<String>> supportedParameters() {
     return Map.of(
-      "supportedLevels", List.of("hard"),
-      "supportedMedia", List.of("image/gif"),
-      "supportedInputType", List.of("text")
-    );
+        "supportedLevels", List.of("hard"),
+        "supportedMedia", List.of("image/gif"),
+        "supportedInputType", List.of("text"));
   }
 
   public Challenge returnChallenge() {
