@@ -11,6 +11,7 @@ import org.limium.picoserve.Server.ByteResponse
 class Server(port: Int) {
   val server: picoserve.Server = picoserve.Server.builder()
     .port(8888)
+    .backlog(32)
     .POST("/v1/captcha", (request) => {
       val json = parse(request.getBodyString())
       val param = json.extract[Parameters]
