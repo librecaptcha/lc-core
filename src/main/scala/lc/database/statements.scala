@@ -64,10 +64,7 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
   val updateAttemptedPstmt: PreparedStatement = dbConn.con.prepareStatement(
     "UPDATE challenge " +
       "SET attempted = attempted+1 " +
-      "WHERE token = (SELECT m.token " +
-      "FROM mapId m, challenge c " +
-      "WHERE m.token=c.token AND " +
-      "m.uuid = ?)"
+      "WHERE token = ?;"
   )
 
   val tokenPstmt: PreparedStatement = dbConn.con.prepareStatement(
