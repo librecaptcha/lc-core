@@ -24,7 +24,8 @@ The sample CAPTCHAs are also just that, samples. They have not been tested again
 1. Download the `jar` file from the latest release
 2. Type `mkdir data/`.
    (The data directory is used to store a config file that you can tweak, and for storing the Database)
-2. Type `java -jar LibreCaptcha.jar`
+3. Type `java -jar LibreCaptcha.jar`
+4. Open [localhost:8888/demo/index.html](http://localhost:8888/demo/index.html) in browser
 
 We recommend a Java 11+ runtime as that's what we compile the code with.
 
@@ -32,6 +33,7 @@ Alternatively,
 1. Install [sbt](https://www.scala-sbt.org/)
 2. Clone this repository
 3. Type `sbt run` within the repository
+4. Open [localhost:8888/demo/index.html](http://localhost:8888/demo/index.html) in browser
 
 
 ## Quick start with Docker
@@ -51,7 +53,9 @@ docker run -v lcdata:/lc-core/data librecaptcha/lc-core:latest
 A default `config.json` is automatically created in the mounted volume.
 
 ## Quick test
-To test the installation, try:
+Open [localhost:8888/demo/index.html](http://localhost:8888/demo/index.html) in browser.
+
+Alternatively, on the command line, try:
 
 ```
 > $ curl -d '{"media":"image/png","level":"easy","input_type":"text"}' localhost:8888/v1/captcha

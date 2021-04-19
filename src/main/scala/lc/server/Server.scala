@@ -7,6 +7,8 @@ import lc.core.{Parameters, Id, Answer, Error, ByteConvert}
 import lc.core.Config.formats
 import org.limium.picoserve
 import org.limium.picoserve.Server.ByteResponse
+import scala.io.Source
+import org.limium.picoserve.Server.StringResponse
 
 class Server(port: Int) {
   val server: picoserve.Server = picoserve.Server.builder()
@@ -34,6 +36,11 @@ class Server(port: Int) {
       val answer = json.extract[Answer]
       val result = Captcha.checkAnswer(answer)
       getResponse(result)
+    })
+    .GET("/demo/index.html", (_) => {
+      val resStream = getClass().getResourceAsStream("/index.html")
+      val str = Source.fromInputStream(resStream).mkString
+      new StringResponse(200, str)
     })
     .build()
 
