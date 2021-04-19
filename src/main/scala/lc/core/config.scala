@@ -53,7 +53,7 @@ object Config {
       (AttributesEnum.RANDOM_SEED.toString -> 20) ~
         (AttributesEnum.PORT.toString -> 8888) ~
         (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
-        (AttributesEnum.THROTTLE.toString -> 10) ~
+        (AttributesEnum.THROTTLE.toString -> 1000) ~
         (AttributesEnum.THREAD_DELAY.toString -> 2) ~
         ("captchas" -> List(
           (
