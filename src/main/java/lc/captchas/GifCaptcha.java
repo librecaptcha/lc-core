@@ -3,9 +3,13 @@ package lc.captchas;
 import java.awt.Font;
 import java.awt.RenderingHints;
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.IntStream;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
@@ -16,16 +20,34 @@ import lc.misc.HelperFunctions;
 import lc.misc.GifSequenceWriter;
 
 public class GifCaptcha implements ChallengeProvider {
+  private final Font font = new Font("Arial", Font.ROMAN_BASELINE, 48);
+  private final int width = 250;
+  private final int height = 100;
 
-  private BufferedImage charToImg(final String text) {
-    final var img = new BufferedImage(250, 100, BufferedImage.TYPE_INT_RGB);
-    final var font = new Font("Bradley Hand", Font.ROMAN_BASELINE, 48);
+  private Integer[] computeOffsets(final String text) {
+    final var img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    final var graphics2D = img.createGraphics();
+    final var frc = graphics2D.getFontRenderContext();
+    final var advances = new LinkedList<Integer>();
+    final var spacing = font.getStringBounds(" ", frc).getWidth() / 2;
+    var currX = 0;
+    for (int i = 0; i < text.length(); i++) {
+      final var c = text.charAt(i);
+      advances.add(currX);
+      currX += font.getStringBounds(String.valueOf(c), frc).getWidth();
+      currX += spacing;
+    };
+    graphics2D.dispose();
+    return advances.toArray(new Integer[]{});
+  }
+
+  private BufferedImage makeImage(final Consumer<Graphics2D> f) {
+    final var img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     final var graphics2D = img.createGraphics();
     graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     graphics2D.setFont(font);
-    graphics2D.setColor(new Color((int) (Math.random() * 0x1000000)));
-    graphics2D.drawString(text, 45, 45);
+    f.accept(graphics2D);
     graphics2D.dispose();
     return img;
   }
@@ -34,11 +56,24 @@ public class GifCaptcha implements ChallengeProvider {
     try {
       final var byteArrayOutputStream = new ByteArrayOutputStream();
       final var output = new MemoryCacheImageOutputStream(byteArrayOutputStream);
-      final var writer = new GifSequenceWriter(output, 1, 1000, true);
-      for (int i = 0; i < text.length(); i++) {
-        final var nextImage = charToImg(String.valueOf(text.charAt(i)));
-        writer.writeToSequence(nextImage);
-      }
+      final var writer = new GifSequenceWriter(output, 1, 600, true);
+      final var advances = computeOffsets(text);
+      final var prevColor = Color.getHSBColor(0f, 0f, 0.1f);
+      IntStream.range(0, text.length()).forEach(i -> {
+        final var color = Color.getHSBColor(HelperFunctions.randomNumber(0, 100)/100.0f, 0.6f, 1.0f);
+        final var prevI = (i - 1 + text.length()) % text.length();
+        final var nextImage = makeImage((g) -> {
+          g.setColor(prevColor);
+          g.drawString(String.valueOf(text.charAt(prevI)), advances[prevI], 45);
+          g.setColor(color);
+          g.drawString(String.valueOf(text.charAt(i)), advances[i], 45);
+        });
+        try {
+          writer.writeToSequence(nextImage);
+        } catch (final IOException e) {
+          e.printStackTrace();
+        }
+      });
       writer.close();
       output.close();
       return byteArrayOutputStream.toByteArray();
