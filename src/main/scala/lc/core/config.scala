@@ -5,6 +5,7 @@ import org.json4s.{DefaultFormats, JValue, JObject, JField, JString}
 import org.json4s.jackson.JsonMethods.{parse, render, pretty}
 import org.json4s.JsonDSL._
 import java.io.{FileNotFoundException, File, PrintWriter}
+import java.{util => ju}
 
 object Config {
 
@@ -50,7 +51,7 @@ object Config {
 
   private def getDefaultConfig(): String = {
     val defaultConfigMap =
-      (AttributesEnum.RANDOM_SEED.toString -> 20) ~
+      (AttributesEnum.RANDOM_SEED.toString -> new ju.Random().nextInt()) ~
         (AttributesEnum.PORT.toString -> 8888) ~
         (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
         (AttributesEnum.THROTTLE.toString -> 1000) ~
