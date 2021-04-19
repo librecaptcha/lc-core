@@ -1,6 +1,5 @@
 /*.log
 /*.png
-**/*.db
 /bin/
 /project/**
 /target/
@@ -17,3 +16,6 @@
 /known/
 /unknown/
 /lib/fonts/
+
+# for data/
+/data
