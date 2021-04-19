@@ -49,6 +49,13 @@ object Config {
   val allowedMedia: Set[String] = captchaConfig.flatMap(_.allowedMedia).toSet
   val allowedInputType: Set[String] = captchaConfig.flatMap(_.allowedInputType).toSet
 
+  private val random = new scala.util.Random(seed)
+
+  def getNextRandomInt(max: Int): Int =
+  random.synchronized {
+    random.nextInt(max)
+  }
+
   private def getDefaultConfig(): String = {
     val defaultConfigMap =
       (AttributesEnum.RANDOM_SEED.toString -> new ju.Random().nextInt()) ~
