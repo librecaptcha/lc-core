@@ -101,6 +101,9 @@ An image of a random string of alphabets is created. Then a series of image filt
 ### RainDropsCaptcha
 ![RaindDrops Sample](./samples/RainDropsCaptcha.gif)
 
+### PoppingCharactersCaptcha
+![PoppingCharacters Sample](./samples/popping.gif)
+
 ### BlurCaptcha
 An image of a word is blurred before being shown to the user.
 
