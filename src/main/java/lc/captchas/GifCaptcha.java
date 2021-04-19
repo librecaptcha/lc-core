@@ -29,7 +29,7 @@ public class GifCaptcha implements ChallengeProvider {
     final var graphics2D = img.createGraphics();
     final var frc = graphics2D.getFontRenderContext();
     final var advances = new LinkedList<Integer>();
-    final var spacing = font.getStringBounds(" ", frc).getWidth() / 2;
+    final var spacing = font.getStringBounds(" ", frc).getWidth() / 3;
     var currX = 0;
     for (int i = 0; i < text.length(); i++) {
       final var c = text.charAt(i);
@@ -52,11 +52,15 @@ public class GifCaptcha implements ChallengeProvider {
     return img;
   }
 
+  private int jitter() {
+    return HelperFunctions.randomNumber(-2, +2);
+  }
+
   private byte[] gifCaptcha(final String text) {
     try {
       final var byteArrayOutputStream = new ByteArrayOutputStream();
       final var output = new MemoryCacheImageOutputStream(byteArrayOutputStream);
-      final var writer = new GifSequenceWriter(output, 1, 600, true);
+      final var writer = new GifSequenceWriter(output, 1, 900, true);
       final var advances = computeOffsets(text);
       final var prevColor = Color.getHSBColor(0f, 0f, 0.1f);
       IntStream.range(0, text.length()).forEach(i -> {
@@ -64,9 +68,9 @@ public class GifCaptcha implements ChallengeProvider {
         final var prevI = (i - 1 + text.length()) % text.length();
         final var nextImage = makeImage((g) -> {
           g.setColor(prevColor);
-          g.drawString(String.valueOf(text.charAt(prevI)), advances[prevI], 45);
+          g.drawString(String.valueOf(text.charAt(prevI)), advances[prevI] + jitter(), 45 + jitter());
           g.setColor(color);
-          g.drawString(String.valueOf(text.charAt(i)), advances[i], 45);
+          g.drawString(String.valueOf(text.charAt(i)), advances[i] + jitter(), 45 + jitter());
         });
         try {
           writer.writeToSequence(nextImage);
