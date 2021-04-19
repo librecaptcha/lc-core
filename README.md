@@ -104,11 +104,8 @@ An image of a random string of alphabets is created. Then a series of image filt
 ### PoppingCharactersCaptcha
 ![PoppingCharacters Sample](./samples/popping.gif)
 
-### BlurCaptcha
-An image of a word is blurred before being shown to the user.
-
 ### LabelCaptcha
-This providers takes in two sets of images. One with known labels, and the other unknown.
+This CAPTCHA provider takes in two sets of images. One with known labels, and the other unknown.
 The created image has a pair of words one from each set.
 The user is tested on the known word, and their answer to the unknown word is recorded.
 If a sufficient number of users agree on their answer to the unknown word, it is transferred to the list of known words.
