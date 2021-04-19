@@ -2,7 +2,7 @@ package lc.background
 
 import lc.database.Statements
 import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
-import lc.core.Captcha
+import lc.core.{Captcha, Config}
 import lc.core.{Parameters, Size}
 
 class BackgroundTask(throttle: Int, timeLimit: Int) {
@@ -22,11 +22,19 @@ class BackgroundTask(throttle: Int, timeLimit: Int) {
         if (imageNum.next())
           throttleIn = (throttleIn - imageNum.getInt("total"))
         while (0 < throttleIn) {
-          Captcha.generateChallenge(Parameters("medium", "image/png", "text", Option(Size(0, 0))))
+          Captcha.generateChallenge(getRandomParam())
           throttleIn -= 1
         }
       } catch { case exception: Exception => println(exception) }
     }
+  }
+
+  private def getRandomParam(): Parameters = {
+    val level = Config.allowedLevels.toList(Config.getNextRandomInt(Config.allowedLevels.size))
+    val media = Config.allowedMedia.toList(Config.getNextRandomInt(Config.allowedMedia.size))
+    val inputType = Config.allowedInputType.toList(Config.getNextRandomInt(Config.allowedInputType.size))
+
+    Parameters(level, media, inputType, Option(Size(0,0)))
   }
 
   def beginThread(delay: Int): Unit = {
