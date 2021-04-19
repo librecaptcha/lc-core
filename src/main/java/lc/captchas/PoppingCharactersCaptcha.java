@@ -36,16 +36,18 @@ public class PoppingCharactersCaptcha implements ChallengeProvider {
       advances.add(currX);
       currX += font.getStringBounds(String.valueOf(c), frc).getWidth();
       currX += spacing;
-    };
+    }
+    ;
     graphics2D.dispose();
-    return advances.toArray(new Integer[]{});
+    return advances.toArray(new Integer[] {});
   }
 
   private BufferedImage makeImage(final Consumer<Graphics2D> f) {
     final var img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     final var graphics2D = img.createGraphics();
     graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    graphics2D.setRenderingHint(
+        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     graphics2D.setFont(font);
     f.accept(graphics2D);
     graphics2D.dispose();
@@ -63,21 +65,32 @@ public class PoppingCharactersCaptcha implements ChallengeProvider {
       final var writer = new GifSequenceWriter(output, 1, 900, true);
       final var advances = computeOffsets(text);
       final var prevColor = Color.getHSBColor(0f, 0f, 0.1f);
-      IntStream.range(0, text.length()).forEach(i -> {
-        final var color = Color.getHSBColor(HelperFunctions.randomNumber(0, 100)/100.0f, 0.6f, 1.0f);
-        final var prevI = (i - 1 + text.length()) % text.length();
-        final var nextImage = makeImage((g) -> {
-          g.setColor(prevColor);
-          g.drawString(String.valueOf(text.charAt(prevI)), advances[prevI] + jitter(), 45 + jitter());
-          g.setColor(color);
-          g.drawString(String.valueOf(text.charAt(i)), advances[i] + jitter(), 45 + jitter());
-        });
-        try {
-          writer.writeToSequence(nextImage);
-        } catch (final IOException e) {
-          e.printStackTrace();
-        }
-      });
+      IntStream.range(0, text.length())
+          .forEach(
+              i -> {
+                final var color =
+                    Color.getHSBColor(HelperFunctions.randomNumber(0, 100) / 100.0f, 0.6f, 1.0f);
+                final var prevI = (i - 1 + text.length()) % text.length();
+                final var nextImage =
+                    makeImage(
+                        (g) -> {
+                          g.setColor(prevColor);
+                          g.drawString(
+                              String.valueOf(text.charAt(prevI)),
+                              advances[prevI] + jitter(),
+                              45 + jitter());
+                          g.setColor(color);
+                          g.drawString(
+                              String.valueOf(text.charAt(i)),
+                              advances[i] + jitter(),
+                              45 + jitter());
+                        });
+                try {
+                  writer.writeToSequence(nextImage);
+                } catch (final IOException e) {
+                  e.printStackTrace();
+                }
+              });
       writer.close();
       output.close();
       return byteArrayOutputStream.toByteArray();
