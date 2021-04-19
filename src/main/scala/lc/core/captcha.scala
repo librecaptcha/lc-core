@@ -96,7 +96,7 @@ object Captcha {
       token match {
         case Some(value) => {
           val uuid = getUUID(value)
-          updateAttempted(uuid)
+          updateAttempted(value)
           Right(Id(uuid))
         }
         case None => {
@@ -121,9 +121,9 @@ object Captcha {
     }
   }
 
-  private def updateAttempted(uuid: String): Unit = {
+  private def updateAttempted(token: Int): Unit = {
     val updateAttemptedPstmt = Statements.tlStmts.get.updateAttemptedPstmt
-    updateAttemptedPstmt.setString(1, uuid)
+    updateAttemptedPstmt.setInt(1, token)
     updateAttemptedPstmt.executeUpdate()
   }
 

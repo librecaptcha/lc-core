@@ -19,7 +19,10 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
       "contentInput varchar, " +
       "image blob, " +
       "attempted int default 0, " +
-      "PRIMARY KEY(token))"
+      "PRIMARY KEY(token));" +
+      """
+      CREATE INDEX IF NOT EXISTS attempted ON challenge(attempted);
+      """
   )
   stmt.execute(
     "CREATE TABLE IF NOT EXISTS mapId" +
@@ -64,21 +67,18 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
   val updateAttemptedPstmt: PreparedStatement = dbConn.con.prepareStatement(
     "UPDATE challenge " +
       "SET attempted = attempted+1 " +
-      "WHERE token = (SELECT m.token " +
-      "FROM mapId m, challenge c " +
-      "WHERE m.token=c.token AND " +
-      "m.uuid = ?)"
+      "WHERE token = ?;"
   )
 
   val tokenPstmt: PreparedStatement = dbConn.con.prepareStatement(
     s"""
-      SELECT token
+      SELECT token, attempted
         FROM challenge
         WHERE attempted < $maxAttempts AND
         contentLevel = ? AND
         contentType = ? AND
         contentInput = ?
-        ORDER BY RAND() LIMIT 1"""
+        ORDER BY attempted ASC LIMIT 1"""
   )
 
   val deleteAnswerPstmt: PreparedStatement = dbConn.con.prepareStatement(
