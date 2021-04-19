@@ -9,7 +9,7 @@ object CaptchaProviders {
   private val providers = Map(
     "FilterChallenge" -> new FilterChallenge,
     //"FontFunCaptcha" -> new FontFunCaptcha,
-    "GifCaptcha" -> new GifCaptcha,
+    "PoppingCharactersCaptcha" -> new PoppingCharactersCaptcha,
     "ShadowTextCaptcha" -> new ShadowTextCaptcha,
     "RainDropsCaptcha" -> new RainDropsCP,
     "DebugCaptcha" -> new DebugCaptcha

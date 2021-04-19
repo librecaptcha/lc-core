@@ -65,7 +65,7 @@ object Config {
               (AttributesEnum.CONFIG.toString -> JObject())
           ),
           (
-            (AttributesEnum.NAME.toString -> "GifCaptcha") ~
+            (AttributesEnum.NAME.toString -> "PoppingCharactersCaptcha") ~
               (ParametersEnum.ALLOWEDLEVELS.toString -> List("hard")) ~
               (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
               (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~

@@ -19,7 +19,7 @@ import lc.captchas.interfaces.ChallengeProvider;
 import lc.misc.HelperFunctions;
 import lc.misc.GifSequenceWriter;
 
-public class GifCaptcha implements ChallengeProvider {
+public class PoppingCharactersCaptcha implements ChallengeProvider {
   private final Font font = new Font("Arial", Font.ROMAN_BASELINE, 48);
   private final int width = 250;
   private final int height = 100;
@@ -108,6 +108,6 @@ public class GifCaptcha implements ChallengeProvider {
   }
 
   public String getId() {
-    return "GifCaptcha";
+    return "PoppingCharactersCaptcha";
   }
 }
