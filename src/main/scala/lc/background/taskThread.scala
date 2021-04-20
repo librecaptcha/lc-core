@@ -34,7 +34,7 @@ class BackgroundTask(throttle: Int, timeLimit: Int) {
     val media = Config.allowedMedia.toList(Config.getNextRandomInt(Config.allowedMedia.size))
     val inputType = Config.allowedInputType.toList(Config.getNextRandomInt(Config.allowedInputType.size))
 
-    Parameters(level, media, inputType, Option(Size(0,0)))
+    Parameters(level, media, inputType, Some(Size(0,0)))
   }
 
   def beginThread(delay: Int): Unit = {
