@@ -11,37 +11,50 @@ import scala.io.Source
 import org.limium.picoserve.Server.StringResponse
 
 class Server(port: Int) {
-  val server: picoserve.Server = picoserve.Server.builder()
+  val server: picoserve.Server = picoserve.Server
+    .builder()
     .port(port)
     .backlog(32)
-    .POST("/v1/captcha", (request) => {
-      val json = parse(request.getBodyString())
-      val param = json.extract[Parameters]
-      val id = Captcha.getChallenge(param)
-      getResponse(id)
-    })
-    .GET("/v1/media", (request) => {
-      val params = request.getQueryParams()
-      val result = if (params.containsKey("id")) {
-        val paramId = params.get("id").get(0)
-        val id = Id(paramId)
-        Captcha.getCaptcha(id)
-      } else {
-        Left(Error(ErrorMessageEnum.INVALID_PARAM.toString + "=> id"))
+    .POST(
+      "/v1/captcha",
+      (request) => {
+        val json = parse(request.getBodyString())
+        val param = json.extract[Parameters]
+        val id = Captcha.getChallenge(param)
+        getResponse(id)
       }
-      getResponse(result)
-    })
-    .POST("/v1/answer", (request) => {
-      val json = parse(request.getBodyString())
-      val answer = json.extract[Answer]
-      val result = Captcha.checkAnswer(answer)
-      getResponse(result)
-    })
-    .GET("/demo/index.html", (_) => {
-      val resStream = getClass().getResourceAsStream("/index.html")
-      val str = Source.fromInputStream(resStream).mkString
-      new StringResponse(200, str)
-    })
+    )
+    .GET(
+      "/v1/media",
+      (request) => {
+        val params = request.getQueryParams()
+        val result = if (params.containsKey("id")) {
+          val paramId = params.get("id").get(0)
+          val id = Id(paramId)
+          Captcha.getCaptcha(id)
+        } else {
+          Left(Error(ErrorMessageEnum.INVALID_PARAM.toString + "=> id"))
+        }
+        getResponse(result)
+      }
+    )
+    .POST(
+      "/v1/answer",
+      (request) => {
+        val json = parse(request.getBodyString())
+        val answer = json.extract[Answer]
+        val result = Captcha.checkAnswer(answer)
+        getResponse(result)
+      }
+    )
+    .GET(
+      "/demo/index.html",
+      (_) => {
+        val resStream = getClass().getResourceAsStream("/index.html")
+        val str = Source.fromInputStream(resStream).mkString
+        new StringResponse(200, str)
+      }
+    )
     .build()
 
   private def getResponse(response: Either[Error, ByteConvert]): ByteResponse = {

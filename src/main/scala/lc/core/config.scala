@@ -52,9 +52,9 @@ object Config {
   private val random = new scala.util.Random(seed)
 
   def getNextRandomInt(max: Int): Int =
-  random.synchronized {
-    random.nextInt(max)
-  }
+    random.synchronized {
+      random.nextInt(max)
+    }
 
   private def getDefaultConfig(): String = {
     val defaultConfigMap =

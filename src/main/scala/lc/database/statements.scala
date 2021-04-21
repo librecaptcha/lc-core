@@ -116,7 +116,7 @@ object Statements {
      org.h2.jdbc.JdbcSQLNonTransientException: General error: "java.lang.NullPointerException"; SQL statement:
      SELECT image FROM challenge c, mapId m WHERE c.token=m.token AND m.uuid = ? [50000-200]
      ```
-     */
+   */
   private val dbConn: DBConn = new DBConn()
   private val maxAttempts = 10
   val tlStmts: ThreadLocal[Statements] = ThreadLocal.withInitial(() => new Statements(dbConn, maxAttempts))
