@@ -30,11 +30,16 @@ class BackgroundTask(throttle: Int, timeLimit: Int) {
   }
 
   private def getRandomParam(): Parameters = {
-    val level = Config.allowedLevels.toList(Config.getNextRandomInt(Config.allowedLevels.size))
-    val media = Config.allowedMedia.toList(Config.getNextRandomInt(Config.allowedMedia.size))
-    val inputType = Config.allowedInputType.toList(Config.getNextRandomInt(Config.allowedInputType.size))
+    val captcha = pickRandom(Config.captchaConfig)
+    val level = pickRandom(captcha.allowedLevels)
+    val media = pickRandom(captcha.allowedMedia)
+    val inputType = pickRandom(captcha.allowedInputType)
 
-    Parameters(level, media, inputType, Some(Size(0,0)))
+    Parameters(level, media, inputType, Some(Size(0, 0)))
+  }
+
+  private def pickRandom[T](list: List[T]): T = {
+    list(Config.getNextRandomInt(list.size))
   }
 
   def beginThread(delay: Int): Unit = {
