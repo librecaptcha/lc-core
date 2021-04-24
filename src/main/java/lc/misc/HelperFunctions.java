@@ -39,7 +39,7 @@ public class HelperFunctions {
   }
 
   synchronized public static int randomNumber(int min, int max) {
-    return (random.nextInt() * ((max - min) + 1)) + min;
+    return random.nextInt((max - min) + 1) + min;
   }
 
   synchronized public static int randomNumber(int bound) {
