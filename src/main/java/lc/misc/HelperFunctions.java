@@ -1,8 +1,15 @@
 package lc.misc;
 
 import java.awt.*;
+import java.util.Random;
 
 public class HelperFunctions {
+
+  private static Random random = new Random();
+
+  synchronized public static void setSeed(long seed){
+    random.setSeed(seed);
+  } 
 
   public static void setRenderingHints(Graphics2D g2d) {
     g2d.setRenderingHint(
@@ -25,13 +32,18 @@ public class HelperFunctions {
   public static String randomString(final int n, final String characters) {
     final StringBuilder stringBuilder = new StringBuilder();
     for (int i = 0; i < n; i++) {
-      int index = (int) (characters.length() * Math.random());
+      int index = randomNumber(characters.length());
       stringBuilder.append(characters.charAt(index));
     }
     return stringBuilder.toString();
   }
 
-  public static int randomNumber(int min, int max) {
-    return (int) (Math.random() * ((max - min) + 1)) + min;
+  synchronized public static int randomNumber(int min, int max) {
+    return (random.nextInt() * ((max - min) + 1)) + min;
   }
+
+  synchronized public static int randomNumber(int bound) {
+   return random.nextInt(bound);
+  }
+  
 }

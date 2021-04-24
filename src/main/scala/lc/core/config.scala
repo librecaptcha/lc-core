@@ -6,6 +6,7 @@ import org.json4s.jackson.JsonMethods.{parse, render, pretty}
 import org.json4s.JsonDSL._
 import java.io.{FileNotFoundException, File, PrintWriter}
 import java.{util => ju}
+import lc.misc.HelperFunctions
 
 object Config {
 
@@ -48,6 +49,8 @@ object Config {
   val allowedLevels: Set[String] = captchaConfig.flatMap(_.allowedLevels).toSet
   val allowedMedia: Set[String] = captchaConfig.flatMap(_.allowedMedia).toSet
   val allowedInputType: Set[String] = captchaConfig.flatMap(_.allowedInputType).toSet
+
+  HelperFunctions.setSeed(seed)
 
   private def getDefaultConfig(): String = {
     val defaultConfigMap =
