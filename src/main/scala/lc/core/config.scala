@@ -6,6 +6,7 @@ import org.json4s.jackson.JsonMethods.{parse, render, pretty}
 import org.json4s.JsonDSL._
 import java.io.{FileNotFoundException, File, PrintWriter}
 import java.{util => ju}
+import lc.misc.HelperFunctions
 
 object Config {
 
@@ -49,12 +50,7 @@ object Config {
   val allowedMedia: Set[String] = captchaConfig.flatMap(_.allowedMedia).toSet
   val allowedInputType: Set[String] = captchaConfig.flatMap(_.allowedInputType).toSet
 
-  private val random = new scala.util.Random(seed)
-
-  def getNextRandomInt(max: Int): Int =
-    random.synchronized {
-      random.nextInt(max)
-    }
+  HelperFunctions.seed = seed
 
   private def getDefaultConfig(): String = {
     val defaultConfigMap =
