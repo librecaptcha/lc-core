@@ -65,10 +65,12 @@ public class PoppingCharactersCaptcha implements ChallengeProvider {
       final var prevColor = Color.getHSBColor(0f, 0f, 0.1f);
       IntStream.range(0, text.length()).forEach(i -> {
         final var color = Color.getHSBColor(HelperFunctions.randomNumber(0, 100)/100.0f, 0.6f, 1.0f);
-        final var prevI = (i - 1 + text.length()) % text.length();
         final var nextImage = makeImage((g) -> {
-          g.setColor(prevColor);
-          g.drawString(String.valueOf(text.charAt(prevI)), advances[prevI] + jitter(), 45 + jitter());
+          if (i > 0) {
+            final var prevI = (i - 1) % text.length();
+            g.setColor(prevColor);
+            g.drawString(String.valueOf(text.charAt(prevI)), advances[prevI] + jitter(), 45 + jitter());
+          }
           g.setColor(color);
           g.drawString(String.valueOf(text.charAt(i)), advances[i] + jitter(), 45 + jitter());
         });
