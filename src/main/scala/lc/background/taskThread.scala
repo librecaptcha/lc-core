@@ -4,6 +4,7 @@ import lc.database.Statements
 import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
 import lc.core.{Captcha, Config}
 import lc.core.{Parameters, Size}
+import lc.misc.HelperFunctions
 
 class BackgroundTask(throttle: Int, timeLimit: Int) {
 
@@ -39,7 +40,7 @@ class BackgroundTask(throttle: Int, timeLimit: Int) {
   }
 
   private def pickRandom[T](list: List[T]): T = {
-    list(Config.getNextRandomInt(list.size))
+    list(HelperFunctions.randomNumber(list.size))
   }
 
   def beginThread(delay: Int): Unit = {

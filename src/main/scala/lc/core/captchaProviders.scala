@@ -4,6 +4,7 @@ import lc.captchas._
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 import scala.collection.mutable.Map
+import lc.misc.HelperFunctions
 
 object CaptchaProviders {
   private val providers = Map(
@@ -51,7 +52,7 @@ object CaptchaProviders {
   def getProvider(param: Parameters): Option[ChallengeProvider] = {
     val providerConfig = filterProviderByParam(param).toList
     if (providerConfig.length > 0) {
-      val randomIndex = Config.getNextRandomInt(providerConfig.length)
+      val randomIndex = HelperFunctions.randomNumber(providerConfig.length)
       val providerIndex = providerConfig(randomIndex)._1
       val selectedProvider = providers(providerIndex)
       selectedProvider.configure(providerConfig(randomIndex)._2)
