@@ -50,7 +50,7 @@ object Config {
   val allowedMedia: Set[String] = captchaConfig.flatMap(_.allowedMedia).toSet
   val allowedInputType: Set[String] = captchaConfig.flatMap(_.allowedInputType).toSet
 
-  HelperFunctions.seed = seed
+  HelperFunctions.setSeed(seed)
 
   private def getDefaultConfig(): String = {
     val defaultConfigMap =
