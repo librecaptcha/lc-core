@@ -5,9 +5,7 @@ import java.util.Random;
 
 public class HelperFunctions {
 
-  public static int seed;
-
-  private static Random random = new Random(seed);
+  private static Random random = new Random();
 
   synchronized public static void setSeed(long seed){
     random.setSeed(seed);
