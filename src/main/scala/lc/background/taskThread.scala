@@ -6,24 +6,24 @@ import lc.core.{Captcha, Config}
 import lc.core.{Parameters, Size}
 import lc.misc.HelperFunctions
 
-class BackgroundTask(throttle: Int, timeLimit: Int) {
+class BackgroundTask(config: Config, captcha: Captcha) {
 
   private val task = new Runnable {
     def run(): Unit = {
       try {
         val mapIdGCPstmt = Statements.tlStmts.get.mapIdGCPstmt
-        mapIdGCPstmt.setInt(1, timeLimit)
+        mapIdGCPstmt.setInt(1, config.captchaExpiryTimeLimit)
         mapIdGCPstmt.executeUpdate()
 
         val challengeGCPstmt = Statements.tlStmts.get.challengeGCPstmt
         challengeGCPstmt.executeUpdate()
 
         val imageNum = Statements.tlStmts.get.getCountChallengeTable.executeQuery()
-        var throttleIn = (throttle * 1.1).toInt
+        var throttleIn = (config.throttle * 1.1).toInt
         if (imageNum.next())
           throttleIn = (throttleIn - imageNum.getInt("total"))
         while (0 < throttleIn) {
-          Captcha.generateChallenge(getRandomParam())
+          captcha.generateChallenge(getRandomParam())
           throttleIn -= 1
         }
       } catch { case exception: Exception => println(exception) }
@@ -31,7 +31,7 @@ class BackgroundTask(throttle: Int, timeLimit: Int) {
   }
 
   private def getRandomParam(): Parameters = {
-    val captcha = pickRandom(Config.captchaConfig)
+    val captcha = pickRandom(config.captchaConfig)
     val level = pickRandom(captcha.allowedLevels)
     val media = pickRandom(captcha.allowedMedia)
     val inputType = pickRandom(captcha.allowedInputType)

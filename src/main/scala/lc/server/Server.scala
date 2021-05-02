@@ -10,7 +10,7 @@ import org.limium.picoserve.Server.ByteResponse
 import scala.io.Source
 import org.limium.picoserve.Server.StringResponse
 
-class Server(port: Int) {
+class Server(port: Int, captcha: Captcha) {
   val server: picoserve.Server = picoserve.Server
     .builder()
     .port(port)
@@ -20,7 +20,7 @@ class Server(port: Int) {
       (request) => {
         val json = parse(request.getBodyString())
         val param = json.extract[Parameters]
-        val id = Captcha.getChallenge(param)
+        val id = captcha.getChallenge(param)
         getResponse(id)
       }
     )
@@ -31,7 +31,7 @@ class Server(port: Int) {
         val result = if (params.containsKey("id")) {
           val paramId = params.get("id").get(0)
           val id = Id(paramId)
-          Captcha.getCaptcha(id)
+          captcha.getCaptcha(id)
         } else {
           Left(Error(ErrorMessageEnum.INVALID_PARAM.toString + "=> id"))
         }
@@ -43,7 +43,7 @@ class Server(port: Int) {
       (request) => {
         val json = parse(request.getBodyString())
         val answer = json.extract[Answer]
-        val result = Captcha.checkAnswer(answer)
+        val result = captcha.checkAnswer(answer)
         getResponse(result)
       }
     )
