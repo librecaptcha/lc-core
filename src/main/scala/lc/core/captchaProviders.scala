@@ -6,7 +6,7 @@ import lc.captchas.interfaces.Challenge
 import scala.collection.mutable.Map
 import lc.misc.HelperFunctions
 
-object CaptchaProviders {
+class CaptchaProviders(config: Config) {
   private val providers = Map(
     "FilterChallenge" -> new FilterChallenge,
     //"FontFunCaptcha" -> new FontFunCaptcha,
@@ -24,7 +24,7 @@ object CaptchaProviders {
     }
   }
 
-  private val config = Config.captchaConfig
+  private val captchaConfig = config.captchaConfig
 
   def getProviderById(id: String): ChallengeProvider = {
     return providers(id)
@@ -32,7 +32,7 @@ object CaptchaProviders {
 
   private def filterProviderByParam(param: Parameters): Iterable[(String, String)] = {
     val configFilter = for {
-      configValue <- config
+      configValue <- captchaConfig
       if configValue.allowedLevels.contains(param.level)
       if configValue.allowedMedia.contains(param.media)
       if configValue.allowedInputType.contains(param.input_type)

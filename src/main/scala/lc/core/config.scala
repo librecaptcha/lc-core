@@ -8,11 +8,10 @@ import java.io.{FileNotFoundException, File, PrintWriter}
 import java.{util => ju}
 import lc.misc.HelperFunctions
 
-object Config {
+class Config(configFilePath: String) {
 
-  implicit val formats: DefaultFormats.type = DefaultFormats
+  import Config.formats
 
-  private val configFilePath = "data/config.json"
   private val configString =
     try {
       val configFile = fromFile(configFilePath)
@@ -22,7 +21,12 @@ object Config {
     } catch {
       case _: FileNotFoundException => {
         val configFileContent = getDefaultConfig()
-        val configFile = new PrintWriter(new File(configFilePath))
+        val file = if(new File(configFilePath).isDirectory){
+          new File(configFilePath.concat("/config.json"))
+        } else {
+          new File(configFilePath)
+        }
+        val configFile = new PrintWriter(file)
         configFile.write(configFileContent)
         configFile.close
         configFileContent
@@ -93,4 +97,8 @@ object Config {
     pretty(render(defaultConfigMap))
   }
 
+}
+
+object Config{
+  implicit val formats: DefaultFormats.type = DefaultFormats
 }

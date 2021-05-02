@@ -1,25 +1,36 @@
 package lc
 
-import lc.core.CaptchaProviders
+import lc.core.{CaptchaProviders, Captcha, Config}
 import lc.server.Server
 import lc.background.BackgroundTask
-import lc.core.Config
 
 object LCFramework {
   def main(args: scala.Array[String]): Unit = {
-    val backgroundTask = new BackgroundTask(
-      throttle = Config.throttle,
-      timeLimit = Config.captchaExpiryTimeLimit
-    )
-    backgroundTask.beginThread(delay = Config.threadDelay)
-    val server = new Server(port = Config.port)
+    val configFilePath = if (args.length > 0){
+      args(0)
+    } else {
+      "data/config.json"
+    }
+    val config = new Config(configFilePath)
+    val captchaProviders = new CaptchaProviders(config = config)
+    val captcha = new Captcha(config = config, captchaProviders = captchaProviders)
+    val backgroundTask = new BackgroundTask(config = config, captcha = captcha)
+    backgroundTask.beginThread(delay = config.threadDelay)
+    val server = new Server(port = config.port, captcha = captcha)
     server.start()
   }
 }
 
 object MakeSamples {
   def main(args: scala.Array[String]): Unit = {
-    val samples = CaptchaProviders.generateChallengeSamples()
+    val configFilePath = if (args.length > 0){
+      args(0)
+    } else {
+      "data/config.json"
+    }
+    val config = new Config(configFilePath)
+    val captchaProviders = new CaptchaProviders(config = config)
+    val samples = captchaProviders.generateChallengeSamples()
     samples.foreach {
       case (key, sample) =>
         val extensionMap = Map("image/png" -> "png", "image/gif" -> "gif")

@@ -9,7 +9,7 @@ import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 import java.sql.Blob
 
-object Captcha {
+class Captcha(config: Config, captchaProviders: CaptchaProviders) {
 
   def getCaptcha(id: Id): Either[Error, Image] = {
     val blob = getImage(id.id)
@@ -37,7 +37,7 @@ object Captcha {
   }
 
   def generateChallenge(param: Parameters): Option[Int] = {
-    val provider = CaptchaProviders.getProvider(param)
+    val provider = captchaProviders.getProvider(param)
     provider match {
       case Some(value) => {
         val providerId = value.getId()
@@ -75,9 +75,9 @@ object Captcha {
     }
   }
 
-  val allowedInputType = Config.allowedInputType
-  val allowedLevels = Config.allowedLevels
-  val allowedMedia = Config.allowedMedia
+  val allowedInputType = config.allowedInputType
+  val allowedLevels = config.allowedLevels
+  val allowedMedia = config.allowedMedia
 
   private def validateParam(param: Parameters): Array[String] = {
     var invalid_params = Array[String]()
@@ -142,7 +142,7 @@ object Captcha {
       case None => Right(Success(ResultEnum.EXPIRED.toString))
       case Some(value) => {
         val (provider, secret) = value
-        val check = CaptchaProviders.getProviderById(provider).checkAnswer(secret, answer.answer)
+        val check = captchaProviders.getProviderById(provider).checkAnswer(secret, answer.answer)
         deleteCaptcha(answer.id)
         val result = if (check) ResultEnum.TRUE.toString else ResultEnum.FALSE.toString
         Right(Success(result))
@@ -152,7 +152,7 @@ object Captcha {
 
   private def getSecret(id: String): Option[(String, String)] = {
     val selectPstmt = Statements.tlStmts.get.selectPstmt
-    selectPstmt.setInt(1, Config.captchaExpiryTimeLimit)
+    selectPstmt.setInt(1, config.captchaExpiryTimeLimit)
     selectPstmt.setString(2, id)
     val rs: ResultSet = selectPstmt.executeQuery()
     if (rs.first()) {
