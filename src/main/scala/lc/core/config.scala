@@ -40,6 +40,7 @@ class Config(configFilePath: String) {
   private val configJson = parse(configString)
 
   val port: Int = (configJson \ AttributesEnum.PORT.toString).extract[Int]
+  val address: String = (configJson \ AttributesEnum.ADDRESS.toString).extract[String]
   val throttle: Int = (configJson \ AttributesEnum.THROTTLE.toString).extract[Int]
   val seed: Int = (configJson \ AttributesEnum.RANDOM_SEED.toString).extract[Int]
   val captchaExpiryTimeLimit: Int = (configJson \ AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString).extract[Int]
@@ -60,6 +61,7 @@ class Config(configFilePath: String) {
     val defaultConfigMap =
       (AttributesEnum.RANDOM_SEED.toString -> new ju.Random().nextInt()) ~
         (AttributesEnum.PORT.toString -> 8888) ~
+        (AttributesEnum.ADDRESS.toString -> "0.0.0.0") ~
         (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
         (AttributesEnum.THROTTLE.toString -> 1000) ~
         (AttributesEnum.THREAD_DELAY.toString -> 2) ~

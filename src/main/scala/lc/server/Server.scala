@@ -9,11 +9,12 @@ import org.limium.picoserve
 import org.limium.picoserve.Server.ByteResponse
 import scala.io.Source
 import org.limium.picoserve.Server.StringResponse
+import java.net.InetSocketAddress
 
-class Server(port: Int, captcha: Captcha) {
+class Server(address: String, port: Int, captcha: Captcha) {
   val server: picoserve.Server = picoserve.Server
     .builder()
-    .port(port)
+    .address(new InetSocketAddress(address, port))
     .backlog(32)
     .POST(
       "/v1/captcha",
@@ -69,7 +70,7 @@ class Server(port: Int, captcha: Captcha) {
   }
 
   def start(): Unit = {
-    println("Starting server on port:" + port)
+    println("Starting server on " + address + ":" + port)
     server.start()
   }
 }

@@ -19,6 +19,7 @@ object AttributesEnum extends Enumeration {
   val NAME: Value = Value("name")
   val RANDOM_SEED: Value = Value("randomSeed")
   val PORT: Value = Value("port")
+  val ADDRESS: Value = Value("address")
   val CAPTCHA_EXPIRY_TIME_LIMIT: Value = Value("captchaExpiryTimeLimit")
   val THROTTLE: Value = Value("throttle")
   val THREAD_DELAY: Value = Value("threadDelay")
