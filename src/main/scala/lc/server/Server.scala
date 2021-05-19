@@ -70,7 +70,7 @@ class Server(address: String, port: Int, captcha: Captcha) {
   }
 
   def start(): Unit = {
-    println("Starting server on port:" + port)
+    println("Starting server on " + address + ":" + port)
     server.start()
   }
 }
