@@ -114,37 +114,40 @@ If a sufficient number of users agree on their answer to the unknown word, it is
 
 ***
 
-## HTTP API 
+## HTTP API
+
+The service can be accessed using a simple HTTP API.
+
 ### - `/v1/captcha`: `POST`
   - Parameters:
-    - `level`: `String` - 
+    - `level`: `String` -
       The difficulty level of a captcha
        - easy
        - medium
        - hard
-    - `input_type`: `String` - 
+    - `input_type`: `String` -
       The type of input option for a captcha
        - text
        - (More to come)
-    - `media`: `String` - 
+    - `media`: `String` -
       The type of media of a captcha
        - image/png
        - image/gif
        - (More to come)
-    - `size`: `Map` - 
+    - `size`: `Map` -
       The dimensions of a captcha (Optional). It needs two more fields nested in this parameter
        - `height`: `Int`
        - `width`: `Int`
 
-  - Return type:
+  - Returns:
     - `id`: `String` - The uuid of the captcha generated
 
 
-### - `/v1/media`: `GET` 
+### - `/v1/media`: `GET`
   - Parameters:
     - `id`: `String` - The uuid of the captcha
 
-  - Return type:
+  - Returns:
     - `image`: `Array[Byte]` - The requested media as bytes
 
 
@@ -153,11 +156,45 @@ If a sufficient number of users agree on their answer to the unknown word, it is
     - `id`: `String` - The uuid of the captcha that needs to be solved
     - `answer`: `String` - The answer to the captcha that needs to be validated
 
-  - Return Type:
+  - Returns:
     - `result`: `String` - The result after validation/checking of the answer
       - True - If the answer is correct
       - False - If the answer is incorrect
       - Expired - If the time limit to solve the captcha exceeds
+
+
+## Example usage
+
+In javascript:
+
+```js
+const resp = await fetch("/v1/captcha", {
+   method: 'POST',
+   body: JSON.stringify({level: "easy", media: "image/png", "input_type" : "text"})
+})
+
+const respJson = await resp.json();
+
+let captchaId = null;
+
+if (resp.ok) {
+  // The CAPTCHA can be displayed using the data in respJson.
+  console.log(respJson);
+  // Store the id somewhere so that it can be used later for answer verification
+  captchaId = respJson.id;
+} else {
+  console.err(respJson);
+}
+
+
+// When user submits an answer it can be sent to the server for verification thusly:
+const resp = await fetch("/v1/answer", {
+   method: 'POST',
+   body: JSON.stringify({id: captchaId, answer: "user input"})
+});
+const respJson = await resp.json();
+console.log(respJson.result);
+```
 
 ***
 
