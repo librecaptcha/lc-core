@@ -1,6 +1,5 @@
 package lc.captchas;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.List;
 import lc.captchas.interfaces.Challenge;
 import lc.captchas.interfaces.ChallengeProvider;
+import lc.misc.DPISetter;
 import lc.misc.HelperFunctions;
 
 public class FontFunCaptcha implements ChallengeProvider {
@@ -74,7 +74,8 @@ public class FontFunCaptcha implements ChallengeProvider {
     graphics2D.dispose();
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      ImageIO.write(img, "png", baos);
+      DPISetter dpi = new DPISetter();
+      dpi.setDPI(baos, img);
     } catch (Exception e) {
       e.printStackTrace();
     }
