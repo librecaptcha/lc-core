@@ -10,7 +10,7 @@ import java.awt.Color
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 import java.util.{List => JavaList, Map => JavaMap}
-import lc.misc.DPISetter
+import lc.misc.PngImageWriter
 
 class LabelCaptcha extends ChallengeProvider {
   private var knownFiles = new File("known").list.toList
@@ -50,8 +50,7 @@ class LabelCaptcha extends ChallengeProvider {
 
       val token = encrypt(knownImageFile + "," + unknownImageFile)
       val baos = new ByteArrayOutputStream()
-      val dpi = new DPISetter();
-      dpi.setDPI(baos, mergedImage);
+      PngImageWriter.write(baos, mergedImage);
 
       new Challenge(baos.toByteArray(), "image/png", token)
     }

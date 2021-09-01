@@ -15,12 +15,12 @@ import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 
-public class DPISetter {
+public class PngImageWriter {
 
-  final int DPI = 245;
-  final double INCH_2_CM = 2.54;
+  static final int DPI = 245;
+  static final double INCH_2_CM = 2.54;
 
-  public void setDPI(ByteArrayOutputStream boas, BufferedImage gridImage) throws IOException {
+  public static void write(ByteArrayOutputStream boas, BufferedImage gridImage) throws IOException {
     final String formatName = "png";
     for (Iterator<ImageWriter> iw = ImageIO.getImageWritersByFormatName(formatName);
         iw.hasNext(); ) {
@@ -45,7 +45,7 @@ public class DPISetter {
     }
   }
 
-  public void setDPIMeta(IIOMetadata metadata) throws IIOInvalidTreeException {
+  private static void setDPIMeta(IIOMetadata metadata) throws IIOInvalidTreeException {
 
     // for PNG, it's dots per millimeter
     double dotsPerMilli = 1.0 * DPI / 10 / INCH_2_CM;

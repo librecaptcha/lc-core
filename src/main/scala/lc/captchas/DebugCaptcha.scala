@@ -11,7 +11,7 @@ import java.util.List
 import lc.misc.HelperFunctions
 import lc.captchas.interfaces.Challenge
 import lc.captchas.interfaces.ChallengeProvider
-import lc.misc.DPISetter
+import lc.misc.PngImageWriter
 
 /** This captcha is only for debugging purposes. It creates very simple captchas that are deliberately easy to solve with OCR engines */
 class DebugCaptcha extends ChallengeProvider {
@@ -53,8 +53,7 @@ class DebugCaptcha extends ChallengeProvider {
     graphics2D.dispose()
     val baos = new ByteArrayOutputStream()
     try {
-      val dpi = new DPISetter();
-      dpi.setDPI(baos, img);
+      PngImageWriter.write(baos, img);
     } catch {
       case e: Exception =>
         e.printStackTrace()

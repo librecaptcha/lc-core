@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.List;
 import lc.captchas.interfaces.Challenge;
 import lc.captchas.interfaces.ChallengeProvider;
-import lc.misc.DPISetter;
+import lc.misc.PngImageWriter;
 import lc.misc.HelperFunctions;
 
 public class FontFunCaptcha implements ChallengeProvider {
@@ -74,8 +74,7 @@ public class FontFunCaptcha implements ChallengeProvider {
     graphics2D.dispose();
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      DPISetter dpi = new DPISetter();
-      dpi.setDPI(baos, img);
+      PngImageWriter.write(baos, img);
     } catch (Exception e) {
       e.printStackTrace();
     }
