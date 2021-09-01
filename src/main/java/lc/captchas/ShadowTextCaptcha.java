@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.List;
 
 import lc.misc.HelperFunctions;
-import lc.misc.DPISetter;
+import lc.misc.PngImageWriter;
 import lc.captchas.interfaces.Challenge;
 import lc.captchas.interfaces.ChallengeProvider;
 
@@ -67,8 +67,7 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     g2d.dispose();
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      DPISetter dpi = new DPISetter();
-      dpi.setDPI(baos, img2);
+      PngImageWriter.write(baos, img2);
     } catch (Exception e) {
       e.printStackTrace();
     }
