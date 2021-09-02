@@ -49,7 +49,6 @@ public class PngImageWriter {
 
     // for PNG, it's dots per millimeter
     double dotsPerMilli = 1.0 * DPI / 10 / INCH_2_CM;
-    System.out.println(dotsPerMilli);
 
     IIOMetadataNode horiz = new IIOMetadataNode("HorizontalPixelSize");
     horiz.setAttribute("value", Double.toString(dotsPerMilli));
