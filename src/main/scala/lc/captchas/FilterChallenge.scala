@@ -8,6 +8,8 @@ import java.awt.Color
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 import java.util.{List => JavaList, Map => JavaMap}
+import java.io.ByteArrayOutputStream
+import lc.misc.PngImageWriter
 
 class FilterChallenge extends ChallengeProvider {
   def getId = "FilterChallenge"
@@ -41,7 +43,15 @@ class FilterChallenge extends ChallengeProvider {
     var image = ImmutableImage.fromAwt(canvas)
     val s = scala.util.Random.nextInt(2)
     image = filterTypes(s).applyFilter(image)
-    new Challenge(image.bytes(new nio.PngWriter()), "image/png", secret)
+    val img = image.awt()
+    val baos = new ByteArrayOutputStream()
+    try {
+      PngImageWriter.write(baos, img);
+    } catch {
+      case e: Exception =>
+        e.printStackTrace()
+    }
+    new Challenge(baos.toByteArray, "image/png", secret)
   }
   def checkAnswer(secret: String, answer: String): Boolean = {
     secret == answer
