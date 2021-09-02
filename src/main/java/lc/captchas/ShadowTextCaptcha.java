@@ -1,6 +1,5 @@
 package lc.captchas;
 
-import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Color;
@@ -14,6 +13,7 @@ import java.util.Map;
 import java.util.List;
 
 import lc.misc.HelperFunctions;
+import lc.misc.PngImageWriter;
 import lc.captchas.interfaces.Challenge;
 import lc.captchas.interfaces.ChallengeProvider;
 
@@ -67,7 +67,7 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     g2d.dispose();
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      ImageIO.write(img2, "png", baos);
+      PngImageWriter.write(baos, img2);
     } catch (Exception e) {
       e.printStackTrace();
     }

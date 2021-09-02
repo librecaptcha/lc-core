@@ -7,9 +7,9 @@ public class HelperFunctions {
 
   private static Random random = new Random();
 
-  synchronized public static void setSeed(long seed){
+  public static synchronized void setSeed(long seed) {
     random.setSeed(seed);
-  } 
+  }
 
   public static void setRenderingHints(Graphics2D g2d) {
     g2d.setRenderingHint(
@@ -38,12 +38,11 @@ public class HelperFunctions {
     return stringBuilder.toString();
   }
 
-  synchronized public static int randomNumber(int min, int max) {
+  public static synchronized int randomNumber(int min, int max) {
     return random.nextInt((max - min) + 1) + min;
   }
 
-  synchronized public static int randomNumber(int bound) {
-   return random.nextInt(bound);
+  public static synchronized int randomNumber(int bound) {
+    return random.nextInt(bound);
   }
-  
 }
