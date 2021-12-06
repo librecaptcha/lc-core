@@ -3,16 +3,22 @@ package lc.server
 import org.json4s.jackson.JsonMethods.parse
 import lc.core.Captcha
 import lc.core.ErrorMessageEnum
-import lc.core.{Parameters, Id, Answer, Error, ByteConvert}
+import lc.core.{Answer, ByteConvert, Error, Id, Parameters}
 import lc.core.Config.formats
 import org.limium.picoserve
-import org.limium.picoserve.Server.ByteResponse
-import scala.io.Source
-import org.limium.picoserve.Server.StringResponse
-import java.net.InetSocketAddress
+import org.limium.picoserve.Server.{ByteResponse, ServerBuilder, StringResponse}
 
-class Server(address: String, port: Int, captcha: Captcha) {
-  val server: picoserve.Server = picoserve.Server
+import scala.io.Source
+import java.net.InetSocketAddress
+import java.util
+import scala.jdk.CollectionConverters._
+
+class Server(address: String, port: Int, captcha: Captcha, playgroundEnabled: Boolean, corsHeader: String) {
+  var headerMap: util.Map[String, util.List[String]] = _
+  if( corsHeader.nonEmpty ) {
+    headerMap = Map("Access-Control-Allow-Origin" -> List(corsHeader).asJava).asJava
+  }
+  val serverBuilder: ServerBuilder = picoserve.Server
     .builder()
     .address(new InetSocketAddress(address, port))
     .backlog(32)
@@ -22,7 +28,7 @@ class Server(address: String, port: Int, captcha: Captcha) {
         val json = parse(request.getBodyString())
         val param = json.extract[Parameters]
         val id = captcha.getChallenge(param)
-        getResponse(id)
+        getResponse(id, headerMap)
       }
     )
     .GET(
@@ -36,7 +42,7 @@ class Server(address: String, port: Int, captcha: Captcha) {
         } else {
           Left(Error(ErrorMessageEnum.INVALID_PARAM.toString + "=> id"))
         }
-        getResponse(result)
+        getResponse(result, headerMap)
       }
     )
     .POST(
@@ -45,10 +51,11 @@ class Server(address: String, port: Int, captcha: Captcha) {
         val json = parse(request.getBodyString())
         val answer = json.extract[Answer]
         val result = captcha.checkAnswer(answer)
-        getResponse(result)
+        getResponse(result, headerMap)
       }
     )
-    .GET(
+  if( playgroundEnabled ) {
+    serverBuilder.GET(
       "/demo/index.html",
       (_) => {
         val resStream = getClass().getResourceAsStream("/index.html")
@@ -56,15 +63,17 @@ class Server(address: String, port: Int, captcha: Captcha) {
         new StringResponse(200, str)
       }
     )
-    .build()
+  }
 
-  private def getResponse(response: Either[Error, ByteConvert]): ByteResponse = {
+  val server: picoserve.Server = serverBuilder.build()
+
+  private def getResponse(response: Either[Error, ByteConvert], responseHeaders: util.Map[String, util.List[String]]): ByteResponse = {
     response match {
       case Right(value) => {
-        new ByteResponse(200, value.toBytes())
+        new ByteResponse(200, value.toBytes(), responseHeaders)
       }
       case Left(value) => {
-        new ByteResponse(500, value.toBytes())
+        new ByteResponse(500, value.toBytes(), responseHeaders)
       }
     }
   }
