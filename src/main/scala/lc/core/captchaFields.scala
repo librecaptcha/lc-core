@@ -23,6 +23,8 @@ object AttributesEnum extends Enumeration {
   val CAPTCHA_EXPIRY_TIME_LIMIT: Value = Value("captchaExpiryTimeLimit")
   val THROTTLE: Value = Value("throttle")
   val THREAD_DELAY: Value = Value("threadDelay")
+  val PLAYGROUND_ENABLED: Value = Value("playgroundEnabled")
+  val CORS_HEADER: Value = Value("corsHeader")
   val CONFIG: Value = Value("config")
 }
 
