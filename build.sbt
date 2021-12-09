@@ -19,7 +19,8 @@ Compile / unmanagedResourceDirectories += { baseDirectory.value / "lib" }
 scalacOptions ++= List(
   "-Yrangepos",
   "-Ywarn-unused",
-  "-deprecation"
+  "-deprecation",
+  "-Xsource:3"
 )
 javacOptions += "-g:none"
 compileOrder := CompileOrder.JavaThenScala
