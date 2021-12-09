@@ -10,8 +10,8 @@ lazy val root = (project in file(".")).settings(
     )
   ),
   name := "LibreCaptcha",
-  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.0.12",
-  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.0.12",
+  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.0.24",
+  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.0.24",
   libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.11"
 )
 
