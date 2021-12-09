@@ -16,7 +16,7 @@ object LCFramework {
     val captcha = new Captcha(config = config, captchaProviders = captchaProviders)
     val backgroundTask = new BackgroundTask(config = config, captcha = captcha)
     backgroundTask.beginThread(delay = config.threadDelay)
-    val server = new Server(address = config.address, port = config.port, captcha = captcha)
+    val server = new Server(address = config.address, port = config.port, captcha = captcha, playgroundEnabled = config.playgroundEnabled, corsHeader = config.corsHeader)
     server.start()
   }
 }
