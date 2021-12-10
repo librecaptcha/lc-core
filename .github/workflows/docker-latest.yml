@@ -3,6 +3,8 @@ name: Update docker image
 on:
   push:
     branches: [ master ]
+  tags:
+    - 'v*'
 
 jobs:
   build:
@@ -19,6 +21,18 @@ jobs:
 
       - name: Assemble Jar
         run: sbt assembly
+
+      -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: librecaptcha/lc-core
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
 
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
@@ -37,8 +51,9 @@ jobs:
         with:
           context: ./
           file: ./Runner.Dockerfile
-          tags: librecaptcha/lc-core:latest
           push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
