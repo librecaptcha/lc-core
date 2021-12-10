@@ -91,6 +91,11 @@ create CAPTCHAs that suit their application and audience, with matching themes a
 And, the more the variety of CAPTCHAS, the harder it is for bots to crack CAPTCHAs.
 
 ## Sample CAPTCHAs
+These are included in this server.
+
+### ShadowText
+![ShadowText Sample](./samples/shadowText.png)
+
 
 ### FilterCaptcha
 
