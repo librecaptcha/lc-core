@@ -27,6 +27,6 @@ compileOrder := CompileOrder.JavaThenScala
 javafmtOnCompile := false
 assembly / mainClass := Some("lc.LCFramework")
 Compile / run / mainClass := Some("lc.LCFramework")
-assembly / assemblyJarName  := "LibreCaptcha.jar"
+assembly / assemblyJarName := "LibreCaptcha.jar"
 
 run / fork := true

@@ -31,9 +31,12 @@ class LabelCaptcha extends ChallengeProvider {
 
   def supportedParameters(): JavaMap[String, JavaList[String]] = {
     JavaMap.of(
-      "supportedLevels", JavaList.of("hard"),
-      "supportedMedia", JavaList.of("image/png"),
-      "supportedInputType", JavaList.of("text")
+      "supportedLevels",
+      JavaList.of("hard"),
+      "supportedMedia",
+      JavaList.of("image/png"),
+      "supportedInputType",
+      JavaList.of("text")
     )
   }
 

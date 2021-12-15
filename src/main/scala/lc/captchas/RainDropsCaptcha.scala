@@ -38,9 +38,12 @@ class RainDropsCP extends ChallengeProvider {
 
   def supportedParameters(): JavaMap[String, JavaList[String]] = {
     JavaMap.of(
-      "supportedLevels", JavaList.of("medium", "easy"),
-      "supportedMedia", JavaList.of("image/gif"),
-      "supportedInputType", JavaList.of("text")
+      "supportedLevels",
+      JavaList.of("medium", "easy"),
+      "supportedMedia",
+      JavaList.of("image/gif"),
+      "supportedInputType",
+      JavaList.of("text")
     )
   }
 

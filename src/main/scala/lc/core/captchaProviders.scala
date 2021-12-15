@@ -9,18 +9,17 @@ import lc.misc.HelperFunctions
 class CaptchaProviders(config: Config) {
   private val providers = Map(
     "FilterChallenge" -> new FilterChallenge,
-    //"FontFunCaptcha" -> new FontFunCaptcha,
+    // "FontFunCaptcha" -> new FontFunCaptcha,
     "PoppingCharactersCaptcha" -> new PoppingCharactersCaptcha,
     "ShadowTextCaptcha" -> new ShadowTextCaptcha,
     "RainDropsCaptcha" -> new RainDropsCP,
     "DebugCaptcha" -> new DebugCaptcha
-    //"LabelCaptcha" -> new LabelCaptcha
+    // "LabelCaptcha" -> new LabelCaptcha
   )
 
   def generateChallengeSamples(): Map[String, Challenge] = {
-    providers.map {
-      case (key, provider) =>
-        (key, provider.returnChallenge())
+    providers.map { case (key, provider) =>
+      (key, provider.returnChallenge())
     }
   }
 
