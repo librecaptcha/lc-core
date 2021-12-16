@@ -12,7 +12,7 @@ lazy val root = (project in file(".")).settings(
   name := "LibreCaptcha",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.0.24",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.0.24",
-  libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.11"
+  libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.12"
 )
 
 Compile / unmanagedResourceDirectories += { baseDirectory.value / "lib" }
@@ -27,6 +27,6 @@ compileOrder := CompileOrder.JavaThenScala
 javafmtOnCompile := false
 assembly / mainClass := Some("lc.LCFramework")
 Compile / run / mainClass := Some("lc.LCFramework")
-assembly / assemblyJarName  := "LibreCaptcha.jar"
+assembly / assemblyJarName := "LibreCaptcha.jar"
 
 run / fork := true
