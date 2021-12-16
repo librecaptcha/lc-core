@@ -21,7 +21,7 @@ class Config(configFilePath: String) {
     } catch {
       case _: FileNotFoundException => {
         val configFileContent = getDefaultConfig()
-        val file = if(new File(configFilePath).isDirectory){
+        val file = if (new File(configFilePath).isDirectory) {
           new File(configFilePath.concat("/config.json"))
         } else {
           new File(configFilePath)
@@ -49,8 +49,8 @@ class Config(configFilePath: String) {
   val corsHeader: String = (configJson \ AttributesEnum.CORS_HEADER.toString).extract[String]
 
   private val captchaConfigJson = (configJson \ "captchas")
-  val captchaConfigTransform: JValue = captchaConfigJson transformField {
-    case JField("config", JObject(config)) => ("config", JString(config.toString))
+  val captchaConfigTransform: JValue = captchaConfigJson transformField { case JField("config", JObject(config)) =>
+    ("config", JString(config.toString))
   }
   val captchaConfig: List[CaptchaConfig] = captchaConfigTransform.extract[List[CaptchaConfig]]
   val allowedLevels: Set[String] = captchaConfig.flatMap(_.allowedLevels).toSet
@@ -105,6 +105,6 @@ class Config(configFilePath: String) {
 
 }
 
-object Config{
+object Config {
   implicit val formats: DefaultFormats.type = DefaultFormats
 }

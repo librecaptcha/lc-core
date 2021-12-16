@@ -14,7 +14,7 @@ import scala.jdk.CollectionConverters._
 
 class Server(address: String, port: Int, captcha: Captcha, playgroundEnabled: Boolean, corsHeader: String) {
   var headerMap: util.Map[String, util.List[String]] = _
-  if( corsHeader.nonEmpty ) {
+  if (corsHeader.nonEmpty) {
     headerMap = Map("Access-Control-Allow-Origin" -> List(corsHeader).asJava).asJava
   }
   val serverBuilder: ServerBuilder = picoserve.Server
@@ -53,7 +53,7 @@ class Server(address: String, port: Int, captcha: Captcha, playgroundEnabled: Bo
         getResponse(result, headerMap)
       }
     )
-  if( playgroundEnabled ) {
+  if (playgroundEnabled) {
     serverBuilder.GET(
       "/demo/index.html",
       (_) => {
@@ -66,7 +66,10 @@ class Server(address: String, port: Int, captcha: Captcha, playgroundEnabled: Bo
 
   val server: picoserve.Server = serverBuilder.build()
 
-  private def getResponse(response: Either[Error, ByteConvert], responseHeaders: util.Map[String, util.List[String]]): ByteResponse = {
+  private def getResponse(
+      response: Either[Error, ByteConvert],
+      responseHeaders: util.Map[String, util.List[String]]
+  ): ByteResponse = {
     response match {
       case Right(value) => {
         new ByteResponse(200, value.toBytes(), responseHeaders)

@@ -20,9 +20,12 @@ class FilterChallenge extends ChallengeProvider {
 
   def supportedParameters(): JavaMap[String, JavaList[String]] = {
     JavaMap.of(
-      "supportedLevels",JavaList.of("medium", "hard"),
-      "supportedMedia", JavaList.of("image/png"),
-      "supportedInputType", JavaList.of("text")
+      "supportedLevels",
+      JavaList.of("medium", "hard"),
+      "supportedMedia",
+      JavaList.of("image/png"),
+      "supportedInputType",
+      JavaList.of("text")
     )
   }
 

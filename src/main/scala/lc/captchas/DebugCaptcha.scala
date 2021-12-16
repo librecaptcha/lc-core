@@ -13,7 +13,9 @@ import lc.captchas.interfaces.Challenge
 import lc.captchas.interfaces.ChallengeProvider
 import lc.misc.PngImageWriter
 
-/** This captcha is only for debugging purposes. It creates very simple captchas that are deliberately easy to solve with OCR engines */
+/** This captcha is only for debugging purposes. It creates very simple captchas that are deliberately easy to solve
+  * with OCR engines
+  */
 class DebugCaptcha extends ChallengeProvider {
 
   def getId(): String = {
@@ -26,9 +28,12 @@ class DebugCaptcha extends ChallengeProvider {
 
   def supportedParameters(): Map[String, List[String]] = {
     Map.of(
-      "supportedLevels", List.of("debug"),
-      "supportedMedia", List.of("image/png"),
-      "supportedInputType", List.of("text")
+      "supportedLevels",
+      List.of("debug"),
+      "supportedMedia",
+      List.of("image/png"),
+      "supportedInputType",
+      List.of("text")
     )
   }
 
