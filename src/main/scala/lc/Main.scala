@@ -3,6 +3,7 @@ package lc
 import lc.core.{CaptchaProviders, Captcha, Config}
 import lc.server.Server
 import lc.background.BackgroundTask
+import lc.database.Statements
 
 object LCFramework {
   def main(args: scala.Array[String]): Unit = {
@@ -12,6 +13,7 @@ object LCFramework {
       "data/config.json"
     }
     val config = new Config(configFilePath)
+    Statements.maxAttempts = config.maxAttempts
     val captchaProviders = new CaptchaProviders(config = config)
     val captcha = new Captcha(config = config, captchaProviders = captchaProviders)
     val backgroundTask = new BackgroundTask(config = config, captcha = captcha)
