@@ -29,4 +29,11 @@ assembly / mainClass := Some("lc.LCFramework")
 Compile / run / mainClass := Some("lc.LCFramework")
 assembly / assemblyJarName := "LibreCaptcha.jar"
 
+assembly / assemblyMergeStrategy := {
+  case x if x.endsWith("/module-info.class") => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assembly / assemblyMergeStrategy).value
+    oldStrategy(x)
+}
+
 run / fork := true
