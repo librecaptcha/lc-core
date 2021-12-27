@@ -12,7 +12,7 @@ lazy val root = (project in file(".")).settings(
   name := "LibreCaptcha",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.0.24",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.0.24",
-  libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.12"
+  libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "4.0.3"
 )
 
 Compile / unmanagedResourceDirectories += { baseDirectory.value / "lib" }
@@ -28,5 +28,13 @@ javafmtOnCompile := false
 assembly / mainClass := Some("lc.LCFramework")
 Compile / run / mainClass := Some("lc.LCFramework")
 assembly / assemblyJarName := "LibreCaptcha.jar"
+
+ThisBuild / assemblyMergeStrategy := {
+  case PathList("module-info.class") => MergeStrategy.discard
+  case x if x.endsWith("/module-info.class") => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
+    oldStrategy(x)
+}
 
 run / fork := true
