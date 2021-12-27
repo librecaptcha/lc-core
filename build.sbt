@@ -29,10 +29,11 @@ assembly / mainClass := Some("lc.LCFramework")
 Compile / run / mainClass := Some("lc.LCFramework")
 assembly / assemblyJarName := "LibreCaptcha.jar"
 
-assembly / assemblyMergeStrategy := {
+ThisBuild / assemblyMergeStrategy := {
+  case PathList("module-info.class") => MergeStrategy.discard
   case x if x.endsWith("/module-info.class") => MergeStrategy.discard
   case x =>
-    val oldStrategy = (assembly / assemblyMergeStrategy).value
+    val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
     oldStrategy(x)
 }
 
