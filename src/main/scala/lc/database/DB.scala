@@ -1,6 +1,6 @@
 package lc.database
 
-import java.sql._
+import java.sql.{Connection, DriverManager, Statement}
 
 class DBConn() {
   val con: Connection = DriverManager.getConnection("jdbc:h2:./data/H2/captcha2", "sa", "")

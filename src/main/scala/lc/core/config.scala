@@ -47,6 +47,7 @@ class Config(configFilePath: String) {
   val threadDelay: Int = (configJson \ AttributesEnum.THREAD_DELAY.toString).extract[Int]
   val playgroundEnabled: Boolean = (configJson \ AttributesEnum.PLAYGROUND_ENABLED.toString).extract[Boolean]
   val corsHeader: String = (configJson \ AttributesEnum.CORS_HEADER.toString).extract[String]
+  val maxAttempts: Int = (configJson \ AttributesEnum.MAX_ATTEMPTS.toString).extract[Int]
 
   private val captchaConfigJson = (configJson \ "captchas")
   val captchaConfigTransform: JValue = captchaConfigJson transformField { case JField("config", JObject(config)) =>
@@ -69,6 +70,7 @@ class Config(configFilePath: String) {
         (AttributesEnum.THREAD_DELAY.toString -> 2) ~
         (AttributesEnum.PLAYGROUND_ENABLED.toString -> true) ~
         (AttributesEnum.CORS_HEADER.toString -> "") ~
+        (AttributesEnum.MAX_ATTEMPTS.toString -> 10) ~
         ("captchas" -> List(
           (
             (AttributesEnum.NAME.toString -> "FilterChallenge") ~

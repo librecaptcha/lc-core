@@ -118,6 +118,6 @@ object Statements {
      ```
    */
   private val dbConn: DBConn = new DBConn()
-  private val maxAttempts = 10
+  var maxAttempts: Int = 10
   val tlStmts: ThreadLocal[Statements] = ThreadLocal.withInitial(() => new Statements(dbConn, maxAttempts))
 }

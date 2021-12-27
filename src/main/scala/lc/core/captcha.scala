@@ -1,13 +1,10 @@
 package lc.core
 
-import java.sql.ResultSet
-import java.util.UUID
-import java.io.ByteArrayInputStream
+import lc.captchas.interfaces.{Challenge, ChallengeProvider}
 import lc.database.Statements
-import lc.core.CaptchaProviders
-import lc.captchas.interfaces.ChallengeProvider
-import lc.captchas.interfaces.Challenge
-import java.sql.Blob
+import java.io.ByteArrayInputStream
+import java.sql.{Blob, ResultSet}
+import java.util.UUID
 
 class Captcha(config: Config, captchaProviders: CaptchaProviders) {
 
