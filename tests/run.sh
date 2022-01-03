@@ -22,7 +22,7 @@ echo Run functional test
 cp data/config.json data/config.json.bak
 cp tests/debug-config.json data/config.json
 
-java -jar target/scala-2.13/LibreCaptcha.jar &
+java -jar target/scala-3.1.0/LibreCaptcha.jar &
 JAVA_PID=$!
 sleep 4
 
