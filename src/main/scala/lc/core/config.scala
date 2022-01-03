@@ -4,6 +4,9 @@ import scala.io.Source.fromFile
 import org.json4s.{DefaultFormats, JValue, JObject, JField, JString}
 import org.json4s.jackson.JsonMethods.{parse, render, pretty}
 import org.json4s.JsonDSL._
+import org.json4s.StringInput
+import org.json4s.jvalue2monadic
+import org.json4s.jvalue2extractable
 import java.io.{FileNotFoundException, File, PrintWriter}
 import java.{util => ju}
 import lc.misc.HelperFunctions

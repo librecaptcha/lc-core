@@ -1,6 +1,7 @@
 package lc.server
 
 import org.json4s.jackson.JsonMethods.parse
+import org.json4s.jvalue2extractable
 import lc.core.Captcha
 import lc.core.ErrorMessageEnum
 import lc.core.{Answer, ByteConvert, Error, Id, Parameters}
