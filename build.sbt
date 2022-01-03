@@ -6,7 +6,9 @@ lazy val root = (project in file(".")).settings(
       version := "0.1.0-SNAPSHOT",
       semanticdbEnabled := true,
       semanticdbVersion := scalafixSemanticdb.revision,
-      scalafixScalaBinaryVersion := "3.1"
+
+      // This is apparently not supported on Scala 3 currently
+      // scalafixScalaBinaryVersion := "3.1"
     )
   ),
   name := "LibreCaptcha",
