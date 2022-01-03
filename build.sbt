@@ -2,25 +2,22 @@ lazy val root = (project in file(".")).settings(
   inThisBuild(
     List(
       organization := "com.example",
-      scalaVersion := "2.13.7",
+      scalaVersion := "3.1.0",
       version := "0.1.0-SNAPSHOT",
       semanticdbEnabled := true,
       semanticdbVersion := scalafixSemanticdb.revision,
-      scalafixScalaBinaryVersion := "2.13"
+      scalafixScalaBinaryVersion := "3.1"
     )
   ),
   name := "LibreCaptcha",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.0.24",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.0.24",
-  libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "4.0.3"
+  libraryDependencies += "org.json4s" %% "json4s-jackson" % "4.0.3"
 )
 
 Compile / unmanagedResourceDirectories += { baseDirectory.value / "lib" }
 scalacOptions ++= List(
-  "-Yrangepos",
-  "-Ywarn-unused",
   "-deprecation",
-  "-Xsource:3"
 )
 javacOptions += "-g:none"
 compileOrder := CompileOrder.JavaThenScala
