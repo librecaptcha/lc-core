@@ -11,6 +11,18 @@ import java.io.{FileNotFoundException, File, PrintWriter}
 import java.{util => ju}
 import lc.misc.HelperFunctions
 
+case class ConfigField(
+                        port: Option[Int],
+                        address: Option[String],
+                        throttle: Option[Int],
+                        seed: Option[Int],
+                        captchaExpiryTimeLimit: Option[Int],
+                        threadDelay: Option[Int],
+                        playgroundEnabled: Option[String],
+                        corsHeader: Option[String],
+                        maxAttempts: Option[Int]
+                      )
+
 class Config(configFilePath: String) {
 
   import Config.formats
@@ -41,6 +53,14 @@ class Config(configFilePath: String) {
     }
 
   private val configJson = parse(configString)
+
+  val fields = configJson.extract[ConfigField]
+
+  val port1: Int = fields.port.getOrElse(8888)
+  val address1: String = fields.address.getOrElse("0.0.0.0")
+
+  println(port1)
+  println(address1)
 
   val port: Int = getOptionalConfigParam(AttributesEnum.PORT.toString, "8888").toInt
   val address: String = getOptionalConfigParam(AttributesEnum.ADDRESS.toString, "0.0.0.0")
@@ -84,7 +104,7 @@ class Config(configFilePath: String) {
         (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
         (AttributesEnum.THROTTLE.toString -> 1000) ~
         (AttributesEnum.THREAD_DELAY.toString -> 2) ~
-        (AttributesEnum.PLAYGROUND_ENABLED.toString -> true) ~
+        (AttributesEnum.PLAYGROUND_ENABLED.toString -> "true") ~
         (AttributesEnum.CORS_HEADER.toString -> "") ~
         (AttributesEnum.MAX_ATTEMPTS.toString -> 10) ~
         ("captchas" -> List(
