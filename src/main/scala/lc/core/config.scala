@@ -42,15 +42,15 @@ class Config(configFilePath: String) {
 
   private val configJson = parse(configString)
 
-  val port: Int = (configJson \ AttributesEnum.PORT.toString).extract[Int]
-  val address: String = (configJson \ AttributesEnum.ADDRESS.toString).extract[String]
-  val throttle: Int = (configJson \ AttributesEnum.THROTTLE.toString).extract[Int]
-  val seed: Int = (configJson \ AttributesEnum.RANDOM_SEED.toString).extract[Int]
-  val captchaExpiryTimeLimit: Int = (configJson \ AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString).extract[Int]
-  val threadDelay: Int = (configJson \ AttributesEnum.THREAD_DELAY.toString).extract[Int]
-  val playgroundEnabled: Boolean = (configJson \ AttributesEnum.PLAYGROUND_ENABLED.toString).extract[Boolean]
-  val corsHeader: String = (configJson \ AttributesEnum.CORS_HEADER.toString).extract[String]
-  val maxAttempts: Int = (configJson \ AttributesEnum.MAX_ATTEMPTS.toString).extract[Int]
+  val port: Int = getOptionalConfigParam(AttributesEnum.PORT.toString, "8888").toInt
+  val address: String = getOptionalConfigParam(AttributesEnum.ADDRESS.toString, "0.0.0.0")
+  val throttle: Int = getOptionalConfigParam(AttributesEnum.THROTTLE.toString, "1000").toInt
+  val seed: Int = getOptionalConfigParam(AttributesEnum.RANDOM_SEED.toString, "375264328").toInt
+  val captchaExpiryTimeLimit: Int = getOptionalConfigParam(AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString, "5").toInt
+  val threadDelay: Int = getOptionalConfigParam(AttributesEnum.THREAD_DELAY.toString, "2").toInt
+  val playgroundEnabled: Boolean = getOptionalConfigParam(AttributesEnum.PLAYGROUND_ENABLED.toString, "true").toBoolean
+  val corsHeader: String = getOptionalConfigParam(AttributesEnum.CORS_HEADER.toString, "")
+  val maxAttempts: Int = getOptionalConfigParam(AttributesEnum.MAX_ATTEMPTS.toString, "10").toInt
 
   private val captchaConfigJson = (configJson \ "captchas")
   val captchaConfigTransform: JValue = captchaConfigJson transformField { case JField("config", JObject(config)) =>
@@ -62,6 +62,19 @@ class Config(configFilePath: String) {
   val allowedInputType: Set[String] = captchaConfig.flatMap(_.allowedInputType).toSet
 
   HelperFunctions.setSeed(seed)
+
+  private def getOptionalConfigParam(paramName: String, defaultValue: String): String = {
+    val param: Option[(String, JValue)] = (configJson findField({
+      case JField(`paramName`, _) => true
+      case _ => false
+    }))
+
+    if(param.isDefined){
+      param.get._2.extract[String]
+    } else {
+      defaultValue
+    }
+  }
 
   private def getDefaultConfig(): String = {
     val defaultConfigMap =
