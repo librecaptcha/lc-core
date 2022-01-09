@@ -18,3 +18,26 @@ case class CaptchaConfig(
     allowedInputType: List[String],
     config: String
 )
+case class ConfigField(
+    port: Option[Integer],
+    address: Option[String],
+    throttle: Option[Integer],
+    seed: Option[Integer],
+    captchaExpiryTimeLimit: Option[Integer],
+    threadDelay: Option[Integer],
+    playgroundEnabled: Option[java.lang.Boolean],
+    corsHeader: Option[String],
+    maxAttempts: Option[Integer]
+    ){
+  lazy val portInt: Option[Int] = mapInt(port)
+  lazy val throttleInt: Option[Int] = mapInt(throttle)
+  lazy val seedInt: Option[Int] = mapInt(seed)
+  lazy val captchaExpiryTimeLimitInt: Option[Int] = mapInt(captchaExpiryTimeLimit)
+  lazy val threadDelayInt: Option[Int] = mapInt(threadDelay)
+  lazy val maxAttemptsInt: Option[Int] = mapInt(maxAttempts)
+  lazy val playgroundEnabledBool: Option[Boolean] = playgroundEnabled.map(_ || true)
+
+  private def mapInt(x: Option[Integer]): Option[Int] = {
+    x.map(_ + 0)
+  }
+}

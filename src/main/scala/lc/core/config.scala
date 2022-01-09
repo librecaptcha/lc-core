@@ -11,6 +11,7 @@ import java.io.{FileNotFoundException, File, PrintWriter}
 import java.{util => ju}
 import lc.misc.HelperFunctions
 
+
 class Config(configFilePath: String) {
 
   import Config.formats
@@ -41,16 +42,17 @@ class Config(configFilePath: String) {
     }
 
   private val configJson = parse(configString)
+  private val configFields: ConfigField = configJson.extract[ConfigField]
 
-  val port: Int = (configJson \ AttributesEnum.PORT.toString).extract[Int]
-  val address: String = (configJson \ AttributesEnum.ADDRESS.toString).extract[String]
-  val throttle: Int = (configJson \ AttributesEnum.THROTTLE.toString).extract[Int]
-  val seed: Int = (configJson \ AttributesEnum.RANDOM_SEED.toString).extract[Int]
-  val captchaExpiryTimeLimit: Int = (configJson \ AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString).extract[Int]
-  val threadDelay: Int = (configJson \ AttributesEnum.THREAD_DELAY.toString).extract[Int]
-  val playgroundEnabled: Boolean = (configJson \ AttributesEnum.PLAYGROUND_ENABLED.toString).extract[Boolean]
-  val corsHeader: String = (configJson \ AttributesEnum.CORS_HEADER.toString).extract[String]
-  val maxAttempts: Int = (configJson \ AttributesEnum.MAX_ATTEMPTS.toString).extract[Int]
+  val port: Int = configFields.portInt.getOrElse(8888)
+  val address: String = configFields.address.getOrElse("0.0.0.0")
+  val throttle: Int = configFields.throttleInt.getOrElse(1000)
+  val seed: Int = configFields.seedInt.getOrElse(375264328)
+  val captchaExpiryTimeLimit: Int = configFields.captchaExpiryTimeLimitInt.getOrElse(5)
+  val threadDelay: Int = configFields.threadDelayInt.getOrElse(2)
+  val playgroundEnabled: Boolean = configFields.playgroundEnabledBool.getOrElse(true)
+  val corsHeader: String = configFields.corsHeader.getOrElse("")
+  val maxAttempts: Int = configFields.maxAttemptsInt.getOrElse(10)
 
   private val captchaConfigJson = (configJson \ "captchas")
   val captchaConfigTransform: JValue = captchaConfigJson transformField { case JField("config", JObject(config)) =>
