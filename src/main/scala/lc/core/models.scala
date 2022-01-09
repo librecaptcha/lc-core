@@ -37,5 +37,7 @@ case class ConfigField(
   lazy val maxAttemptsInt: Option[Int] = mapInt(maxAttempts)
   lazy val playgroundEnabledBool: Option[Boolean] = playgroundEnabled.map(_ || true)
 
-  private val mapInt = (x: Option[Integer]) => x.map(_ + 0)
+  private def mapInt(x: Option[Integer]): Option[Int] = {
+    x.map(_ + 0)
+  }
 }

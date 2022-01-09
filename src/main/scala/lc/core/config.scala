@@ -73,7 +73,7 @@ class Config(configFilePath: String) {
         (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
         (AttributesEnum.THROTTLE.toString -> 1000) ~
         (AttributesEnum.THREAD_DELAY.toString -> 2) ~
-        (AttributesEnum.PLAYGROUND_ENABLED.toString -> "true") ~
+        (AttributesEnum.PLAYGROUND_ENABLED.toString -> true) ~
         (AttributesEnum.CORS_HEADER.toString -> "") ~
         (AttributesEnum.MAX_ATTEMPTS.toString -> 10) ~
         ("captchas" -> List(
