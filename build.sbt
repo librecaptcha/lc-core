@@ -5,21 +5,21 @@ lazy val root = (project in file(".")).settings(
       scalaVersion := "3.1.0",
       version := "0.1.0-SNAPSHOT",
       semanticdbEnabled := true,
-      semanticdbVersion := scalafixSemanticdb.revision,
+      semanticdbVersion := scalafixSemanticdb.revision
 
       // This is apparently not supported on Scala 3 currently
       // scalafixScalaBinaryVersion := "3.1"
     )
   ),
   name := "LibreCaptcha",
-  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.0.24",
-  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.0.24",
+  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.0.25",
+  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.0.25",
   libraryDependencies += "org.json4s" %% "json4s-jackson" % "4.0.3"
 )
 
 Compile / unmanagedResourceDirectories += { baseDirectory.value / "lib" }
 scalacOptions ++= List(
-  "-deprecation",
+  "-deprecation"
 )
 javacOptions += "-g:none"
 compileOrder := CompileOrder.JavaThenScala
