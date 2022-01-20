@@ -11,7 +11,6 @@ import java.io.{FileNotFoundException, File, PrintWriter}
 import java.{util => ju}
 import lc.misc.HelperFunctions
 
-
 class Config(configFilePath: String) {
 
   import Config.formats

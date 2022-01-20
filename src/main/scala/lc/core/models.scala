@@ -28,7 +28,7 @@ case class ConfigField(
     playgroundEnabled: Option[java.lang.Boolean],
     corsHeader: Option[String],
     maxAttempts: Option[Integer]
-    ){
+) {
   lazy val portInt: Option[Int] = mapInt(port)
   lazy val throttleInt: Option[Int] = mapInt(throttle)
   lazy val seedInt: Option[Int] = mapInt(seed)
