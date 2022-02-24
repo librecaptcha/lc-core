@@ -2,7 +2,7 @@ package lc.server
 
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jvalue2extractable
-import lc.core.Captcha
+import lc.core.CaptchaManager
 import lc.core.ErrorMessageEnum
 import lc.core.{Answer, ByteConvert, Error, Id, Parameters}
 import lc.core.Config.formats
@@ -13,7 +13,7 @@ import java.net.InetSocketAddress
 import java.util
 import scala.jdk.CollectionConverters._
 
-class Server(address: String, port: Int, captcha: Captcha, playgroundEnabled: Boolean, corsHeader: String) {
+class Server(address: String, port: Int, captchaManager: CaptchaManager, playgroundEnabled: Boolean, corsHeader: String) {
   var headerMap: util.Map[String, util.List[String]] = _
   if (corsHeader.nonEmpty) {
     headerMap = Map("Access-Control-Allow-Origin" -> List(corsHeader).asJava).asJava
@@ -27,7 +27,7 @@ class Server(address: String, port: Int, captcha: Captcha, playgroundEnabled: Bo
       (request) => {
         val json = parse(request.getBodyString())
         val param = json.extract[Parameters]
-        val id = captcha.getChallenge(param)
+        val id = captchaManager.getChallenge(param)
         getResponse(id, headerMap)
       }
     )
@@ -38,7 +38,7 @@ class Server(address: String, port: Int, captcha: Captcha, playgroundEnabled: Bo
         val result = if (params.containsKey("id")) {
           val paramId = params.get("id").get(0)
           val id = Id(paramId)
-          captcha.getCaptcha(id)
+          captchaManager.getCaptcha(id)
         } else {
           Left(Error(ErrorMessageEnum.INVALID_PARAM.toString + "=> id"))
         }
@@ -50,7 +50,7 @@ class Server(address: String, port: Int, captcha: Captcha, playgroundEnabled: Bo
       (request) => {
         val json = parse(request.getBodyString())
         val answer = json.extract[Answer]
-        val result = captcha.checkAnswer(answer)
+        val result = captchaManager.checkAnswer(answer)
         getResponse(result, headerMap)
       }
     )

@@ -2,11 +2,11 @@ package lc.background
 
 import lc.database.Statements
 import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
-import lc.core.{Captcha, Config}
+import lc.core.{CaptchaManager, Config}
 import lc.core.{Parameters, Size}
 import lc.misc.HelperFunctions
 
-class BackgroundTask(config: Config, captcha: Captcha) {
+class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
 
   private val task = new Runnable {
     def run(): Unit = {
@@ -18,13 +18,17 @@ class BackgroundTask(config: Config, captcha: Captcha) {
         val challengeGCPstmt = Statements.tlStmts.get.challengeGCPstmt
         challengeGCPstmt.executeUpdate()
 
-        val imageNum = Statements.tlStmts.get.getCountChallengeTable.executeQuery()
-        var throttleIn = (config.throttle * 1.1).toInt
-        if (imageNum.next())
-          throttleIn = (throttleIn - imageNum.getInt("total"))
-        while (0 < throttleIn) {
-          captcha.generateChallenge(getRandomParam())
-          throttleIn -= 1
+        val imageNumResult = Statements.tlStmts.get.getCountChallengeTable.executeQuery()
+        val imageNum = if (imageNumResult.next()) {
+          imageNumResult.getInt("total")
+        } else {
+          0
+        }
+
+        val throttle = (config.throttle * 1.1).toInt - imageNum
+
+        for (i <- 0 until throttle) {
+          captchaManager.generateChallenge(getRandomParam())
         }
       } catch { case exception: Exception => println(exception) }
     }
