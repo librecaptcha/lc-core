@@ -18,13 +18,17 @@ class BackgroundTask(config: Config, captcha: Captcha) {
         val challengeGCPstmt = Statements.tlStmts.get.challengeGCPstmt
         challengeGCPstmt.executeUpdate()
 
-        val imageNum = Statements.tlStmts.get.getCountChallengeTable.executeQuery()
-        var throttleIn = (config.throttle * 1.1).toInt
-        if (imageNum.next())
-          throttleIn = (throttleIn - imageNum.getInt("total"))
-        while (0 < throttleIn) {
+        val imageNumResult = Statements.tlStmts.get.getCountChallengeTable.executeQuery()
+        val imageNum = if (imageNumResult.next()) {
+          imageNumResult.getInt("total")
+        } else {
+          0
+        }
+
+        val throttle = (config.throttle * 1.1).toInt - imageNum
+
+        for (i <- 0 until throttle) {
           captcha.generateChallenge(getRandomParam())
-          throttleIn -= 1
         }
       } catch { case exception: Exception => println(exception) }
     }
