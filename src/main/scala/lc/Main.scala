@@ -1,6 +1,6 @@
 package lc
 
-import lc.core.{CaptchaProviders, Captcha, Config}
+import lc.core.{CaptchaProviders, CaptchaManager, Config}
 import lc.server.Server
 import lc.background.BackgroundTask
 import lc.database.Statements
@@ -15,13 +15,13 @@ object LCFramework {
     val config = new Config(configFilePath)
     Statements.maxAttempts = config.maxAttempts
     val captchaProviders = new CaptchaProviders(config = config)
-    val captcha = new Captcha(config = config, captchaProviders = captchaProviders)
-    val backgroundTask = new BackgroundTask(config = config, captcha = captcha)
+    val captchaManager = new CaptchaManager(config = config, captchaProviders = captchaProviders)
+    val backgroundTask = new BackgroundTask(config = config, captchaManager = captchaManager)
     backgroundTask.beginThread(delay = config.threadDelay)
     val server = new Server(
       address = config.address,
       port = config.port,
-      captcha = captcha,
+      captchaManager = captchaManager,
       playgroundEnabled = config.playgroundEnabled,
       corsHeader = config.corsHeader
     )

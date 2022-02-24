@@ -6,7 +6,7 @@ import java.io.ByteArrayInputStream
 import java.sql.{Blob, ResultSet}
 import java.util.UUID
 
-class Captcha(config: Config, captchaProviders: CaptchaProviders) {
+class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
 
   def getCaptcha(id: Id): Either[Error, Image] = {
     val blob = getImage(id.id)
