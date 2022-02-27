@@ -70,6 +70,17 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
       "WHERE token = ?;"
   )
 
+  val countPstmt: PreparedStatement = dbConn.con.prepareStatement(
+    s"""
+      SELECT count(*) as count
+        FROM challenge
+        WHERE attempted < $maxAttempts AND
+        contentLevel = ? AND
+        contentType = ? AND
+        contentInput = ?
+        """
+  )
+
   val tokenPstmt: PreparedStatement = dbConn.con.prepareStatement(
     s"""
       SELECT token, attempted
@@ -78,7 +89,9 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
         contentLevel = ? AND
         contentType = ? AND
         contentInput = ?
-        ORDER BY attempted ASC LIMIT 1"""
+        LIMIT 1
+        OFFSET FLOOR(RAND()*?)
+         """
   )
 
   val deleteAnswerPstmt: PreparedStatement = dbConn.con.prepareStatement(
