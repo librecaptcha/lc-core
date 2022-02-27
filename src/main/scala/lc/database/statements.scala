@@ -70,7 +70,7 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
       "WHERE token = ?;"
   )
 
-  val countPstmt: PreparedStatement = dbConn.con.prepareStatement(
+  val countForParameterPstmt: PreparedStatement = dbConn.con.prepareStatement(
     s"""
       SELECT count(*) as count
         FROM challenge

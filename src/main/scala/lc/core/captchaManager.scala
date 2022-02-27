@@ -105,8 +105,8 @@ class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
     }
   }
 
-  private def getCount(param: Parameters): Option[Int] = {
-    val countPstmt = Statements.tlStmts.get.countPstmt
+  def getCount(param: Parameters): Option[Int] = {
+    val countPstmt = Statements.tlStmts.get.countForParameterPstmt
     countPstmt.setString(1, param.level)
     countPstmt.setString(2, param.media)
     countPstmt.setString(3, param.input_type)
@@ -123,16 +123,16 @@ class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
     if (count == 0) {
       None
     } else {
-    val tokenPstmt = Statements.tlStmts.get.tokenPstmt
-    tokenPstmt.setString(1, param.level)
-    tokenPstmt.setString(2, param.media)
-    tokenPstmt.setString(3, param.input_type)
+      val tokenPstmt = Statements.tlStmts.get.tokenPstmt
+      tokenPstmt.setString(1, param.level)
+      tokenPstmt.setString(2, param.media)
+      tokenPstmt.setString(3, param.input_type)
       tokenPstmt.setInt(4, count)
-    val rs = tokenPstmt.executeQuery()
-    if (rs.next()) {
-      Some(rs.getInt("token"))
-    } else {
-      None
+      val rs = tokenPstmt.executeQuery()
+      if (rs.next()) {
+        Some(rs.getInt("token"))
+      } else {
+        None
       }
     }
   }

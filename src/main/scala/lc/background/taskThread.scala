@@ -18,19 +18,30 @@ class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
         val challengeGCPstmt = Statements.tlStmts.get.challengeGCPstmt
         challengeGCPstmt.executeUpdate()
 
-        val imageNumResult = Statements.tlStmts.get.getCountChallengeTable.executeQuery()
-        val imageNum = if (imageNumResult.next()) {
-          imageNumResult.getInt("total")
-        } else {
-          0
-        }
+        for (param <- allParameterCombinations()) {
+          val imageNum = captchaManager.getCount(param).getOrElse(0)
+          val countCreate = (config.throttle * 1.1).toInt - imageNum
+          if (countCreate > 0) {
+            println(s"Creating $countCreate captchas for $param")
 
-        val throttle = (config.throttle * 1.1).toInt - imageNum
-
-        for (i <- 0 until throttle) {
-          captchaManager.generateChallenge(getRandomParam())
+            for (i <- 0 until countCreate) {
+              captchaManager.generateChallenge(param)
+            }
+          }
         }
       } catch { case exception: Exception => println(exception) }
+    }
+  }
+
+  private def allParameterCombinations(): List[Parameters] = {
+    (config.captchaConfig).flatMap {captcha =>
+      (captcha.allowedLevels).flatMap {level =>
+        (captcha.allowedMedia).flatMap {media =>
+          (captcha.allowedInputType).map {inputType =>
+            Parameters(level, media, inputType, Some(Size(0, 0)))
+          }
+        }
+      }
     }
   }
 
