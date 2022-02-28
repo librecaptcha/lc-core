@@ -18,11 +18,15 @@ class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
         val challengeGCPstmt = Statements.tlStmts.get.challengeGCPstmt
         challengeGCPstmt.executeUpdate()
 
-        for (param <- allParameterCombinations()) {
-          val imageNum = captchaManager.getCount(param).getOrElse(0)
-          val countCreate = (config.throttle * 1.1).toInt - imageNum
-          if (countCreate > 0) {
-            println(s"Creating $countCreate captchas for $param")
+        val allCombinations = allParameterCombinations()
+        val requiredCountPerCombination = Math.max(1, (config.throttle * 1.01) / allCombinations.size).toInt
+
+        for (param <- allCombinations) {
+          val countExisting = captchaManager.getCount(param).getOrElse(0)
+          val countRequired = requiredCountPerCombination - countExisting
+          if (countRequired > 0) {
+            val countCreate = Math.min(1.0 + requiredCountPerCombination/10.0, countRequired).toInt
+            println(s"Creating $countCreate of $countRequired captchas for $param")
 
             for (i <- 0 until countCreate) {
               captchaManager.generateChallenge(param)
