@@ -63,6 +63,19 @@ class Server(address: String, port: Int, captchaManager: CaptchaManager, playgro
         new StringResponse(200, str)
       }
     )
+    serverBuilder.GET(
+      "/",
+      (_) => {
+        val str = """
+        <html>
+          <h2>Welcome to LibreCaptcha server</h2>
+          <h3><a href="/demo/index.html">Link to Demo</a></h3>
+          <h3>API is served at <b>/v1/</b></h3>
+        </html>
+        """
+        new StringResponse(200, str)
+      }
+    )
   }
 
   val server: picoserve.Server = serverBuilder.build()
