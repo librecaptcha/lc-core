@@ -21,10 +21,8 @@ import lc.misc.GifSequenceWriter;
 
 public class PoppingCharactersCaptcha implements ChallengeProvider {
   private final Font font = new Font("Arial", Font.ROMAN_BASELINE, 48);
-  private final int width = 250;
-  private final int height = 100;
 
-  private Integer[] computeOffsets(final String text) {
+  private Integer[] computeOffsets(final int width, final int height, final String text) {
     final var img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     final var graphics2D = img.createGraphics();
     final var frc = graphics2D.getFontRenderContext();
@@ -41,7 +39,7 @@ public class PoppingCharactersCaptcha implements ChallengeProvider {
     return advances.toArray(new Integer[]{});
   }
 
-  private BufferedImage makeImage(final Consumer<Graphics2D> f) {
+  private BufferedImage makeImage(final int width, final int height, final Consumer<Graphics2D> f) {
     final var img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     final var graphics2D = img.createGraphics();
     graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -56,16 +54,16 @@ public class PoppingCharactersCaptcha implements ChallengeProvider {
     return HelperFunctions.randomNumber(-2, +2);
   }
 
-  private byte[] gifCaptcha(final String text) {
+  private byte[] gifCaptcha(final int width, final int height, final String text) {
     try {
       final var byteArrayOutputStream = new ByteArrayOutputStream();
       final var output = new MemoryCacheImageOutputStream(byteArrayOutputStream);
       final var writer = new GifSequenceWriter(output, 1, 900, true);
-      final var advances = computeOffsets(text);
+      final var advances = computeOffsets(width, height, text);
       final var prevColor = Color.getHSBColor(0f, 0f, 0.1f);
       IntStream.range(0, text.length()).forEach(i -> {
         final var color = Color.getHSBColor(HelperFunctions.randomNumber(0, 100)/100.0f, 0.6f, 1.0f);
-        final var nextImage = makeImage((g) -> {
+        final var nextImage = makeImage(width, height, (g) -> {
           if (i > 0) {
             final var prevI = (i - 1) % text.length();
             g.setColor(prevColor);
@@ -102,7 +100,10 @@ public class PoppingCharactersCaptcha implements ChallengeProvider {
 
   public Challenge returnChallenge(String level, String size) {
     final var secret = HelperFunctions.randomString(6);
-    return new Challenge(gifCaptcha(secret), "image/gif", secret.toLowerCase());
+    final int[] size2D = HelperFunctions.parseSize2D(size);
+    final int width = size2D[0];
+    final int height = size2D[1];
+    return new Challenge(gifCaptcha(width, height, secret), "image/gif", secret.toLowerCase());
   }
 
   public boolean checkAnswer(String secret, String answer) {

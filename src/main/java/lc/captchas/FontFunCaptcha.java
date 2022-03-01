@@ -58,9 +58,9 @@ public class FontFunCaptcha implements ChallengeProvider {
     return null;
   }
 
-  private byte[] fontFun(String captchaText, String level, String path) {
+  private byte[] fontFun(final int width, final int height, String captchaText, String level, String path) {
     String[] colors = {"#f68787", "#f8a978", "#f1eb9a", "#a4f6a5"};
-    BufferedImage img = new BufferedImage(350, 100, BufferedImage.TYPE_INT_RGB);
+    BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     Graphics2D graphics2D = img.createGraphics();
     for (int i = 0; i < captchaText.length(); i++) {
       Font font = loadCustomFont(level, path);
@@ -83,8 +83,11 @@ public class FontFunCaptcha implements ChallengeProvider {
 
   public Challenge returnChallenge(String level, String size) {
     String secret = HelperFunctions.randomString(7);
+    final int[] size2D = HelperFunctions.parseSize2D(size);
+    final int width = size2D[0];
+    final int height = size2D[1];
     String path = "./lib/fonts/";
-    return new Challenge(fontFun(secret, "medium", path), "image/png", secret.toLowerCase());
+    return new Challenge(fontFun(width, height, secret, "medium", path), "image/png", secret.toLowerCase());
   }
 
   public boolean checkAnswer(String secret, String answer) {

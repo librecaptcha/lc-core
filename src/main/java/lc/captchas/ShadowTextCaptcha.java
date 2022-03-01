@@ -38,8 +38,8 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     return answer.toLowerCase().equals(secret);
   }
 
-  private byte[] shadowText(String text) {
-    BufferedImage img = new BufferedImage(350, 100, BufferedImage.TYPE_INT_RGB);
+  private byte[] shadowText(final int width, final int height, String text) {
+    BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     Font font = new Font("Arial", Font.ROMAN_BASELINE, 48);
     Graphics2D graphics2D = img.createGraphics();
     graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -76,6 +76,9 @@ public class ShadowTextCaptcha implements ChallengeProvider {
 
   public Challenge returnChallenge(String level, String size) {
     String secret = HelperFunctions.randomString(6);
-    return new Challenge(shadowText(secret), "image/png", secret.toLowerCase());
+    final int[] size2D = HelperFunctions.parseSize2D(size);
+    final int width = size2D[0];
+    final int height = size2D[1];
+    return new Challenge(shadowText(width, height, secret), "image/png", secret.toLowerCase());
   }
 }

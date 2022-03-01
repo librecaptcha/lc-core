@@ -11,6 +11,12 @@ public class HelperFunctions {
     random.setSeed(seed);
   }
 
+  public static int[] parseSize2D(final String size) {
+    final String[] fields = size.split("x");
+    final int[] result = {Integer.parseInt(fields[0]), Integer.parseInt(fields[1])};
+    return result;
+  }
+
   public static void setRenderingHints(Graphics2D g2d) {
     g2d.setRenderingHint(
         RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);

@@ -10,6 +10,7 @@ import lc.captchas.interfaces.Challenge
 import java.util.{List => JavaList, Map => JavaMap}
 import java.io.ByteArrayOutputStream
 import lc.misc.PngImageWriter
+import lc.misc.HelperFunctions
 
 class FilterChallenge extends ChallengeProvider {
   def getId = "FilterChallenge"
@@ -35,7 +36,10 @@ class FilterChallenge extends ChallengeProvider {
     val alphabet = "abcdefghijklmnopqrstuvwxyz"
     val n = 8
     val secret = LazyList.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
-    val canvas = new BufferedImage(225, 50, BufferedImage.TYPE_INT_RGB)
+    val size2D = HelperFunctions.parseSize2D(size)
+    val width = size2D(0)
+    val height = size2D(1)
+    val canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
     val g = canvas.createGraphics()
     g.setColor(Color.WHITE)
     g.fillRect(0, 0, canvas.getWidth, canvas.getHeight)

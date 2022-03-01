@@ -11,6 +11,7 @@ import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 import lc.misc.GifSequenceWriter
 import java.util.{List => JavaList, Map => JavaMap}
+import lc.misc.HelperFunctions
 
 class Drop {
   var x = 0
@@ -59,8 +60,9 @@ class RainDropsCP extends ChallengeProvider {
   def returnChallenge(level: String, size: String): Challenge = {
     val r = new scala.util.Random
     val secret = LazyList.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
-    val width = 450
-    val height = 100
+    val size2D = HelperFunctions.parseSize2D(size)
+    val width = size2D(0)
+    val height = size2D(1)
     val imgType = BufferedImage.TYPE_INT_RGB
     val xOffset = 2 + r.nextInt(3)
     val xBias = (height / 10) - 2
