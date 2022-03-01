@@ -105,16 +105,35 @@ class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
     }
   }
 
-  private def getToken(param: Parameters): Option[Int] = {
-    val tokenPstmt = Statements.tlStmts.get.tokenPstmt
-    tokenPstmt.setString(1, param.level)
-    tokenPstmt.setString(2, param.media)
-    tokenPstmt.setString(3, param.input_type)
-    val rs = tokenPstmt.executeQuery()
+  def getCount(param: Parameters): Option[Int] = {
+    val countPstmt = Statements.tlStmts.get.countForParameterPstmt
+    countPstmt.setString(1, param.level)
+    countPstmt.setString(2, param.media)
+    countPstmt.setString(3, param.input_type)
+    val rs = countPstmt.executeQuery()
     if (rs.next()) {
-      Some(rs.getInt("token"))
+      Some(rs.getInt("count"))
     } else {
       None
+    }
+  }
+
+  private def getToken(param: Parameters): Option[Int] = {
+    val count = getCount(param).getOrElse(0)
+    if (count == 0) {
+      None
+    } else {
+      val tokenPstmt = Statements.tlStmts.get.tokenPstmt
+      tokenPstmt.setString(1, param.level)
+      tokenPstmt.setString(2, param.media)
+      tokenPstmt.setString(3, param.input_type)
+      tokenPstmt.setInt(4, count)
+      val rs = tokenPstmt.executeQuery()
+      if (rs.next()) {
+        Some(rs.getInt("token"))
+      } else {
+        None
+      }
     }
   }
 
