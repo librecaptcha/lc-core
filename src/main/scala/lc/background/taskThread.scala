@@ -22,14 +22,18 @@ class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
         val requiredCountPerCombination = Math.max(1, (config.throttle * 1.01) / allCombinations.size).toInt
 
         for (param <- allCombinations) {
-          val countExisting = captchaManager.getCount(param).getOrElse(0)
-          val countRequired = requiredCountPerCombination - countExisting
-          if (countRequired > 0) {
-            val countCreate = Math.min(1.0 + requiredCountPerCombination/10.0, countRequired).toInt
-            println(s"Creating $countCreate of $countRequired captchas for $param")
+          if (!shutdownInProgress) {
+            val countExisting = captchaManager.getCount(param).getOrElse(0)
+            val countRequired = requiredCountPerCombination - countExisting
+            if (countRequired > 0) {
+              val countCreate = Math.min(1.0 + requiredCountPerCombination/10.0, countRequired).toInt
+              println(s"Creating $countCreate of $countRequired captchas for $param")
 
-            for (i <- 0 until countCreate) {
-              captchaManager.generateChallenge(param)
+              for (i <- 0 until countCreate) {
+                if (!shutdownInProgress) {
+                  captchaManager.generateChallenge(param)
+                }
+              }
             }
           }
         }
@@ -62,9 +66,22 @@ class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
     list(HelperFunctions.randomNumber(list.size))
   }
 
+  private val ex = new ScheduledThreadPoolExecutor(1)
+
   def beginThread(delay: Int): Unit = {
-    val ex = new ScheduledThreadPoolExecutor(1)
     ex.scheduleWithFixedDelay(task, 1, delay, TimeUnit.SECONDS)
+  }
+
+  @volatile var shutdownInProgress = false
+
+  def shutdown(): Unit = {
+    println("  Shutting down background task...")
+    shutdownInProgress = true
+    ex.shutdown()
+    println("    Finished Shutting background task")
+    println("  Shutting down DB...")
+    Statements.tlStmts.get.shutdown.execute()
+    println("    Finished shutting down db")
   }
 
 }

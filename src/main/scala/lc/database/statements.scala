@@ -120,6 +120,14 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
     "SELECT * FROM mapId"
   )
 
+  val shutdown: PreparedStatement = dbConn.con.prepareStatement(
+    "SHUTDOWN"
+  )
+
+  val shutdownCompact: PreparedStatement = dbConn.con.prepareStatement(
+    "SHUTDOWN COMPACT"
+  )
+
 }
 
 object Statements {
