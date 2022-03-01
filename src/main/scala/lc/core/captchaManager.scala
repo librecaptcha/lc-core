@@ -34,17 +34,13 @@ class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
   }
 
   def generateChallenge(param: Parameters): Option[Int] = {
-    val provider = captchaProviders.getProvider(param)
-    provider match {
-      case Some(value) => {
-        val providerId = value.getId()
-        val challenge = value.returnChallenge()
+    captchaProviders.getProvider(param).flatMap { provider =>
+      val providerId = provider.getId()
+      val challenge = provider.returnChallenge()
         val blob = new ByteArrayInputStream(challenge.content)
-        val token = insertCaptcha(value, challenge, providerId, param, blob)
+      val token = insertCaptcha(provider, challenge, providerId, param, blob)
         // println("Added new challenge: " + token.toString)
         token.map(_.toInt)
-      }
-      case None => None
     }
   }
 
