@@ -81,7 +81,7 @@ public class FontFunCaptcha implements ChallengeProvider {
     return baos.toByteArray();
   }
 
-  public Challenge returnChallenge() {
+  public Challenge returnChallenge(String level, String size) {
     String secret = HelperFunctions.randomString(7);
     String path = "./lib/fonts/";
     return new Challenge(fontFun(secret, "medium", path), "image/png", secret.toLowerCase());

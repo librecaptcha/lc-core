@@ -29,7 +29,7 @@ class FilterChallenge extends ChallengeProvider {
     )
   }
 
-  def returnChallenge(): Challenge = {
+  def returnChallenge(level: String, size: String): Challenge = {
     val filterTypes = List(new FilterType1, new FilterType2)
     val r = new scala.util.Random
     val alphabet = "abcdefghijklmnopqrstuvwxyz"

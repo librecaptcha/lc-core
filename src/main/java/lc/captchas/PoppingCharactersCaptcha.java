@@ -100,7 +100,7 @@ public class PoppingCharactersCaptcha implements ChallengeProvider {
         "supportedInputType", List.of("text"));
   }
 
-  public Challenge returnChallenge() {
+  public Challenge returnChallenge(String level, String size) {
     final var secret = HelperFunctions.randomString(6);
     return new Challenge(gifCaptcha(secret), "image/gif", secret.toLowerCase());
   }

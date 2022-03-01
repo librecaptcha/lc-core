@@ -56,7 +56,7 @@ class RainDropsCP extends ChallengeProvider {
     })
   }
 
-  def returnChallenge(): Challenge = {
+  def returnChallenge(level: String, size: String): Challenge = {
     val r = new scala.util.Random
     val secret = LazyList.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
     val width = 450

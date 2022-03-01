@@ -10,7 +10,7 @@ object ParametersEnum extends Enumeration {
   val ALLOWEDLEVELS: Value = Value("allowedLevels")
   val ALLOWEDMEDIA: Value = Value("allowedMedia")
   val ALLOWEDINPUTTYPE: Value = Value("allowedInputType")
-
+  val ALLOWEDSIZES: Value = Value("allowedSizes")
 }
 
 object AttributesEnum extends Enumeration {

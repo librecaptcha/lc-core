@@ -81,6 +81,7 @@ class Config(configFilePath: String) {
               (ParametersEnum.ALLOWEDLEVELS.toString -> List("medium", "hard")) ~
               (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
               (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
               (AttributesEnum.CONFIG.toString -> JObject())
           ),
           (
@@ -88,6 +89,7 @@ class Config(configFilePath: String) {
               (ParametersEnum.ALLOWEDLEVELS.toString -> List("hard")) ~
               (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
               (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
               (AttributesEnum.CONFIG.toString -> JObject())
           ),
           (
@@ -95,6 +97,7 @@ class Config(configFilePath: String) {
               (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy")) ~
               (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
               (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
               (AttributesEnum.CONFIG.toString -> JObject())
           ),
           (
@@ -102,6 +105,7 @@ class Config(configFilePath: String) {
               (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy", "medium")) ~
               (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
               (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
               (AttributesEnum.CONFIG.toString -> JObject())
           )
         ))

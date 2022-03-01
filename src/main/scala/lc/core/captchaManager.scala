@@ -36,11 +36,11 @@ class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
   def generateChallenge(param: Parameters): Option[Int] = {
     captchaProviders.getProvider(param).flatMap { provider =>
       val providerId = provider.getId()
-      val challenge = provider.returnChallenge()
-        val blob = new ByteArrayInputStream(challenge.content)
+      val challenge = provider.returnChallenge(param.level, param.size)
+      val blob = new ByteArrayInputStream(challenge.content)
       val token = insertCaptcha(provider, challenge, providerId, param, blob)
-        // println("Added new challenge: " + token.toString)
-        token.map(_.toInt)
+      // println("Added new challenge: " + token.toString)
+      token.map(_.toInt)
     }
   }
 
@@ -58,7 +58,8 @@ class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
     insertPstmt.setString(4, challenge.contentType)
     insertPstmt.setString(5, param.level)
     insertPstmt.setString(6, param.input_type)
-    insertPstmt.setBlob(7, blob)
+    insertPstmt.setString(7, param.size)
+    insertPstmt.setBlob(8, blob)
     insertPstmt.executeUpdate()
     val rs: ResultSet = insertPstmt.getGeneratedKeys()
     if (rs.next()) {
@@ -106,6 +107,7 @@ class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
     countPstmt.setString(1, param.level)
     countPstmt.setString(2, param.media)
     countPstmt.setString(3, param.input_type)
+    countPstmt.setString(4, param.size.toString())
     val rs = countPstmt.executeQuery()
     if (rs.next()) {
       Some(rs.getInt("count"))
@@ -123,7 +125,8 @@ class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
       tokenPstmt.setString(1, param.level)
       tokenPstmt.setString(2, param.media)
       tokenPstmt.setString(3, param.input_type)
-      tokenPstmt.setInt(4, count)
+      tokenPstmt.setString(4, param.size)
+      tokenPstmt.setInt(5, count)
       val rs = tokenPstmt.executeQuery()
       if (rs.next()) {
         Some(rs.getInt("token"))

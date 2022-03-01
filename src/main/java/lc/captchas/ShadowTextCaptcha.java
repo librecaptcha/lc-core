@@ -74,7 +74,7 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     return baos.toByteArray();
   }
 
-  public Challenge returnChallenge() {
+  public Challenge returnChallenge(String level, String size) {
     String secret = HelperFunctions.randomString(6);
     return new Challenge(shadowText(secret), "image/png", secret.toLowerCase());
   }

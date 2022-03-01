@@ -66,7 +66,7 @@ class DebugCaptcha extends ChallengeProvider {
     baos.toByteArray()
   }
 
-  def returnChallenge(): Challenge = {
+  def returnChallenge(level: String, size: String): Challenge = {
     val secret = HelperFunctions.randomString(6, HelperFunctions.safeAlphabets)
     new Challenge(simpleText(secret), "image/png", secret.toLowerCase())
   }

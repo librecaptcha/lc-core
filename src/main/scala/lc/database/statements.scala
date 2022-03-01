@@ -17,6 +17,7 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
       "contentType varchar, " +
       "contentLevel varchar, " +
       "contentInput varchar, " +
+      "size varchar, " +
       "image blob, " +
       "attempted int default 0, " +
       "PRIMARY KEY(token));" +
@@ -37,8 +38,8 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
 
   val insertPstmt: PreparedStatement = dbConn.con.prepareStatement(
     "INSERT INTO " +
-      "challenge(id, secret, provider, contentType, contentLevel, contentInput, image) " +
-      "VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "challenge(id, secret, provider, contentType, contentLevel, contentInput, size, image) " +
+      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     Statement.RETURN_GENERATED_KEYS
   )
 
@@ -77,7 +78,8 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
         WHERE attempted < $maxAttempts AND
         contentLevel = ? AND
         contentType = ? AND
-        contentInput = ?
+        contentInput = ? AND
+        size = ?
         """
   )
 
@@ -88,7 +90,8 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
         WHERE attempted < $maxAttempts AND
         contentLevel = ? AND
         contentType = ? AND
-        contentInput = ?
+        contentInput = ? AND
+        size = ?
         LIMIT 1
         OFFSET FLOOR(RAND()*?)
          """

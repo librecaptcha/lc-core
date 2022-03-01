@@ -23,7 +23,7 @@ class Server(address: String, port: Int, captchaManager: CaptchaManager, playgro
     .address(new InetSocketAddress(address, port))
     .backlog(32)
     .POST(
-      "/v1/captcha",
+      "/v2/captcha",
       (request) => {
         val json = parse(request.getBodyString())
         val param = json.extract[Parameters]
@@ -32,7 +32,7 @@ class Server(address: String, port: Int, captchaManager: CaptchaManager, playgro
       }
     )
     .GET(
-      "/v1/media",
+      "/v2/media",
       (request) => {
         val params = request.getQueryParams()
         val result = if (params.containsKey("id")) {
@@ -46,7 +46,7 @@ class Server(address: String, port: Int, captchaManager: CaptchaManager, playgro
       }
     )
     .POST(
-      "/v1/answer",
+      "/v2/answer",
       (request) => {
         val json = parse(request.getBodyString())
         val answer = json.extract[Answer]
@@ -70,7 +70,7 @@ class Server(address: String, port: Int, captchaManager: CaptchaManager, playgro
         <html>
           <h2>Welcome to LibreCaptcha server</h2>
           <h3><a href="/demo/index.html">Link to Demo</a></h3>
-          <h3>API is served at <b>/v1/</b></h3>
+          <h3>API is served at <b>/v2/</b></h3>
         </html>
         """
         new StringResponse(200, str)
