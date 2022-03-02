@@ -3,7 +3,8 @@ version: "3.6"
 services:
   lc-core:
     container_name: "libre-captcha"
-    image: librecaptcha/lc-core:1.0.0-stable
+    image: librecaptcha/lc-core:latest
+    #build: .
     volumes: 
       - "./docker-data:/lc-core/data"
     ports: 
