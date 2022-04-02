@@ -29,7 +29,8 @@ public class HelperFunctions {
   public static final String safeNumbers = "23456789";
   public static final String allNumbers = safeNumbers + "10";
   public static final String specialCharacters = "$#%@&?";
-  public static final String safeCharacters = safeAlphabets + safeNumbers + specialCharacters;
+  public static final String safeAlphaNum = safeAlphabets + safeNumbers;
+  public static final String safeCharacters = safeAlphaNum + specialCharacters;
 
   public static String randomString(final int n) {
     return randomString(n, safeCharacters);
