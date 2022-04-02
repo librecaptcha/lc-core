@@ -41,23 +41,21 @@ class FilterChallenge extends ChallengeProvider {
     val height = size2D(1)
     val canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
     val g = canvas.createGraphics()
+    val fontHeight = (height*0.6).toInt
     g.setColor(Color.WHITE)
     g.fillRect(0, 0, canvas.getWidth, canvas.getHeight)
     g.setColor(Color.BLACK)
-    g.setFont(new Font("Serif", Font.PLAIN, 30))
-    g.drawString(secret, 5, 30)
+    g.setFont(new Font("Serif", Font.PLAIN, fontHeight))
+    val stringWidth = g.getFontMetrics().stringWidth(secret)
+    val xOffset = ((width - stringWidth)*r.nextDouble).toInt
+    g.drawString(secret, xOffset, fontHeight)
     g.dispose()
     var image = ImmutableImage.fromAwt(canvas)
-    val s = scala.util.Random.nextInt(2)
+    val s = r.nextInt(2)
     image = filterTypes(s).applyFilter(image)
     val img = image.awt()
     val baos = new ByteArrayOutputStream()
-    try {
-      PngImageWriter.write(baos, img);
-    } catch {
-      case e: Exception =>
-        e.printStackTrace()
-    }
+    PngImageWriter.write(baos, img);
     new Challenge(baos.toByteArray, "image/png", secret)
   }
   def checkAnswer(secret: String, answer: String): Boolean = {
