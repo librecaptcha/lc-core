@@ -30,9 +30,10 @@ class FilterChallenge extends ChallengeProvider {
     )
   }
 
+  private val filterTypes = List(new FilterType1, new FilterType2)
+
   def returnChallenge(level: String, size: String): Challenge = {
     val mediumLevel = level == "medium"
-    val filterTypes = List(new FilterType1, new FilterType2)
     val r = new scala.util.Random
     val characters = if (mediumLevel) HelperFunctions.safeAlphaNum else HelperFunctions.safeCharacters
     val n = if (mediumLevel) 5 else 7
@@ -53,7 +54,7 @@ class FilterChallenge extends ChallengeProvider {
     g.dispose()
     var image = ImmutableImage.fromAwt(canvas)
     val s = r.nextInt(2)
-    image = filterTypes(s).applyFilter(image)
+    image = filterTypes(s).applyFilter(image, !mediumLevel)
     val img = image.awt()
     val baos = new ByteArrayOutputStream()
     PngImageWriter.write(baos, img);
@@ -65,14 +66,15 @@ class FilterChallenge extends ChallengeProvider {
 }
 
 trait FilterType {
-  def applyFilter(image: ImmutableImage): ImmutableImage
+  def applyFilter(image: ImmutableImage, hardLevel: Boolean): ImmutableImage
 }
 
 class FilterType1 extends FilterType {
-  override def applyFilter(image: ImmutableImage): ImmutableImage = {
-    val blur = new GaussianBlurFilter(2)
+  override def applyFilter(image: ImmutableImage, hardLevel: Boolean): ImmutableImage = {
+    val radius = if (hardLevel) 3 else 2
+    val blur = new GaussianBlurFilter(radius)
     val smear = new SmearFilter(com.sksamuel.scrimage.filter.SmearType.Circles, 10, 10, 10, 0, 1)
-    val diffuse = new DiffuseFilter(2)
+    val diffuse = new DiffuseFilter(radius.toFloat)
     blur.apply(image)
     diffuse.apply(image)
     smear.apply(image)
@@ -81,9 +83,10 @@ class FilterType1 extends FilterType {
 }
 
 class FilterType2 extends FilterType {
-  override def applyFilter(image: ImmutableImage): ImmutableImage = {
+  override def applyFilter(image: ImmutableImage, hardLevel: Boolean): ImmutableImage = {
+    val radius = if (hardLevel) 2f else 1f
     val smear = new SmearFilter(com.sksamuel.scrimage.filter.SmearType.Circles, 10, 10, 10, 0, 1)
-    val diffuse = new DiffuseFilter(1)
+    val diffuse = new DiffuseFilter(radius)
     val ripple = new RippleFilter(com.sksamuel.scrimage.filter.RippleType.Noise, 1, 1, 0.005.toFloat, 0.005.toFloat)
     diffuse.apply(image)
     ripple.apply(image)
