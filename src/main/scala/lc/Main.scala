@@ -26,13 +26,12 @@ object LCFramework {
       corsHeader = config.corsHeader
     )
 
-    Runtime.getRuntime.addShutdownHook( new Thread {
-        override def run(): Unit = {
-          println("Shutting down gracefully...")
-          backgroundTask.shutdown()
-        }
+    Runtime.getRuntime.addShutdownHook(new Thread {
+      override def run(): Unit = {
+        println("Shutting down gracefully...")
+        backgroundTask.shutdown()
       }
-    )
+    })
 
     server.start()
   }

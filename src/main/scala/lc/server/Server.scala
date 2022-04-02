@@ -13,7 +13,13 @@ import java.net.InetSocketAddress
 import java.util
 import scala.jdk.CollectionConverters._
 
-class Server(address: String, port: Int, captchaManager: CaptchaManager, playgroundEnabled: Boolean, corsHeader: String) {
+class Server(
+    address: String,
+    port: Int,
+    captchaManager: CaptchaManager,
+    playgroundEnabled: Boolean,
+    corsHeader: String
+) {
   var headerMap: util.Map[String, util.List[String]] = _
   if (corsHeader.nonEmpty) {
     headerMap = Map("Access-Control-Allow-Origin" -> List(corsHeader).asJava).asJava
