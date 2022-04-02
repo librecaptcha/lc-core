@@ -31,11 +31,12 @@ class FilterChallenge extends ChallengeProvider {
   }
 
   def returnChallenge(level: String, size: String): Challenge = {
+    val mediumLevel = level == "medium"
     val filterTypes = List(new FilterType1, new FilterType2)
     val r = new scala.util.Random
-    val alphabet = "abcdefghijklmnopqrstuvwxyz"
-    val n = 8
-    val secret = LazyList.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
+    val characters = if (mediumLevel) HelperFunctions.safeAlphaNum else HelperFunctions.safeCharacters
+    val n = if (mediumLevel) 5 else 7
+    val secret = LazyList.continually(r.nextInt(characters.size)).map(characters).take(n).mkString
     val size2D = HelperFunctions.parseSize2D(size)
     val width = size2D(0)
     val height = size2D(1)
