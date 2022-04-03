@@ -37,10 +37,10 @@ class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
     captchaProviders.getProvider(param).flatMap { provider =>
       val providerId = provider.getId()
       val challenge = provider.returnChallenge()
-        val blob = new ByteArrayInputStream(challenge.content)
+      val blob = new ByteArrayInputStream(challenge.content)
       val token = insertCaptcha(provider, challenge, providerId, param, blob)
-        // println("Added new challenge: " + token.toString)
-        token.map(_.toInt)
+      // println("Added new challenge: " + token.toString)
+      token.map(_.toInt)
     }
   }
 
