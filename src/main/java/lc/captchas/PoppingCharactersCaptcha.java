@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
@@ -20,26 +19,26 @@ import lc.misc.HelperFunctions;
 import lc.misc.GifSequenceWriter;
 
 public class PoppingCharactersCaptcha implements ChallengeProvider {
-  private final Font font = new Font("Arial", Font.ROMAN_BASELINE, 48);
 
-  private Integer[] computeOffsets(final int width, final int height, final String text) {
+  private int[] computeOffsets(final Font font, final int width, final int height, final String text) {
     final var img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     final var graphics2D = img.createGraphics();
     final var frc = graphics2D.getFontRenderContext();
-    final var advances = new LinkedList<Integer>();
+    final var advances = new int[text.length() + 1];
     final var spacing = font.getStringBounds(" ", frc).getWidth() / 3;
     var currX = 0;
     for (int i = 0; i < text.length(); i++) {
       final var c = text.charAt(i);
-      advances.add(currX);
+      advances[i] = currX;
       currX += font.getStringBounds(String.valueOf(c), frc).getWidth();
       currX += spacing;
     };
+    advances[text.length()] = currX;
     graphics2D.dispose();
-    return advances.toArray(new Integer[]{});
+    return advances;
   }
 
-  private BufferedImage makeImage(final int width, final int height, final Consumer<Graphics2D> f) {
+  private BufferedImage makeImage(final Font font, final int width, final int height, final Consumer<Graphics2D> f) {
     final var img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     final var graphics2D = img.createGraphics();
     graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -56,21 +55,26 @@ public class PoppingCharactersCaptcha implements ChallengeProvider {
 
   private byte[] gifCaptcha(final int width, final int height, final String text) {
     try {
+      final var fontHeight = (int) (height * 0.5);
+      final Font font = new Font("Arial", Font.ROMAN_BASELINE, fontHeight);
       final var byteArrayOutputStream = new ByteArrayOutputStream();
       final var output = new MemoryCacheImageOutputStream(byteArrayOutputStream);
       final var writer = new GifSequenceWriter(output, 1, 900, true);
-      final var advances = computeOffsets(width, height, text);
+      final var advances = computeOffsets(font, width, height, text);
+      final var expectedWidth = advances[advances.length - 1];
+      final var scale = width / (float) expectedWidth;
       final var prevColor = Color.getHSBColor(0f, 0f, 0.1f);
       IntStream.range(0, text.length()).forEach(i -> {
         final var color = Color.getHSBColor(HelperFunctions.randomNumber(0, 100)/100.0f, 0.6f, 1.0f);
-        final var nextImage = makeImage(width, height, (g) -> {
+        final var nextImage = makeImage(font, width, height, (g) -> {
+          g.scale(scale, 1);
           if (i > 0) {
             final var prevI = (i - 1) % text.length();
             g.setColor(prevColor);
-            g.drawString(String.valueOf(text.charAt(prevI)), advances[prevI] + jitter(), 45 + jitter());
+            g.drawString(String.valueOf(text.charAt(prevI)), advances[prevI] + jitter(), fontHeight*1.1f + jitter());
           }
           g.setColor(color);
-          g.drawString(String.valueOf(text.charAt(i)), advances[i] + jitter(), 45 + jitter());
+          g.drawString(String.valueOf(text.charAt(i)), advances[i] + jitter(), fontHeight*1.1f + jitter());
         });
         try {
           writer.writeToSequence(nextImage);
