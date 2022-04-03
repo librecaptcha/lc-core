@@ -37,14 +37,16 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     return answer.toLowerCase().equals(secret);
   }
 
+  private float[] kernel = {
+    1f / 9f, 1f / 9f, 1f / 9f,
+    1f / 9f, 1f / 9f, 1f / 9f,
+    1f / 9f, 1f / 9f, 1f / 9f
+  };
+
   private byte[] shadowText(final int width, final int height, String text) {
     BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     Font font = new Font("Arial", Font.ROMAN_BASELINE, 48);
     Graphics2D graphics2D = img.createGraphics();
-    graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    graphics2D.setRenderingHint(
-        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
     HelperFunctions.setRenderingHints(graphics2D);
     graphics2D.setPaint(Color.WHITE);
     graphics2D.fillRect(0, 0, width, height);
@@ -52,11 +54,6 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     graphics2D.setFont(font);
     graphics2D.drawString(text, 15, 50);
     graphics2D.dispose();
-    float[] kernel = {
-      1f / 9f, 1f / 9f, 1f / 9f,
-      1f / 9f, 1f / 9f, 1f / 9f,
-      1f / 9f, 1f / 9f, 1f / 9f
-    };
     ConvolveOp op = new ConvolveOp(new Kernel(3, 3, kernel), ConvolveOp.EDGE_NO_OP, null);
     BufferedImage img2 = op.filter(img, null);
     Graphics2D g2d = img2.createGraphics();
