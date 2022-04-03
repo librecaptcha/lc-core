@@ -37,10 +37,12 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     return answer.toLowerCase().equals(secret);
   }
 
-  private float[] kernel = {
-    1f / 9f, 1f / 9f, 1f / 9f,
-    1f / 9f, 1f / 9f, 1f / 9f,
-    1f / 9f, 1f / 9f, 1f / 9f
+  private float[] makeKernel(int size) {
+    final int N = size * size;
+    final float weight = 1.0f / (N);
+    final float[] kernel = new float[N];
+    java.util.Arrays.fill(kernel, weight);
+    return kernel;
   };
 
   private byte[] shadowText(final int width, final int height, String text) {
@@ -54,7 +56,8 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     graphics2D.setFont(font);
     graphics2D.drawString(text, 15, 50);
     graphics2D.dispose();
-    ConvolveOp op = new ConvolveOp(new Kernel(3, 3, kernel), ConvolveOp.EDGE_NO_OP, null);
+    final int kernelSize = (int) Math.ceil((Math.min(width, height) / 50.0));
+    ConvolveOp op = new ConvolveOp(new Kernel(kernelSize, kernelSize, makeKernel(kernelSize)), ConvolveOp.EDGE_NO_OP, null);
     BufferedImage img2 = op.filter(img, null);
     Graphics2D g2d = img2.createGraphics();
     HelperFunctions.setRenderingHints(g2d);
