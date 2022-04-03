@@ -47,9 +47,13 @@ class FilterChallenge extends ChallengeProvider {
     g.setColor(Color.WHITE)
     g.fillRect(0, 0, canvas.getWidth, canvas.getHeight)
     g.setColor(Color.BLACK)
-    g.setFont(new Font("Serif", Font.PLAIN, fontHeight))
+    val font = new Font("Serif", Font.PLAIN, fontHeight)
+    g.setFont(font)
     val stringWidth = g.getFontMetrics().stringWidth(secret)
-    val xOffset = ((width - stringWidth)*r.nextDouble).toInt
+    val scaleX = if (stringWidth > width) width/(stringWidth.toDouble) else 1d
+    val margin = if (stringWidth > width) 0 else (width - stringWidth)
+    val xOffset = (margin*r.nextDouble).toInt
+    g.scale(scaleX, 1d)
     g.drawString(secret, xOffset, fontHeight)
     g.dispose()
     var image = ImmutableImage.fromAwt(canvas)
