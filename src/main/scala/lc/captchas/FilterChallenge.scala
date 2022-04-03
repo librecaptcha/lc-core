@@ -47,7 +47,7 @@ class FilterChallenge extends ChallengeProvider {
     g.setColor(Color.WHITE)
     g.fillRect(0, 0, canvas.getWidth, canvas.getHeight)
     g.setColor(Color.BLACK)
-    val font = new Font("Serif", Font.PLAIN, fontHeight)
+    val font = new Font("Serif", Font.BOLD, fontHeight)
     g.setFont(font)
     val stringWidth = g.getFontMetrics().stringWidth(secret)
     val scaleX = if (stringWidth > width) width/(stringWidth.toDouble) else 1d
