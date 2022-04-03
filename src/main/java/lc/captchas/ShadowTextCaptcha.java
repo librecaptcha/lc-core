@@ -4,7 +4,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
@@ -46,12 +45,12 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     graphics2D.setRenderingHint(
         RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-    TextLayout textLayout = new TextLayout(text, font, graphics2D.getFontRenderContext());
     HelperFunctions.setRenderingHints(graphics2D);
     graphics2D.setPaint(Color.WHITE);
-    graphics2D.fillRect(0, 0, 350, 100);
+    graphics2D.fillRect(0, 0, width, height);
     graphics2D.setPaint(Color.BLACK);
-    textLayout.draw(graphics2D, 15, 50);
+    graphics2D.setFont(font);
+    graphics2D.drawString(text, 15, 50);
     graphics2D.dispose();
     float[] kernel = {
       1f / 9f, 1f / 9f, 1f / 9f,
@@ -63,7 +62,8 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     Graphics2D g2d = img2.createGraphics();
     HelperFunctions.setRenderingHints(g2d);
     g2d.setPaint(Color.WHITE);
-    textLayout.draw(g2d, 13, 50);
+    g2d.setFont(font);
+    g2d.drawString(text, 13, 50);
     g2d.dispose();
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
