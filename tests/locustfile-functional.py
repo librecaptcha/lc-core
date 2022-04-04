@@ -22,7 +22,7 @@ class QuickStartUser(SequentialTaskSet):
 
     @task
     def captcha(self):
-        captcha_params = {"level":"debug","media":"image/png","input_type":"text"}
+        captcha_params = {"level":"debug","media":"image/png","input_type":"text", "size":"350x100"}
 
         with self.client.post(path="/v2/captcha", json=captcha_params, name="/captcha", catch_response = True) as resp:
           if resp.status_code != 200:
