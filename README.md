@@ -139,10 +139,10 @@ The service can be accessed using a simple HTTP API.
        - image/png
        - image/gif
        - (More to come)
-    - `size`: `Map` -
-      The dimensions of a captcha (Optional). It needs two more fields nested in this parameter
-       - `height`: `Int`
-       - `width`: `Int`
+    - `size`: String -
+      The dimensions of a captcha. It needs to be a string in the format `"widthxheight"` in pixels, and will be matched
+      with the `allowedSizes` config setting. Example: `size: "450x200"` which requests an image of width 450 and height
+      200 pixels.
 
   - Returns:
     - `id`: `String` - The uuid of the captcha generated
