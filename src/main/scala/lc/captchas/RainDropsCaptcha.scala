@@ -25,8 +25,6 @@ class Drop {
 }
 
 class RainDropsCP extends ChallengeProvider {
-  private val alphabet = "abcdefghijklmnopqrstuvwxyz"
-  private val n = 6
   private val bgColor = new Color(200, 200, 200)
   private val textColor = new Color(208, 208, 218)
   private val textHighlightColor = new Color(100, 100, 125)
@@ -59,7 +57,8 @@ class RainDropsCP extends ChallengeProvider {
 
   def returnChallenge(level: String, size: String): Challenge = {
     val r = new scala.util.Random
-    val secret = LazyList.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
+    val n = if (level == "easy") 4 else 6
+    val secret = HelperFunctions.randomString(n, HelperFunctions.safeAlphaNum)
     val size2D = HelperFunctions.parseSize2D(size)
     val width = size2D(0)
     val height = size2D(1)
