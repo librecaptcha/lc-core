@@ -82,7 +82,8 @@ class RainDropsCP extends ChallengeProvider {
       xOffset
     )
 
-    val baseFont = new Font(Font.MONOSPACED, Font.BOLD, 80)
+    val fontHeight = (height * 0.5f).toInt
+    val baseFont = new Font(Font.MONOSPACED, Font.BOLD, fontHeight)
     val attributes = new java.util.HashMap[TextAttribute, Object]()
     attributes.put(TextAttribute.TRACKING, Double.box(0.2))
     attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_EXTRABOLD)
@@ -119,17 +120,22 @@ class RainDropsCP extends ChallengeProvider {
         }
       }
 
-      // center the text
       g.setFont(spacedFont)
-      val textWidth = g.getFontMetrics().charsWidth(secret.toCharArray, 0, secret.toCharArray.length)
-      val textX = (width - textWidth) / 2
+      val textWidth = g.getFontMetrics().stringWidth(secret)
+      val scaleX = if (textWidth > width) width / textWidth.toDouble else 1.0d
+      g.scale(scaleX, 1)
 
-      // paint the top outline
+      // center the text
+      val textX = if (textWidth > width) 0 else ((width - textWidth) / 2)
+
+      // this will be overlapped by the following text to show the top outline because of the offset
+      val yOffset = (fontHeight*0.01).ceil.toInt
       g.setColor(textHighlightColor)
-      g.drawString(secret, textX, 69)
+      g.drawString(secret, textX, (fontHeight*1.1).toInt - yOffset)
+
       // paint the text
       g.setColor(textColor)
-      g.drawString(secret, textX, 70)
+      g.drawString(secret, textX, (fontHeight*1.1).toInt)
 
       g.dispose()
       writer.writeToSequence(canvas)
