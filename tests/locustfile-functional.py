@@ -22,9 +22,9 @@ class QuickStartUser(SequentialTaskSet):
 
     @task
     def captcha(self):
-        captcha_params = {"level":"debug","media":"image/png","input_type":"text"}
+        captcha_params = {"level":"debug","media":"image/png","input_type":"text", "size":"350x100"}
 
-        with self.client.post(path="/v1/captcha", json=captcha_params, name="/captcha", catch_response = True) as resp:
+        with self.client.post(path="/v2/captcha", json=captcha_params, name="/captcha", catch_response = True) as resp:
           if resp.status_code != 200:
             resp.failure("Status was not 200: " + resp.text)
           captchaJson = resp.json()
@@ -32,7 +32,7 @@ class QuickStartUser(SequentialTaskSet):
           if not uuid:
             resp.failure("uuid not returned on /captcha endpoint: " + resp.text)
 
-        with self.client.get(path="/v1/media?id=%s" % uuid, name="/media", stream=True, catch_response = True) as resp:
+        with self.client.get(path="/v2/media?id=%s" % uuid, name="/media", stream=True, catch_response = True) as resp:
           if resp.status_code != 200:
             resp.failure("Status was not 200: " + resp.text)
 
@@ -41,7 +41,7 @@ class QuickStartUser(SequentialTaskSet):
         ocrAnswer = self.solve(uuid, media)
 
         answerBody = {"answer": ocrAnswer,"id": uuid}
-        with self.client.post(path='/v1/answer', json=answerBody, name="/answer", catch_response=True) as resp:
+        with self.client.post(path='/v2/answer', json=answerBody, name="/answer", catch_response=True) as resp:
           if resp.status_code != 200:
               resp.failure("Status was not 200: " + resp.text)
           else:

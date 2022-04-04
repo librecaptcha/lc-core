@@ -11,6 +11,7 @@ import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 import lc.misc.GifSequenceWriter
 import java.util.{List => JavaList, Map => JavaMap}
+import lc.misc.HelperFunctions
 
 class Drop {
   var x = 0
@@ -24,8 +25,6 @@ class Drop {
 }
 
 class RainDropsCP extends ChallengeProvider {
-  private val alphabet = "abcdefghijklmnopqrstuvwxyz"
-  private val n = 6
   private val bgColor = new Color(200, 200, 200)
   private val textColor = new Color(208, 208, 218)
   private val textHighlightColor = new Color(100, 100, 125)
@@ -56,11 +55,13 @@ class RainDropsCP extends ChallengeProvider {
     })
   }
 
-  def returnChallenge(): Challenge = {
+  def returnChallenge(level: String, size: String): Challenge = {
     val r = new scala.util.Random
-    val secret = LazyList.continually(r.nextInt(alphabet.size)).map(alphabet).take(n).mkString
-    val width = 450
-    val height = 100
+    val n = if (level == "easy") 4 else 6
+    val secret = HelperFunctions.randomString(n, HelperFunctions.safeAlphaNum)
+    val size2D = HelperFunctions.parseSize2D(size)
+    val width = size2D(0)
+    val height = size2D(1)
     val imgType = BufferedImage.TYPE_INT_RGB
     val xOffset = 2 + r.nextInt(3)
     val xBias = (height / 10) - 2
@@ -80,7 +81,8 @@ class RainDropsCP extends ChallengeProvider {
       xOffset
     )
 
-    val baseFont = new Font(Font.MONOSPACED, Font.BOLD, 80)
+    val fontHeight = (height * 0.5f).toInt
+    val baseFont = new Font(Font.MONOSPACED, Font.BOLD, fontHeight)
     val attributes = new java.util.HashMap[TextAttribute, Object]()
     attributes.put(TextAttribute.TRACKING, Double.box(0.2))
     attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_EXTRABOLD)
@@ -117,17 +119,22 @@ class RainDropsCP extends ChallengeProvider {
         }
       }
 
-      // center the text
       g.setFont(spacedFont)
-      val textWidth = g.getFontMetrics().charsWidth(secret.toCharArray, 0, secret.toCharArray.length)
-      val textX = (width - textWidth) / 2
+      val textWidth = g.getFontMetrics().stringWidth(secret)
+      val scaleX = if (textWidth > width) width / textWidth.toDouble else 1.0d
+      g.scale(scaleX, 1)
 
-      // paint the top outline
+      // center the text
+      val textX = if (textWidth > width) 0 else ((width - textWidth) / 2)
+
+      // this will be overlapped by the following text to show the top outline because of the offset
+      val yOffset = (fontHeight*0.01).ceil.toInt
       g.setColor(textHighlightColor)
-      g.drawString(secret, textX, 69)
+      g.drawString(secret, textX, (fontHeight*1.1).toInt - yOffset)
+
       // paint the text
       g.setColor(textColor)
-      g.drawString(secret, textX, 70)
+      g.drawString(secret, textX, (fontHeight*1.1).toInt)
 
       g.dispose()
       writer.writeToSequence(canvas)

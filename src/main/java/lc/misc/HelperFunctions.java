@@ -11,7 +11,14 @@ public class HelperFunctions {
     random.setSeed(seed);
   }
 
+  public static int[] parseSize2D(final String size) {
+    final String[] fields = size.split("x");
+    final int[] result = {Integer.parseInt(fields[0]), Integer.parseInt(fields[1])};
+    return result;
+  }
+
   public static void setRenderingHints(Graphics2D g2d) {
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     g2d.setRenderingHint(
         RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     g2d.setRenderingHint(
@@ -23,7 +30,8 @@ public class HelperFunctions {
   public static final String safeNumbers = "23456789";
   public static final String allNumbers = safeNumbers + "10";
   public static final String specialCharacters = "$#%@&?";
-  public static final String safeCharacters = safeAlphabets + safeNumbers + specialCharacters;
+  public static final String safeAlphaNum = safeAlphabets + safeNumbers;
+  public static final String safeCharacters = safeAlphaNum + specialCharacters;
 
   public static String randomString(final int n) {
     return randomString(n, safeCharacters);

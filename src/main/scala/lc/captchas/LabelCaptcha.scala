@@ -40,7 +40,7 @@ class LabelCaptcha extends ChallengeProvider {
     )
   }
 
-  def returnChallenge(): Challenge =
+  def returnChallenge(level: String, size: String): Challenge =
     synchronized {
       val r = scala.util.Random.nextInt(knownFiles.length)
       val s = scala.util.Random.nextInt(unknownFiles.length)

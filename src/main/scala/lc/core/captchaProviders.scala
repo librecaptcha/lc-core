@@ -19,7 +19,7 @@ class CaptchaProviders(config: Config) {
 
   def generateChallengeSamples(): Map[String, Challenge] = {
     providers.map { case (key, provider) =>
-      (key, provider.returnChallenge())
+      (key, provider.returnChallenge("easy", "350x100"))
     }
   }
 
@@ -35,6 +35,7 @@ class CaptchaProviders(config: Config) {
       if configValue.allowedLevels.contains(param.level)
       if configValue.allowedMedia.contains(param.media)
       if configValue.allowedInputType.contains(param.input_type)
+      if configValue.allowedSizes.contains(param.size)
     } yield (configValue.name, configValue.config)
 
     val providerFilter = for {

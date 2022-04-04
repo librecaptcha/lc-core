@@ -20,9 +20,10 @@
     const levelInput = document.getElementById("levelInput").value
     const mediaInput = document.getElementById("mediaInput").value
     const typeInput = document.getElementById("typeInput").value
-    fetch("/v1/captcha", {
+    const sizeInput = document.getElementById("sizeInput").value
+    fetch("/v2/captcha", {
        method: 'POST',
-       body: JSON.stringify({level: levelInput, media: mediaInput, "input_type" : typeInput})
+       body: JSON.stringify({level: levelInput, media: mediaInput, "input_type" : typeInput, "size": sizeInput})
     }).then(async function(resp) {
       const respJson = await resp.json()
       if (resp.ok) {
@@ -30,7 +31,7 @@
         const resultDiv = document.getElementById("result")
         const result = `
           <p>Id: ${id}</p>
-          <p><img src="/v1/media?id=${id}" /> </p>
+          <p><img src="/v2/media?id=${id}" /> </p>
           <input type="text" id="answerInput" />
           <button onClick="submitAnswer('${id}')">Submit</button>
           <div id="answerResult" />
@@ -43,7 +44,7 @@
   }
   async function submitAnswer(id) {
     const ans = document.getElementById("answerInput").value;
-    const resp = await fetch("/v1/answer", {
+    const resp = await fetch("/v2/answer", {
        method: 'POST',
        body: JSON.stringify({id: id, answer: ans})
     })
@@ -69,6 +70,10 @@
     <div class="inputGroup">
       <span>Input Type</span>
       <input type="text" id="typeInput" value="text" />
+    </div>
+    <div class="inputGroup">
+      <span>Input Size</span>
+      <input type="text" id="sizeInput" value="150x100" />
     </div>
     <div class="inputGroup">
       <button onClick="loadCaptcha()">Get New CAPTCHA</button>

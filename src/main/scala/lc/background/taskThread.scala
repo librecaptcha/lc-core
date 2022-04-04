@@ -45,8 +45,10 @@ class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
     (config.captchaConfig).flatMap { captcha =>
       (captcha.allowedLevels).flatMap { level =>
         (captcha.allowedMedia).flatMap { media =>
-          (captcha.allowedInputType).map { inputType =>
-            Parameters(level, media, inputType, Some(Size(0, 0)))
+          (captcha.allowedInputType).flatMap { inputType =>
+            (captcha.allowedSizes).map {size =>
+              Parameters(level, media, inputType, size)
+            }
           }
         }
       }
@@ -58,8 +60,9 @@ class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
     val level = pickRandom(captcha.allowedLevels)
     val media = pickRandom(captcha.allowedMedia)
     val inputType = pickRandom(captcha.allowedInputType)
+    val size = pickRandom(captcha.allowedSizes)
 
-    Parameters(level, media, inputType, Some(Size(0, 0)))
+    Parameters(level, media, inputType, size)
   }
 
   private def pickRandom[T](list: List[T]): T = {

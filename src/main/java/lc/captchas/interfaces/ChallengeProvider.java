@@ -6,7 +6,7 @@ import java.util.List;
 public interface ChallengeProvider {
   public String getId();
 
-  public Challenge returnChallenge();
+  public Challenge returnChallenge(String level, String size);
 
   public boolean checkAnswer(String secret, String answer);
 
