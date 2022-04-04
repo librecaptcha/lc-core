@@ -26,7 +26,7 @@ class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
             val countExisting = captchaManager.getCount(param).getOrElse(0)
             val countRequired = requiredCountPerCombination - countExisting
             if (countRequired > 0) {
-              val countCreate = Math.min(1.0 + requiredCountPerCombination/10.0, countRequired).toInt
+              val countCreate = Math.min(1.0 + requiredCountPerCombination / 10.0, countRequired).toInt
               println(s"Creating $countCreate of $countRequired captchas for $param")
 
               for (i <- 0 until countCreate) {
@@ -42,10 +42,10 @@ class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
   }
 
   private def allParameterCombinations(): List[Parameters] = {
-    (config.captchaConfig).flatMap {captcha =>
-      (captcha.allowedLevels).flatMap {level =>
-        (captcha.allowedMedia).flatMap {media =>
-          (captcha.allowedInputType).flatMap {inputType =>
+    (config.captchaConfig).flatMap { captcha =>
+      (captcha.allowedLevels).flatMap { level =>
+        (captcha.allowedMedia).flatMap { media =>
+          (captcha.allowedInputType).flatMap { inputType =>
             (captcha.allowedSizes).map {size =>
               Parameters(level, media, inputType, size)
             }
