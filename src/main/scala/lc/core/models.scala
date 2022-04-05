@@ -23,7 +23,7 @@ case class CaptchaConfig(
 case class ConfigField(
     port: Option[Integer],
     address: Option[String],
-    throttle: Option[Integer],
+    bufferCount: Option[Integer],
     seed: Option[Integer],
     captchaExpiryTimeLimit: Option[Integer],
     threadDelay: Option[Integer],
@@ -32,7 +32,7 @@ case class ConfigField(
     maxAttempts: Option[Integer]
 ) {
   lazy val portInt: Option[Int] = mapInt(port)
-  lazy val throttleInt: Option[Int] = mapInt(throttle)
+  lazy val bufferCountInt: Option[Int] = mapInt(bufferCount)
   lazy val seedInt: Option[Int] = mapInt(seed)
   lazy val captchaExpiryTimeLimitInt: Option[Int] = mapInt(captchaExpiryTimeLimit)
   lazy val threadDelayInt: Option[Int] = mapInt(threadDelay)

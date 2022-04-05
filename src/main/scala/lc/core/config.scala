@@ -45,7 +45,7 @@ class Config(configFilePath: String) {
 
   val port: Int = configFields.portInt.getOrElse(8888)
   val address: String = configFields.address.getOrElse("0.0.0.0")
-  val throttle: Int = configFields.throttleInt.getOrElse(1000)
+  val bufferCount: Int = configFields.bufferCountInt.getOrElse(1000)
   val seed: Int = configFields.seedInt.getOrElse(375264328)
   val captchaExpiryTimeLimit: Int = configFields.captchaExpiryTimeLimitInt.getOrElse(5)
   val threadDelay: Int = configFields.threadDelayInt.getOrElse(2)
@@ -70,7 +70,7 @@ class Config(configFilePath: String) {
         (AttributesEnum.PORT.toString -> 8888) ~
         (AttributesEnum.ADDRESS.toString -> "0.0.0.0") ~
         (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
-        (AttributesEnum.THROTTLE.toString -> 1000) ~
+        (AttributesEnum.BUFFER_COUNT.toString -> 1000) ~
         (AttributesEnum.THREAD_DELAY.toString -> 2) ~
         (AttributesEnum.PLAYGROUND_ENABLED.toString -> true) ~
         (AttributesEnum.CORS_HEADER.toString -> "") ~

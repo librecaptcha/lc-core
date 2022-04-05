@@ -19,7 +19,7 @@ class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
         challengeGCPstmt.executeUpdate()
 
         val allCombinations = allParameterCombinations()
-        val requiredCountPerCombination = Math.max(1, (config.throttle * 1.01) / allCombinations.size).toInt
+        val requiredCountPerCombination = Math.max(1, (config.bufferCount * 1.01) / allCombinations.size).toInt
 
         for (param <- allCombinations) {
           if (!shutdownInProgress) {
