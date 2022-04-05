@@ -2,12 +2,12 @@
 LibreCaptcha is a framework that allows developers to create their own [CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA)s.
 The framework defines the API for a CAPTCHA generator and takes care of mundane details
 such as:
-  * An HTTP interface for serving CAPTCHAs
-  * Background workers to pre-compute CAPTCHAs and to store them in a database
-  * Managing secrets for the CAPTCHAs (tokens, expected answers, etc)
-  * Safe re-impressions of CAPTCHA images (by creating unique tokens for every impression)
-  * Garbage collection of stale CAPTCHAs
-  * Sandboxed plugin architecture (TBD)
+* An HTTP interface for serving CAPTCHAs
+* Background workers to pre-compute CAPTCHAs and to store them in a database
+* Managing secrets for the CAPTCHAs (tokens, expected answers, etc)
+* Safe re-impressions of CAPTCHA images (by creating unique tokens for every impression)
+* Garbage collection of stale CAPTCHAs
+* Sandboxed plugin architecture (TBD)
 
 Some sample CAPTCHA generators are included in the distribution (see below). We will continue adding more samples to the list. For quick
 deployments the samples themselves might be sufficient. Projects with more resources might want create their own CAPTCHAs
@@ -124,48 +124,48 @@ If a sufficient number of users agree on their answer to the unknown word, it is
 The service can be accessed using a simple HTTP API.
 
 ### - `/v1/captcha`: `POST`
-  - Parameters:
+- Parameters:
     - `level`: `String` -
       The difficulty level of a captcha
-       - easy
-       - medium
-       - hard
+        - easy
+        - medium
+        - hard
     - `input_type`: `String` -
       The type of input option for a captcha
-       - text
-       - (More to come)
+        - text
+        - (More to come)
     - `media`: `String` -
       The type of media of a captcha
-       - image/png
-       - image/gif
-       - (More to come)
+        - image/png
+        - image/gif
+        - (More to come)
     - `size`: String -
       The dimensions of a captcha. It needs to be a string in the format `"widthxheight"` in pixels, and will be matched
       with the `allowedSizes` config setting. Example: `size: "450x200"` which requests an image of width 450 and height
       200 pixels.
 
-  - Returns:
+- Returns:
     - `id`: `String` - The uuid of the captcha generated
 
 
 ### - `/v1/media`: `GET`
-  - Parameters:
+- Parameters:
     - `id`: `String` - The uuid of the captcha
 
-  - Returns:
+- Returns:
     - `image`: `Array[Byte]` - The requested media as bytes
 
 
 ### - `/v1/answer`: `POST`
-  - Parameter:
+- Parameter:
     - `id`: `String` - The uuid of the captcha that needs to be solved
     - `answer`: `String` - The answer to the captcha that needs to be validated
 
-  - Returns:
+- Returns:
     - `result`: `String` - The result after validation/checking of the answer
-      - True - If the answer is correct
-      - False - If the answer is incorrect
-      - Expired - If the time limit to solve the captcha exceeds
+        - True - If the answer is correct
+        - False - If the answer is incorrect
+        - Expired - If the time limit to solve the captcha exceeds
 
 
 ## Example usage
@@ -173,9 +173,9 @@ The service can be accessed using a simple HTTP API.
 In javascript:
 
 ```js
-const resp = await fetch("/v1/captcha", {
-   method: 'POST',
-   body: JSON.stringify({level: "easy", media: "image/png", "input_type" : "text"})
+const resp = await fetch("/v2/captcha", {
+    method: 'POST',
+    body: JSON.stringify({level: "easy", media: "image/png", "input_type" : "text", size: "350x100"})
 })
 
 const respJson = await resp.json();
@@ -183,19 +183,19 @@ const respJson = await resp.json();
 let captchaId = null;
 
 if (resp.ok) {
-  // The CAPTCHA can be displayed using the data in respJson.
-  console.log(respJson);
-  // Store the id somewhere so that it can be used later for answer verification
-  captchaId = respJson.id;
+    // The CAPTCHA can be displayed using the data in respJson.
+    console.log(respJson);
+    // Store the id somewhere so that it can be used later for answer verification
+    captchaId = respJson.id;
 } else {
-  console.err(respJson);
+    console.err(respJson);
 }
 
 
 // When user submits an answer it can be sent to the server for verification thusly:
-const resp = await fetch("/v1/answer", {
-   method: 'POST',
-   body: JSON.stringify({id: captchaId, answer: "user input"})
+const resp = await fetch("/v2/answer", {
+    method: 'POST',
+    body: JSON.stringify({id: captchaId, answer: "user input"})
 });
 const respJson = await resp.json();
 console.log(respJson.result);
