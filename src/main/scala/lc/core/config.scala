@@ -51,7 +51,7 @@ class Config(configFilePath: String) {
   val threadDelay: Int = configFields.threadDelayInt.getOrElse(2)
   val playgroundEnabled: Boolean = configFields.playgroundEnabledBool.getOrElse(true)
   val corsHeader: String = configFields.corsHeader.getOrElse("")
-  val maxAttempts: Int = configFields.maxAttemptsInt.getOrElse(10)
+  val maxAttempts: Int = Math.max(1, (configFields.maxAttemptsRatioFloat.getOrElse(0.01f) * bufferCount).toInt)
 
   private val captchaConfigJson = (configJson \ "captchas")
   val captchaConfigTransform: JValue = captchaConfigJson transformField { case JField("config", JObject(config)) =>
@@ -74,7 +74,7 @@ class Config(configFilePath: String) {
         (AttributesEnum.THREAD_DELAY.toString -> 2) ~
         (AttributesEnum.PLAYGROUND_ENABLED.toString -> true) ~
         (AttributesEnum.CORS_HEADER.toString -> "") ~
-        (AttributesEnum.MAX_ATTEMPTS.toString -> 10) ~
+        (AttributesEnum.MAX_ATTEMPTS_RATIO.toString -> 0.01f) ~
         ("captchas" -> List(
           (
             (AttributesEnum.NAME.toString -> "FilterChallenge") ~

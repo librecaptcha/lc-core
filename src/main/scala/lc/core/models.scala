@@ -28,17 +28,20 @@ case class ConfigField(
     threadDelay: Option[Integer],
     playgroundEnabled: Option[java.lang.Boolean],
     corsHeader: Option[String],
-    maxAttempts: Option[Integer]
+    maxAttemptsRatio: Option[java.lang.Float]
 ) {
   lazy val portInt: Option[Int] = mapInt(port)
   lazy val bufferCountInt: Option[Int] = mapInt(bufferCount)
   lazy val seedInt: Option[Int] = mapInt(seed)
   lazy val captchaExpiryTimeLimitInt: Option[Int] = mapInt(captchaExpiryTimeLimit)
   lazy val threadDelayInt: Option[Int] = mapInt(threadDelay)
-  lazy val maxAttemptsInt: Option[Int] = mapInt(maxAttempts)
+  lazy val maxAttemptsRatioFloat: Option[Float] = mapFloat(maxAttemptsRatio)
   lazy val playgroundEnabledBool: Option[Boolean] = playgroundEnabled.map(_ || true)
 
   private def mapInt(x: Option[Integer]): Option[Int] = {
     x.map(_ + 0)
+  }
+  private def mapFloat(x: Option[java.lang.Float]): Option[Float] = {
+    x.map(_ + 0.0f)
   }
 }

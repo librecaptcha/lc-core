@@ -26,7 +26,7 @@ object AttributesEnum extends Enumeration {
   val PLAYGROUND_ENABLED: Value = Value("playgroundEnabled")
   val CORS_HEADER: Value = Value("corsHeader")
   val CONFIG: Value = Value("config")
-  val MAX_ATTEMPTS: Value = Value("maxAttempts")
+  val MAX_ATTEMPTS_RATIO: Value = Value("maxAttemptsRatio")
 }
 
 object ResultEnum extends Enumeration {
