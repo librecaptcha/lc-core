@@ -3,7 +3,7 @@ lazy val root = (project in file(".")).settings(
     List(
       organization := "com.example",
       scalaVersion := "3.1.1",
-      version := "0.1.0-SNAPSHOT",
+      version := "0.2.0-beta",
       semanticdbEnabled := true,
       semanticdbVersion := scalafixSemanticdb.revision
 
