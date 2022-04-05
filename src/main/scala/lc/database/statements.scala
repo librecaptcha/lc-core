@@ -17,6 +17,7 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
       "contentType varchar, " +
       "contentLevel varchar, " +
       "contentInput varchar, " +
+      "size varchar, " +
       "image blob, " +
       "attempted int default 0, " +
       "PRIMARY KEY(token));" +
@@ -37,8 +38,8 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
 
   val insertPstmt: PreparedStatement = dbConn.con.prepareStatement(
     "INSERT INTO " +
-      "challenge(id, secret, provider, contentType, contentLevel, contentInput, image) " +
-      "VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "challenge(id, secret, provider, contentType, contentLevel, contentInput, size, image) " +
+      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     Statement.RETURN_GENERATED_KEYS
   )
 
@@ -70,6 +71,18 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
       "WHERE token = ?;"
   )
 
+  val countForParameterPstmt: PreparedStatement = dbConn.con.prepareStatement(
+    s"""
+      SELECT count(*) as count
+        FROM challenge
+        WHERE attempted < $maxAttempts AND
+        contentLevel = ? AND
+        contentType = ? AND
+        contentInput = ? AND
+        size = ?
+        """
+  )
+
   val tokenPstmt: PreparedStatement = dbConn.con.prepareStatement(
     s"""
       SELECT token, attempted
@@ -77,8 +90,11 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
         WHERE attempted < $maxAttempts AND
         contentLevel = ? AND
         contentType = ? AND
-        contentInput = ?
-        ORDER BY attempted ASC LIMIT 1"""
+        contentInput = ? AND
+        size = ?
+        LIMIT 1
+        OFFSET FLOOR(RAND()*?)
+         """
   )
 
   val deleteAnswerPstmt: PreparedStatement = dbConn.con.prepareStatement(
@@ -107,6 +123,14 @@ class Statements(dbConn: DBConn, maxAttempts: Int) {
     "SELECT * FROM mapId"
   )
 
+  val shutdown: PreparedStatement = dbConn.con.prepareStatement(
+    "SHUTDOWN"
+  )
+
+  val shutdownCompact: PreparedStatement = dbConn.con.prepareStatement(
+    "SHUTDOWN COMPACT"
+  )
+
 }
 
 object Statements {
@@ -118,6 +142,6 @@ object Statements {
      ```
    */
   private val dbConn: DBConn = new DBConn()
-  private val maxAttempts = 10
+  var maxAttempts: Int = 10
   val tlStmts: ThreadLocal[Statements] = ThreadLocal.withInitial(() => new Statements(dbConn, maxAttempts))
 }

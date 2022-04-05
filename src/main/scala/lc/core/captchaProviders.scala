@@ -1,6 +1,6 @@
 package lc.core
 
-import lc.captchas._
+import lc.captchas.*
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 import scala.collection.mutable.Map
@@ -9,18 +9,17 @@ import lc.misc.HelperFunctions
 class CaptchaProviders(config: Config) {
   private val providers = Map(
     "FilterChallenge" -> new FilterChallenge,
-    //"FontFunCaptcha" -> new FontFunCaptcha,
+    // "FontFunCaptcha" -> new FontFunCaptcha,
     "PoppingCharactersCaptcha" -> new PoppingCharactersCaptcha,
     "ShadowTextCaptcha" -> new ShadowTextCaptcha,
     "RainDropsCaptcha" -> new RainDropsCP,
     "DebugCaptcha" -> new DebugCaptcha
-    //"LabelCaptcha" -> new LabelCaptcha
+    // "LabelCaptcha" -> new LabelCaptcha
   )
 
   def generateChallengeSamples(): Map[String, Challenge] = {
-    providers.map {
-      case (key, provider) =>
-        (key, provider.returnChallenge())
+    providers.map { case (key, provider) =>
+      (key, provider.returnChallenge("easy", "350x100"))
     }
   }
 
@@ -36,6 +35,7 @@ class CaptchaProviders(config: Config) {
       if configValue.allowedLevels.contains(param.level)
       if configValue.allowedMedia.contains(param.media)
       if configValue.allowedInputType.contains(param.input_type)
+      if configValue.allowedSizes.contains(param.size)
     } yield (configValue.name, configValue.config)
 
     val providerFilter = for {
@@ -51,7 +51,7 @@ class CaptchaProviders(config: Config) {
 
   def getProvider(param: Parameters): Option[ChallengeProvider] = {
     val providerConfig = filterProviderByParam(param).toList
-    if (providerConfig.length > 0) {
+    if (providerConfig.nonEmpty) {
       val randomIndex = HelperFunctions.randomNumber(providerConfig.length)
       val providerIndex = providerConfig(randomIndex)._1
       val selectedProvider = providers(providerIndex)

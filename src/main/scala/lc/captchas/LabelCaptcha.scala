@@ -31,13 +31,16 @@ class LabelCaptcha extends ChallengeProvider {
 
   def supportedParameters(): JavaMap[String, JavaList[String]] = {
     JavaMap.of(
-      "supportedLevels", JavaList.of("hard"),
-      "supportedMedia", JavaList.of("image/png"),
-      "supportedInputType", JavaList.of("text")
+      "supportedLevels",
+      JavaList.of("hard"),
+      "supportedMedia",
+      JavaList.of("image/png"),
+      "supportedInputType",
+      JavaList.of("text")
     )
   }
 
-  def returnChallenge(): Challenge =
+  def returnChallenge(level: String, size: String): Challenge =
     synchronized {
       val r = scala.util.Random.nextInt(knownFiles.length)
       val s = scala.util.Random.nextInt(unknownFiles.length)

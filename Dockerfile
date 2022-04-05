@@ -1,12 +1,12 @@
 FROM adoptopenjdk/openjdk16:alpine AS base-builder
-ARG SBT_VERSION=1.3.13
+ARG SBT_VERSION=1.6.2
 RUN apk add --no-cache bash
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 ENV PATH=$PATH:${JAVA_HOME}/bin
 RUN \
 	wget -O sbt-$SBT_VERSION.tgz https://github.com/sbt/sbt/releases/download/v$SBT_VERSION/sbt-$SBT_VERSION.tgz && \
-  	tar -xzvf sbt-$SBT_VERSION.tgz && \
-  	rm sbt-$SBT_VERSION.tgz
+        tar -xzvf sbt-$SBT_VERSION.tgz && \
+        rm sbt-$SBT_VERSION.tgz
 
 ENV PATH=$PATH:/sbt/bin/
 
@@ -30,7 +30,7 @@ ENV PATH=$PATH:${JAVA_HOME}/bin
 
 FROM base-core
 WORKDIR /lc-core
-COPY --from=builder /build/target/scala-2.13/LibreCaptcha.jar .
+COPY --from=builder /build/target/scala-3.1.1/LibreCaptcha.jar .
 RUN mkdir data/
 
 EXPOSE 8888

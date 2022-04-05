@@ -3,15 +3,17 @@
   "port" : 8888,
   "address" : "0.0.0.0",
   "captchaExpiryTimeLimit" : 5,
-  "throttle" : 10,
+  "bufferCount" : 10,
   "threadDelay" : 2,
   "playgroundEnabled" : false,
   "corsHeader" : "*",
+  "maxAttemptsRatio" : 0.01,
   "captchas" : [ {
     "name" : "DebugCaptcha",
     "allowedLevels" : [ "debug" ],
     "allowedMedia" : [ "image/png" ],
     "allowedInputType" : [ "text" ],
+    "allowedSizes" : [ "350x100" ],
     "config" : { }
   }]
 }

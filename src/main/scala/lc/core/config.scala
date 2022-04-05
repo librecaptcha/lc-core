@@ -4,6 +4,9 @@ import scala.io.Source.fromFile
 import org.json4s.{DefaultFormats, JValue, JObject, JField, JString}
 import org.json4s.jackson.JsonMethods.{parse, render, pretty}
 import org.json4s.JsonDSL._
+import org.json4s.StringInput
+import org.json4s.jvalue2monadic
+import org.json4s.jvalue2extractable
 import java.io.{FileNotFoundException, File, PrintWriter}
 import java.{util => ju}
 import lc.misc.HelperFunctions
@@ -21,7 +24,7 @@ class Config(configFilePath: String) {
     } catch {
       case _: FileNotFoundException => {
         val configFileContent = getDefaultConfig()
-        val file = if(new File(configFilePath).isDirectory){
+        val file = if (new File(configFilePath).isDirectory) {
           new File(configFilePath.concat("/config.json"))
         } else {
           new File(configFilePath)
@@ -38,19 +41,21 @@ class Config(configFilePath: String) {
     }
 
   private val configJson = parse(configString)
+  private val configFields: ConfigField = configJson.extract[ConfigField]
 
-  val port: Int = (configJson \ AttributesEnum.PORT.toString).extract[Int]
-  val address: String = (configJson \ AttributesEnum.ADDRESS.toString).extract[String]
-  val throttle: Int = (configJson \ AttributesEnum.THROTTLE.toString).extract[Int]
-  val seed: Int = (configJson \ AttributesEnum.RANDOM_SEED.toString).extract[Int]
-  val captchaExpiryTimeLimit: Int = (configJson \ AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString).extract[Int]
-  val threadDelay: Int = (configJson \ AttributesEnum.THREAD_DELAY.toString).extract[Int]
-  val playgroundEnabled: Boolean = (configJson \ AttributesEnum.PLAYGROUND_ENABLED.toString).extract[Boolean]
-  val corsHeader: String = (configJson \ AttributesEnum.CORS_HEADER.toString).extract[String]
+  val port: Int = configFields.portInt.getOrElse(8888)
+  val address: String = configFields.address.getOrElse("0.0.0.0")
+  val bufferCount: Int = configFields.bufferCountInt.getOrElse(1000)
+  val seed: Int = configFields.seedInt.getOrElse(375264328)
+  val captchaExpiryTimeLimit: Int = configFields.captchaExpiryTimeLimitInt.getOrElse(5)
+  val threadDelay: Int = configFields.threadDelayInt.getOrElse(2)
+  val playgroundEnabled: Boolean = configFields.playgroundEnabledBool.getOrElse(true)
+  val corsHeader: String = configFields.corsHeader.getOrElse("")
+  val maxAttempts: Int = Math.max(1, (configFields.maxAttemptsRatioFloat.getOrElse(0.01f) * bufferCount).toInt)
 
   private val captchaConfigJson = (configJson \ "captchas")
-  val captchaConfigTransform: JValue = captchaConfigJson transformField {
-    case JField("config", JObject(config)) => ("config", JString(config.toString))
+  val captchaConfigTransform: JValue = captchaConfigJson transformField { case JField("config", JObject(config)) =>
+    ("config", JString(config.toString))
   }
   val captchaConfig: List[CaptchaConfig] = captchaConfigTransform.extract[List[CaptchaConfig]]
   val allowedLevels: Set[String] = captchaConfig.flatMap(_.allowedLevels).toSet
@@ -65,16 +70,18 @@ class Config(configFilePath: String) {
         (AttributesEnum.PORT.toString -> 8888) ~
         (AttributesEnum.ADDRESS.toString -> "0.0.0.0") ~
         (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
-        (AttributesEnum.THROTTLE.toString -> 1000) ~
+        (AttributesEnum.BUFFER_COUNT.toString -> 1000) ~
         (AttributesEnum.THREAD_DELAY.toString -> 2) ~
         (AttributesEnum.PLAYGROUND_ENABLED.toString -> true) ~
         (AttributesEnum.CORS_HEADER.toString -> "") ~
+        (AttributesEnum.MAX_ATTEMPTS_RATIO.toString -> 0.01f) ~
         ("captchas" -> List(
           (
             (AttributesEnum.NAME.toString -> "FilterChallenge") ~
               (ParametersEnum.ALLOWEDLEVELS.toString -> List("medium", "hard")) ~
               (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
               (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
               (AttributesEnum.CONFIG.toString -> JObject())
           ),
           (
@@ -82,6 +89,7 @@ class Config(configFilePath: String) {
               (ParametersEnum.ALLOWEDLEVELS.toString -> List("hard")) ~
               (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
               (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
               (AttributesEnum.CONFIG.toString -> JObject())
           ),
           (
@@ -89,6 +97,7 @@ class Config(configFilePath: String) {
               (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy")) ~
               (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
               (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
               (AttributesEnum.CONFIG.toString -> JObject())
           ),
           (
@@ -96,6 +105,7 @@ class Config(configFilePath: String) {
               (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy", "medium")) ~
               (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
               (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
+              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
               (AttributesEnum.CONFIG.toString -> JObject())
           )
         ))
@@ -105,6 +115,6 @@ class Config(configFilePath: String) {
 
 }
 
-object Config{
+object Config {
   implicit val formats: DefaultFormats.type = DefaultFormats
 }

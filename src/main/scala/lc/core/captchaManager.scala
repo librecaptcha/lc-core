@@ -1,15 +1,12 @@
 package lc.core
 
-import java.sql.ResultSet
-import java.util.UUID
-import java.io.ByteArrayInputStream
+import lc.captchas.interfaces.{Challenge, ChallengeProvider}
 import lc.database.Statements
-import lc.core.CaptchaProviders
-import lc.captchas.interfaces.ChallengeProvider
-import lc.captchas.interfaces.Challenge
-import java.sql.Blob
+import java.io.ByteArrayInputStream
+import java.sql.{Blob, ResultSet}
+import java.util.UUID
 
-class Captcha(config: Config, captchaProviders: CaptchaProviders) {
+class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
 
   def getCaptcha(id: Id): Either[Error, Image] = {
     val blob = getImage(id.id)
@@ -37,17 +34,19 @@ class Captcha(config: Config, captchaProviders: CaptchaProviders) {
   }
 
   def generateChallenge(param: Parameters): Option[Int] = {
-    val provider = captchaProviders.getProvider(param)
-    provider match {
-      case Some(value) => {
-        val providerId = value.getId()
-        val challenge = value.returnChallenge()
+    try {
+      captchaProviders.getProvider(param).flatMap { provider =>
+        val providerId = provider.getId()
+        val challenge = provider.returnChallenge(param.level, param.size)
         val blob = new ByteArrayInputStream(challenge.content)
-        val token = insertCaptcha(value, challenge, providerId, param, blob)
+        val token = insertCaptcha(provider, challenge, providerId, param, blob)
         // println("Added new challenge: " + token.toString)
         token.map(_.toInt)
       }
-      case None => None
+    } catch {
+      case e: Exception =>
+        e.printStackTrace()
+        None
     }
   }
 
@@ -65,7 +64,8 @@ class Captcha(config: Config, captchaProviders: CaptchaProviders) {
     insertPstmt.setString(4, challenge.contentType)
     insertPstmt.setString(5, param.level)
     insertPstmt.setString(6, param.input_type)
-    insertPstmt.setBlob(7, blob)
+    insertPstmt.setString(7, param.size)
+    insertPstmt.setBlob(8, blob)
     insertPstmt.executeUpdate()
     val rs: ResultSet = insertPstmt.getGeneratedKeys()
     if (rs.next()) {
@@ -108,16 +108,37 @@ class Captcha(config: Config, captchaProviders: CaptchaProviders) {
     }
   }
 
-  private def getToken(param: Parameters): Option[Int] = {
-    val tokenPstmt = Statements.tlStmts.get.tokenPstmt
-    tokenPstmt.setString(1, param.level)
-    tokenPstmt.setString(2, param.media)
-    tokenPstmt.setString(3, param.input_type)
-    val rs = tokenPstmt.executeQuery()
+  def getCount(param: Parameters): Option[Int] = {
+    val countPstmt = Statements.tlStmts.get.countForParameterPstmt
+    countPstmt.setString(1, param.level)
+    countPstmt.setString(2, param.media)
+    countPstmt.setString(3, param.input_type)
+    countPstmt.setString(4, param.size.toString())
+    val rs = countPstmt.executeQuery()
     if (rs.next()) {
-      Some(rs.getInt("token"))
+      Some(rs.getInt("count"))
     } else {
       None
+    }
+  }
+
+  private def getToken(param: Parameters): Option[Int] = {
+    val count = getCount(param).getOrElse(0)
+    if (count == 0) {
+      None
+    } else {
+      val tokenPstmt = Statements.tlStmts.get.tokenPstmt
+      tokenPstmt.setString(1, param.level)
+      tokenPstmt.setString(2, param.media)
+      tokenPstmt.setString(3, param.input_type)
+      tokenPstmt.setString(4, param.size)
+      tokenPstmt.setInt(5, count)
+      val rs = tokenPstmt.executeQuery()
+      if (rs.next()) {
+        Some(rs.getInt("token"))
+      } else {
+        None
+      }
     }
   }
 
