@@ -56,9 +56,10 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     graphics2D.setPaint(Color.BLACK);
     graphics2D.setFont(font);
     final var stringWidth = graphics2D.getFontMetrics().stringWidth(text);
+    final var padding = (stringWidth > width) ? 0 : (width - stringWidth)/2;
     final var scaleX = (stringWidth > width) ? width/((double) stringWidth) : 1d;
     graphics2D.scale(scaleX, 1d);
-    graphics2D.drawString(text, 0, fontHeight*1.1f);
+    graphics2D.drawString(text, padding, fontHeight*1.1f);
     graphics2D.dispose();
     final int kernelSize = (int) Math.ceil((Math.min(width, height) / 50.0));
     ConvolveOp op = new ConvolveOp(new Kernel(kernelSize, kernelSize, makeKernel(kernelSize)), ConvolveOp.EDGE_NO_OP, null);
@@ -68,7 +69,7 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     g2d.setPaint(Color.WHITE);
     g2d.scale(scaleX, 1d);
     g2d.setFont(font);
-    g2d.drawString(text, -kernelSize, fontHeight*1.1f);
+    g2d.drawString(text, padding-kernelSize, fontHeight*1.1f);
     g2d.dispose();
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
