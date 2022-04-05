@@ -173,9 +173,9 @@ The service can be accessed using a simple HTTP API.
 In javascript:
 
 ```js
-const resp = await fetch("/v1/captcha", {
+const resp = await fetch("/v2/captcha", {
    method: 'POST',
-   body: JSON.stringify({level: "easy", media: "image/png", "input_type" : "text"})
+   body: JSON.stringify({level: "easy", media: "image/png", "input_type" : "text", size: "350x100"})
 })
 
 const respJson = await resp.json();
@@ -193,7 +193,7 @@ if (resp.ok) {
 
 
 // When user submits an answer it can be sent to the server for verification thusly:
-const resp = await fetch("/v1/answer", {
+const resp = await fetch("/v2/answer", {
    method: 'POST',
    body: JSON.stringify({id: captchaId, answer: "user input"})
 });
