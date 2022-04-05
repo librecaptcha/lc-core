@@ -4,7 +4,6 @@ import org.json4s.jackson.Serialization.write
 import lc.core.Config.formats
 
 trait ByteConvert { def toBytes(): Array[Byte] }
-// case class Size(height: Int, width: Int)
 case class Size(height: Int, width: Int)
 case class Parameters(level: String, media: String, input_type: String, size: String)
 case class Id(id: String) extends ByteConvert { def toBytes(): Array[Byte] = { write(this).getBytes } }
