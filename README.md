@@ -58,7 +58,7 @@ Open [localhost:8888/demo/index.html](http://localhost:8888/demo/index.html) in 
 Alternatively, on the command line, try:
 
 ```
-> $ curl -d '{"media":"image/png","level":"easy","input_type":"text"}' localhost:8888/v1/captcha
+> $ curl -d '{"media":"image/png","level":"easy","input_type":"text","size":"350x100"}' localhost:8888/v2/captcha
 {"id":"3bf928ce-a1e7-4616-b34f-8252d777855d"}
 
 > $ curl "localhost:8888/v1/media?id=3bf928ce-a1e7-4616-b34f-8252d777855d" -o sample.png
