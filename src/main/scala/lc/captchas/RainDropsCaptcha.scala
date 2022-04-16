@@ -128,13 +128,13 @@ class RainDropsCP extends ChallengeProvider {
       val textX = if (textWidth > width) 0 else ((width - textWidth) / 2)
 
       // this will be overlapped by the following text to show the top outline because of the offset
-      val yOffset = (fontHeight*0.01).ceil.toInt
+      val yOffset = (fontHeight * 0.01).ceil.toInt
       g.setColor(textHighlightColor)
-      g.drawString(secret, textX, (fontHeight*1.1).toInt - yOffset)
+      g.drawString(secret, textX, (fontHeight * 1.1).toInt - yOffset)
 
       // paint the text
       g.setColor(textColor)
-      g.drawString(secret, textX, (fontHeight*1.1).toInt)
+      g.drawString(secret, textX, (fontHeight * 1.1).toInt)
 
       g.dispose()
       writer.writeToSequence(canvas)

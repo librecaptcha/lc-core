@@ -43,16 +43,16 @@ class FilterChallenge extends ChallengeProvider {
     val height = size2D(1)
     val canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
     val g = canvas.createGraphics()
-    val fontHeight = (height*0.6).toInt
+    val fontHeight = (height * 0.6).toInt
     g.setColor(Color.WHITE)
     g.fillRect(0, 0, canvas.getWidth, canvas.getHeight)
     g.setColor(Color.BLACK)
     val font = new Font("Serif", Font.BOLD, fontHeight)
     g.setFont(font)
     val stringWidth = g.getFontMetrics().stringWidth(secret)
-    val scaleX = if (stringWidth > width) width/(stringWidth.toDouble) else 1d
+    val scaleX = if (stringWidth > width) width / (stringWidth.toDouble) else 1d
     val margin = if (stringWidth > width) 0 else (width - stringWidth)
-    val xOffset = (margin*r.nextDouble).toInt
+    val xOffset = (margin * r.nextDouble).toInt
     g.scale(scaleX, 1d)
     g.drawString(secret, xOffset, fontHeight)
     g.dispose()
