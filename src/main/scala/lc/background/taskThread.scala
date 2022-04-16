@@ -46,7 +46,7 @@ class BackgroundTask(config: Config, captchaManager: CaptchaManager) {
       (captcha.allowedLevels).flatMap { level =>
         (captcha.allowedMedia).flatMap { media =>
           (captcha.allowedInputType).flatMap { inputType =>
-            (captcha.allowedSizes).map {size =>
+            (captcha.allowedSizes).map { size =>
               Parameters(level, media, inputType, size)
             }
           }
