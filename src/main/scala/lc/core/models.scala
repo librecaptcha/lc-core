@@ -36,7 +36,7 @@ case class ConfigField(
   lazy val captchaExpiryTimeLimitInt: Option[Int] = mapInt(captchaExpiryTimeLimit)
   lazy val threadDelayInt: Option[Int] = mapInt(threadDelay)
   lazy val maxAttemptsRatioFloat: Option[Float] = mapFloat(maxAttemptsRatio)
-  lazy val playgroundEnabledBool: Option[Boolean] = playgroundEnabled.map(_ || true)
+  lazy val playgroundEnabledBool: Option[Boolean] = playgroundEnabled.map(_ || false)
 
   private def mapInt(x: Option[Integer]): Option[Int] = {
     x.map(_ + 0)
