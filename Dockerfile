@@ -1,5 +1,5 @@
 FROM adoptopenjdk/openjdk16:alpine AS base-builder
-ARG SBT_VERSION=1.6.2
+ARG SBT_VERSION=1.7.1
 RUN apk add --no-cache bash
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 ENV PATH=$PATH:${JAVA_HOME}/bin
