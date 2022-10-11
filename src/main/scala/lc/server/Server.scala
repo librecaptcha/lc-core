@@ -82,6 +82,7 @@ class Server(
         new StringResponse(200, str)
       }
     )
+    println("Playground enabled on /demo/index.html")
   }
 
   val server: picoserve.Server = serverBuilder.build()
