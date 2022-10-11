@@ -47,7 +47,7 @@ docker-compose up
 Using `docker`:
 
 ```
-docker run -v lcdata:/lc-core/data librecaptcha/lc-core:1.1.0-stable
+docker run -v lcdata:/lc-core/data librecaptcha/lc-core:2.0
 ```
 
 A default `config.json` is automatically created in the mounted volume.
