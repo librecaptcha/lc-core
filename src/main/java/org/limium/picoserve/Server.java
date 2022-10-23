@@ -3,21 +3,21 @@
 
 package org.limium.picoserve;
 
-import java.net.InetSocketAddress;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.LinkedList;
-import java.util.concurrent.Executor;
-import java.util.regex.Pattern;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public final class Server {
   private final HttpServer server;

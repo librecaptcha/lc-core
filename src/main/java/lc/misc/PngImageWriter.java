@@ -1,9 +1,9 @@
 package lc.misc;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
-
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageTypeSpecifier;
@@ -13,7 +13,6 @@ import javax.imageio.metadata.IIOInvalidTreeException;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageOutputStream;
-import java.awt.image.BufferedImage;
 
 public class PngImageWriter {
 
@@ -26,7 +25,8 @@ public class PngImageWriter {
         iw.hasNext(); ) {
       ImageWriter writer = iw.next();
       ImageWriteParam writeParam = writer.getDefaultWriteParam();
-      ImageTypeSpecifier typeSpecifier = ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_INT_RGB);
+      ImageTypeSpecifier typeSpecifier =
+          ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_INT_RGB);
       IIOMetadata metadata = writer.getDefaultImageMetadata(typeSpecifier, writeParam);
       if (metadata.isReadOnly() || !metadata.isStandardMetadataFormatSupported()) {
         continue;

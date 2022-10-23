@@ -5,12 +5,12 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import lc.captchas.interfaces.Challenge;
 import lc.captchas.interfaces.ChallengeProvider;
-import lc.misc.PngImageWriter;
 import lc.misc.HelperFunctions;
+import lc.misc.PngImageWriter;
 
 public class FontFunCaptcha implements ChallengeProvider {
 
@@ -58,7 +58,8 @@ public class FontFunCaptcha implements ChallengeProvider {
     return null;
   }
 
-  private byte[] fontFun(final int width, final int height, String captchaText, String level, String path) {
+  private byte[] fontFun(
+      final int width, final int height, String captchaText, String level, String path) {
     String[] colors = {"#f68787", "#f8a978", "#f1eb9a", "#a4f6a5"};
     BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     Graphics2D graphics2D = img.createGraphics();
@@ -87,7 +88,8 @@ public class FontFunCaptcha implements ChallengeProvider {
     final int width = size2D[0];
     final int height = size2D[1];
     String path = "./lib/fonts/";
-    return new Challenge(fontFun(width, height, secret, "medium", path), "image/png", secret.toLowerCase());
+    return new Challenge(
+        fontFun(width, height, secret, "medium", path), "image/png", secret.toLowerCase());
   }
 
   public boolean checkAnswer(String secret, String answer) {
