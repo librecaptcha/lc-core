@@ -3,12 +3,12 @@
 
 package lc.misc;
 
-import javax.imageio.*;
-import javax.imageio.metadata.*;
-import javax.imageio.stream.*;
 import java.awt.image.*;
 import java.io.*;
 import java.util.Iterator;
+import javax.imageio.*;
+import javax.imageio.metadata.*;
+import javax.imageio.stream.*;
 
 public class GifSequenceWriter {
   protected ImageWriter gifWriter;

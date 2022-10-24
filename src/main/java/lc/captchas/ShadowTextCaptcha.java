@@ -1,20 +1,18 @@
 package lc.captchas;
 
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.io.ByteArrayOutputStream;
-import java.util.Map;
 import java.util.List;
-
-import lc.misc.HelperFunctions;
-import lc.misc.PngImageWriter;
+import java.util.Map;
 import lc.captchas.interfaces.Challenge;
 import lc.captchas.interfaces.ChallengeProvider;
+import lc.misc.HelperFunctions;
+import lc.misc.PngImageWriter;
 
 public class ShadowTextCaptcha implements ChallengeProvider {
 
@@ -56,20 +54,24 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     graphics2D.setPaint(Color.BLACK);
     graphics2D.setFont(font);
     final var stringWidth = graphics2D.getFontMetrics().stringWidth(text);
-    final var padding = (stringWidth > width) ? 0 : (width - stringWidth)/2;
-    final var scaleX = (stringWidth > width) ? width/((double) stringWidth) : 1d;
+    final var padding = (stringWidth > width) ? 0 : (width - stringWidth) / 2;
+    final var scaleX = (stringWidth > width) ? width / ((double) stringWidth) : 1d;
     graphics2D.scale(scaleX, 1d);
-    graphics2D.drawString(text, padding, fontHeight*1.1f);
+    graphics2D.drawString(text, padding, fontHeight * 1.1f);
     graphics2D.dispose();
     final int kernelSize = (int) Math.ceil((Math.min(width, height) / 50.0));
-    ConvolveOp op = new ConvolveOp(new Kernel(kernelSize, kernelSize, makeKernel(kernelSize)), ConvolveOp.EDGE_NO_OP, null);
+    ConvolveOp op =
+        new ConvolveOp(
+            new Kernel(kernelSize, kernelSize, makeKernel(kernelSize)),
+            ConvolveOp.EDGE_NO_OP,
+            null);
     BufferedImage img2 = op.filter(img, null);
     Graphics2D g2d = img2.createGraphics();
     HelperFunctions.setRenderingHints(g2d);
     g2d.setPaint(Color.WHITE);
     g2d.scale(scaleX, 1d);
     g2d.setFont(font);
-    g2d.drawString(text, padding-kernelSize, fontHeight*1.1f);
+    g2d.drawString(text, padding - kernelSize, fontHeight * 1.1f);
     g2d.dispose();
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
