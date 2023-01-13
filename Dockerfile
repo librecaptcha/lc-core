@@ -1,9 +1,10 @@
-FROM adoptopenjdk/openjdk16:alpine AS base-builder
+FROM adoptopenjdk/openjdk16:latest AS base-builder
 ARG SBT_VERSION=1.7.1
-RUN apk add --no-cache bash
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 ENV PATH=$PATH:${JAVA_HOME}/bin
 RUN \
+        apt update && \
+        apt install -y wget && \
 	wget -O sbt-$SBT_VERSION.tgz https://github.com/sbt/sbt/releases/download/v$SBT_VERSION/sbt-$SBT_VERSION.tgz && \
         tar -xzvf sbt-$SBT_VERSION.tgz && \
         rm sbt-$SBT_VERSION.tgz
@@ -22,9 +23,9 @@ FROM sbt-builder as builder
 COPY src/ src/
 RUN sbt assembly
 
-FROM adoptopenjdk/openjdk16:alpine-jre  AS base-core
+FROM adoptopenjdk/openjdk16:jre  AS base-core
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
-RUN apk add --update ttf-dejavu
+RUN apt update && apt install -y ttf-dejavu
 ENV PATH=$PATH:${JAVA_HOME}/bin
 
 
