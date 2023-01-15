@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk16:alpine-jre  AS base-core
+FROM adoptopenjdk/openjdk16:latest  AS base-core
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 RUN apk add --update ttf-dejavu
 ENV PATH=$PATH:${JAVA_HOME}/bin
