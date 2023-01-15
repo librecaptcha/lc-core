@@ -1,6 +1,6 @@
 FROM adoptopenjdk/openjdk16:latest  AS base-core
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
-RUN apk add --update ttf-dejavu
+RUN apt update && apt install -y ttf-dejavu
 ENV PATH=$PATH:${JAVA_HOME}/bin
 
 
