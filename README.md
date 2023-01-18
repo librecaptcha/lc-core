@@ -47,10 +47,17 @@ docker-compose up
 Using `docker`:
 
 ```
-docker run -v lcdata:/lc-core/data librecaptcha/lc-core:2.0
+docker run -p=8888:8888 -v ./lcdata:/lc-core/data librecaptcha/lc-core:2.0
 ```
 
 A default `config.json` is automatically created in the mounted volume.
+
+The above commands should work with `podman` as well, if docker.io registry is pre-configured. Otherwise,
+you can manually specify the repository like so:
+
+```
+podman run -p=8888:8888 -v ./lcdata:/lc-core/data docker.io/librecaptcha/lc-core:2.0
+```
 
 ## Quick test
 Open [localhost:8888/demo/index.html](http://localhost:8888/demo/index.html) in browser.
