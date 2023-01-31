@@ -32,8 +32,12 @@ ENV PATH=$PATH:${JAVA_HOME}/bin
 FROM base-core
 WORKDIR /lc-core
 COPY --from=builder /build/target/scala-3.2.1/LibreCaptcha.jar .
-RUN mkdir data/
+ENV UID_TO_SET 1001552021
+RUN mkdir data/ && \
+    groupadd --gid $UID_TO_SET lc-core && useradd --uid $UID_TO_SET -l -g lc-core lc-core && \
+    chown -R lc-core:lc-core /lc-core && chmod -R g+w /lc-core
 
 EXPOSE 8888
+USER lc-core
 
 CMD [ "java", "-jar", "LibreCaptcha.jar" ]
