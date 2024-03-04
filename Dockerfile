@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk17:latest AS base-builder
+FROM eclipse-temurin:21 AS base-builder
 ARG SBT_VERSION=1.7.1
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 ENV PATH=$PATH:${JAVA_HOME}/bin

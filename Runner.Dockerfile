@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk17:latest  AS base-core
+FROM eclipse-temurin:21  AS base-core
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 RUN apt update && apt install -y ttf-dejavu
 ENV PATH=$PATH:${JAVA_HOME}/bin
