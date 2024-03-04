@@ -25,7 +25,7 @@ RUN sbt assembly
 
 FROM eclipse-temurin:17-jre-jammy  AS base-core
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
-RUN apt update && apt install -y ttf-dejavu
+RUN apt update && apt install -y fonts-dejavu
 ENV PATH=$PATH:${JAVA_HOME}/bin
 
 
