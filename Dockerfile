@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21 AS base-builder
+FROM eclipse-temurin:17-jre-jammy AS base-builder
 ARG SBT_VERSION=1.7.1
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 ENV PATH=$PATH:${JAVA_HOME}/bin
@@ -23,7 +23,7 @@ FROM sbt-builder as builder
 COPY src/ src/
 RUN sbt assembly
 
-FROM adoptopenjdk/openjdk16:jre  AS base-core
+FROM eclipse-temurin:17-jre-jammy  AS base-core
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm/"
 RUN apt update && apt install -y ttf-dejavu
 ENV PATH=$PATH:${JAVA_HOME}/bin
