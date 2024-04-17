@@ -31,7 +31,7 @@ ENV PATH=$PATH:${JAVA_HOME}/bin
 
 FROM base-core
 WORKDIR /lc-core
-COPY --from=builder /build/target/scala-3.3.3/LibreCaptcha.jar .
+COPY --from=builder /build/target/scala-3.4.1/LibreCaptcha.jar .
 RUN mkdir data/
 
 EXPOSE 8888
