@@ -6,7 +6,7 @@ ENV PATH=$PATH:${JAVA_HOME}/bin
 
 FROM base-core
 RUN mkdir /lc-core
-COPY target/scala-3.4.1/LibreCaptcha.jar /lc-core
+COPY target/scala-3.4.2/LibreCaptcha.jar /lc-core
 WORKDIR /lc-core
 RUN mkdir data/
 
