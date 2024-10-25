@@ -4,7 +4,7 @@ python3 -m venv testEnv
 source ./testEnv/bin/activate
 pip install locust
 mkdir -p data/
-java -jar target/scala-3.5.0/LibreCaptcha.jar &
+java -jar target/scala-3.5.2/LibreCaptcha.jar &
 JAVA_PID=$!
 sleep 4
 
