@@ -41,7 +41,8 @@ public class ShadowTextCaptcha implements ChallengeProvider {
     final float[] kernel = new float[N];
     java.util.Arrays.fill(kernel, weight);
     return kernel;
-  };
+  }
+  ;
 
   private byte[] shadowText(final int width, final int height, String text) {
     BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
