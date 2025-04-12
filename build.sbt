@@ -4,8 +4,8 @@ lazy val root = (project in file(".")).settings(
       organization := "com.example",
       scalaVersion := "3.6.4",
       version := "0.2.1-snapshot",
-      semanticdbEnabled := true,
-      semanticdbVersion := scalafixSemanticdb.revision
+      // semanticdbEnabled := true,
+      // semanticdbVersion := scalafixSemanticdb.revision
 
       // This is apparently not supported on Scala 3 currently
       // scalafixScalaBinaryVersion := "3.1"
