@@ -23,7 +23,7 @@ scalacOptions ++= List(
 )
 javacOptions += "-g:none"
 compileOrder := CompileOrder.JavaThenScala
-javafmtOnCompile := false
+// javafmtOnCompile := false
 assembly / mainClass := Some("lc.LCFramework")
 Compile / run / mainClass := Some("lc.LCFramework")
 assembly / assemblyJarName := "LibreCaptcha.jar"
