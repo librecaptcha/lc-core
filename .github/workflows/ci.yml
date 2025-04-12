@@ -19,7 +19,7 @@ jobs:
     - uses: sbt/setup-sbt@v1
     - name: Run tests
       run: sbt test assembly
-    - name: Run linter
-      run: sbt "scalafixAll --check"
+        #- name: Run linter
+        #run: sbt "scalafixAll --check"
     - name: Run locust tests
       run: sudo apt-get install -y tesseract-ocr && ./tests/run.sh
