@@ -3,7 +3,7 @@ lazy val root = (project in file(".")).settings(
     List(
       organization := "com.example",
       scalaVersion := "3.6.4",
-      version := "0.2.1-snapshot",
+      version := "0.2.1-snapshot"
       // semanticdbEnabled := true,
       // semanticdbVersion := scalafixSemanticdb.revision
 
@@ -12,8 +12,8 @@ lazy val root = (project in file(".")).settings(
     )
   ),
   name := "LibreCaptcha",
-  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.3.0",
-  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.3.0",
+  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.3.1",
+  libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.3.1",
   libraryDependencies += "org.json4s" %% "json4s-jackson" % "4.0.7"
 )
 
