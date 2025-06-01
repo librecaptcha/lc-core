@@ -160,7 +160,7 @@ class CaptchaManager(config: Config, captchaProviders: CaptchaProviders) {
   def checkAnswer(answer: Answer): Either[Error, Success] = {
     val challenge = getSecret(answer.id)
     challenge match {
-      case None => Right(Success(ResultEnum.EXPIRED.toString))
+      case None        => Right(Success(ResultEnum.EXPIRED.toString))
       case Some(value) => {
         val (provider, secret) = value
         val check = captchaProviders.getProviderById(provider).checkAnswer(secret, answer.answer)

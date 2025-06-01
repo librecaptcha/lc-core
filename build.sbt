@@ -31,7 +31,7 @@ assembly / assemblyJarName := "LibreCaptcha.jar"
 ThisBuild / assemblyMergeStrategy := {
   case PathList("module-info.class")         => MergeStrategy.discard
   case x if x.endsWith("/module-info.class") => MergeStrategy.discard
-  case x =>
+  case x                                     =>
     val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
     oldStrategy(x)
 }
