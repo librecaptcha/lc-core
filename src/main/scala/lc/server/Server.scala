@@ -1,11 +1,9 @@
 package lc.server
 
-import org.json4s.jackson.JsonMethods.parse
-import org.json4s.jvalue2extractable
+import com.github.plokhotnyuk.jsoniter_scala.core._
 import lc.core.CaptchaManager
 import lc.core.ErrorMessageEnum
 import lc.core.{Answer, ByteConvert, Error, Id, Parameters}
-import lc.core.Config.formats
 import org.limium.picoserve
 import org.limium.picoserve.Server.{ByteResponse, ServerBuilder, StringResponse}
 import scala.io.Source
@@ -31,8 +29,7 @@ class Server(
     .POST(
       "/v2/captcha",
       (request) => {
-        val json = parse(request.getBodyString())
-        val param = json.extract[Parameters]
+        val param = readFromString[Parameters](request.getBodyString())
         val id = captchaManager.getChallenge(param)
         getResponse(id, headerMap)
       }
@@ -54,8 +51,7 @@ class Server(
     .POST(
       "/v2/answer",
       (request) => {
-        val json = parse(request.getBodyString())
-        val answer = json.extract[Answer]
+        val answer = readFromString[Answer](request.getBodyString())
         val result = captchaManager.checkAnswer(answer)
         getResponse(result, headerMap)
       }

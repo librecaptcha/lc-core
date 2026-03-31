@@ -1,19 +1,12 @@
 package lc.core
 
 import scala.io.Source.fromFile
-import org.json4s.{DefaultFormats, JValue, JObject, JField, JString}
-import org.json4s.jackson.JsonMethods.{parse, render, pretty}
-import org.json4s.JsonDSL._
-import org.json4s.StringInput
-import org.json4s.jvalue2monadic
-import org.json4s.jvalue2extractable
+import com.github.plokhotnyuk.jsoniter_scala.core._
 import java.io.{FileNotFoundException, File, PrintWriter}
 import java.{util => ju}
 import lc.misc.HelperFunctions
 
 class Config(configFilePath: String) {
-
-  import Config.formats
 
   private val configString =
     try {
@@ -40,8 +33,8 @@ class Config(configFilePath: String) {
       }
     }
 
-  private val configJson = parse(configString)
-  private val configFields: ConfigField = configJson.extract[ConfigField]
+  private val appConfig = readFromString[AppConfig](configString)
+  private val configFields: ConfigField = appConfig.toConfigField
 
   val port: Int = configFields.portInt.getOrElse(8888)
   val address: String = configFields.address.getOrElse("0.0.0.0")
@@ -53,11 +46,7 @@ class Config(configFilePath: String) {
   val corsHeader: String = configFields.corsHeader.getOrElse("")
   val maxAttempts: Int = Math.max(1, (configFields.maxAttemptsRatioFloat.getOrElse(0.01f) * bufferCount).toInt)
 
-  private val captchaConfigJson = (configJson \ "captchas")
-  val captchaConfigTransform: JValue = captchaConfigJson transformField { case JField("config", JObject(config)) =>
-    ("config", JString(config.toString))
-  }
-  val captchaConfig: List[CaptchaConfig] = captchaConfigTransform.extract[List[CaptchaConfig]]
+  val captchaConfig: List[CaptchaConfig] = appConfig.captchas
   val allowedLevels: Set[String] = captchaConfig.flatMap(_.allowedLevels).toSet
   val allowedMedia: Set[String] = captchaConfig.flatMap(_.allowedMedia).toSet
   val allowedInputType: Set[String] = captchaConfig.flatMap(_.allowedInputType).toSet
@@ -65,56 +54,56 @@ class Config(configFilePath: String) {
   HelperFunctions.setSeed(seed)
 
   private def getDefaultConfig(): String = {
-    val defaultConfigMap =
-      (AttributesEnum.RANDOM_SEED.toString -> new ju.Random().nextInt()) ~
-        (AttributesEnum.PORT.toString -> 8888) ~
-        (AttributesEnum.ADDRESS.toString -> "0.0.0.0") ~
-        (AttributesEnum.CAPTCHA_EXPIRY_TIME_LIMIT.toString -> 5) ~
-        (AttributesEnum.BUFFER_COUNT.toString -> 1000) ~
-        (AttributesEnum.THREAD_DELAY.toString -> 2) ~
-        (AttributesEnum.PLAYGROUND_ENABLED.toString -> true) ~
-        (AttributesEnum.CORS_HEADER.toString -> "") ~
-        (AttributesEnum.MAX_ATTEMPTS_RATIO.toString -> 0.01f) ~
-        ("captchas" -> List(
-          (
-            (AttributesEnum.NAME.toString -> "FilterChallenge") ~
-              (ParametersEnum.ALLOWEDLEVELS.toString -> List("medium", "hard")) ~
-              (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
-              (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
-              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
-              (AttributesEnum.CONFIG.toString -> JObject())
-          ),
-          (
-            (AttributesEnum.NAME.toString -> "PoppingCharactersCaptcha") ~
-              (ParametersEnum.ALLOWEDLEVELS.toString -> List("hard")) ~
-              (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
-              (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
-              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
-              (AttributesEnum.CONFIG.toString -> JObject())
-          ),
-          (
-            (AttributesEnum.NAME.toString -> "ShadowTextCaptcha") ~
-              (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy")) ~
-              (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/png")) ~
-              (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
-              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
-              (AttributesEnum.CONFIG.toString -> JObject())
-          ),
-          (
-            (AttributesEnum.NAME.toString -> "RainDropsCaptcha") ~
-              (ParametersEnum.ALLOWEDLEVELS.toString -> List("easy", "medium")) ~
-              (ParametersEnum.ALLOWEDMEDIA.toString -> List("image/gif")) ~
-              (ParametersEnum.ALLOWEDINPUTTYPE.toString -> List("text")) ~
-              (ParametersEnum.ALLOWEDSIZES.toString -> List("350x100")) ~
-              (AttributesEnum.CONFIG.toString -> JObject())
-          )
-        ))
+    val defaultConfig = AppConfig(
+      seed = Some(new ju.Random().nextInt()),
+      port = Some(8888),
+      address = Some("0.0.0.0"),
+      captchaExpiryTimeLimit = Some(5),
+      bufferCount = Some(1000),
+      threadDelay = Some(2),
+      playgroundEnabled = Some(true),
+      corsHeader = Some(""),
+      maxAttemptsRatio = Some(0.01f),
+      captchas = List(
+        CaptchaConfig(
+          name = "FilterChallenge",
+          allowedLevels = List("medium", "hard"),
+          allowedMedia = List("image/png"),
+          allowedInputType = List("text"),
+          allowedSizes = List("350x100"),
+          config = JSONString("{}")
+        ),
+        CaptchaConfig(
+          name = "PoppingCharactersCaptcha",
+          allowedLevels = List("hard"),
+          allowedMedia = List("image/gif"),
+          allowedInputType = List("text"),
+          allowedSizes = List("350x100"),
+          config = JSONString("{}")
+        ),
+        CaptchaConfig(
+          name = "ShadowTextCaptcha",
+          allowedLevels = List("easy"),
+          allowedMedia = List("image/png"),
+          allowedInputType = List("text"),
+          allowedSizes = List("350x100"),
+          config = JSONString("{}")
+        ),
+        CaptchaConfig(
+          name = "RainDropsCaptcha",
+          allowedLevels = List("easy", "medium"),
+          allowedMedia = List("image/gif"),
+          allowedInputType = List("text"),
+          allowedSizes = List("350x100"),
+          config = JSONString("{}")
+        )
+      )
+    )
 
-    pretty(render(defaultConfigMap))
+    writeToString(defaultConfig, WriterConfig.withIndentionStep(2))
   }
 
 }
 
 object Config {
-  implicit val formats: DefaultFormats.type = DefaultFormats
 }
