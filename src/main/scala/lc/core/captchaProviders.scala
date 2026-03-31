@@ -36,7 +36,7 @@ class CaptchaProviders(config: Config) {
       if configValue.allowedMedia.contains(param.media)
       if configValue.allowedInputType.contains(param.input_type)
       if configValue.allowedSizes.contains(param.size)
-    } yield (configValue.name, configValue.config)
+    } yield (configValue.name, configValue.config.string)
 
     val providerFilter = for {
       providerValue <- configFilter
