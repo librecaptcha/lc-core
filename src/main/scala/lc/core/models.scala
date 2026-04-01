@@ -82,7 +82,7 @@ case class CaptchaConfig(
     allowedMedia: List[String],
     allowedInputType: List[String],
     allowedSizes: List[String],
-    config: zio.blocks.schema.json.Json
+    config: zio.blocks.schema.json.Json.Object
 )
 
 case class AppConfig(
