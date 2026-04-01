@@ -102,6 +102,14 @@ class Config(configFilePath: String) {
           allowedInputType = List("text"),
           allowedSizes = List("350x100"),
           config = Json.Object()
+        ),
+        CaptchaConfig(
+          name = "CrumpledTextCaptcha",
+          allowedLevels = List("easy", "medium", "hard"),
+          allowedMedia = List("image/png"),
+          allowedInputType = List("text"),
+          allowedSizes = List("350x100"),
+          config = Json.Object()
         )
       )
     )

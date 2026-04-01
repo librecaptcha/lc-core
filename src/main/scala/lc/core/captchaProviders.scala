@@ -15,6 +15,7 @@ class CaptchaProviders(config: Config) {
     "PoppingCharactersCaptcha" -> new PoppingCharactersCaptcha,
     "ShadowTextCaptcha" -> new ShadowTextCaptcha,
     "RainDropsCaptcha" -> new RainDropsCP,
+    "CrumpledTextCaptcha" -> new CrumpledTextCaptcha,
     "DebugCaptcha" -> new DebugCaptcha
     // "LabelCaptcha" -> new LabelCaptcha
   )
