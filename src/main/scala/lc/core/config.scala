@@ -1,10 +1,12 @@
 package lc.core
 
 import scala.io.Source.fromFile
-import com.github.plokhotnyuk.jsoniter_scala.core._
+import zio.blocks.schema._
+import zio.blocks.schema.json._
 import java.io.{FileNotFoundException, File, PrintWriter}
 import java.{util => ju}
 import lc.misc.HelperFunctions
+import java.nio.ByteBuffer
 
 class Config(configFilePath: String) {
 
@@ -33,7 +35,11 @@ class Config(configFilePath: String) {
       }
     }
 
-  private val appConfig = readFromString[AppConfig](configString)
+  private val appConfigEither = AppConfig.codec.decode(ByteBuffer.wrap(configString.getBytes("UTF-8")))
+  private val appConfig = appConfigEither match {
+    case Right(conf) => conf
+    case Left(err) => throw new Exception(err.toString)
+  }
   private val configFields: ConfigField = appConfig.toConfigField
 
   val port: Int = configFields.portInt.getOrElse(8888)
@@ -71,7 +77,7 @@ class Config(configFilePath: String) {
           allowedMedia = List("image/png"),
           allowedInputType = List("text"),
           allowedSizes = List("350x100"),
-          config = JSONString("{}")
+          config = Json.Object()
         ),
         CaptchaConfig(
           name = "PoppingCharactersCaptcha",
@@ -79,7 +85,7 @@ class Config(configFilePath: String) {
           allowedMedia = List("image/gif"),
           allowedInputType = List("text"),
           allowedSizes = List("350x100"),
-          config = JSONString("{}")
+          config = Json.Object()
         ),
         CaptchaConfig(
           name = "ShadowTextCaptcha",
@@ -87,7 +93,7 @@ class Config(configFilePath: String) {
           allowedMedia = List("image/png"),
           allowedInputType = List("text"),
           allowedSizes = List("350x100"),
-          config = JSONString("{}")
+          config = Json.Object()
         ),
         CaptchaConfig(
           name = "RainDropsCaptcha",
@@ -95,12 +101,12 @@ class Config(configFilePath: String) {
           allowedMedia = List("image/gif"),
           allowedInputType = List("text"),
           allowedSizes = List("350x100"),
-          config = JSONString("{}")
+          config = Json.Object()
         )
       )
     )
 
-    writeToString(defaultConfig, WriterConfig.withIndentionStep(2))
+    new String(BufferEncoder.encode(defaultConfig, AppConfig.codec), "UTF-8")
   }
 
 }

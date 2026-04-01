@@ -5,6 +5,8 @@ import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
 import scala.collection.mutable.Map
 import lc.misc.HelperFunctions
+import zio.blocks.schema.json.JsonFormat
+import java.nio.ByteBuffer
 
 class CaptchaProviders(config: Config) {
   private val providers = Map(
@@ -30,13 +32,18 @@ class CaptchaProviders(config: Config) {
   }
 
   private def filterProviderByParam(param: Parameters): Iterable[(String, String)] = {
+    val codec = zio.blocks.schema.json.Json.schema.derive(JsonFormat.deriver)
+
     val configFilter = for {
       configValue <- captchaConfig
       if configValue.allowedLevels.contains(param.level)
       if configValue.allowedMedia.contains(param.media)
       if configValue.allowedInputType.contains(param.input_type)
       if configValue.allowedSizes.contains(param.size)
-    } yield (configValue.name, configValue.config.string)
+    } yield {
+      val strConfig = new String(BufferEncoder.encode(configValue.config, codec), "UTF-8")
+      (configValue.name, strConfig)
+    }
 
     val providerFilter = for {
       providerValue <- configFilter
