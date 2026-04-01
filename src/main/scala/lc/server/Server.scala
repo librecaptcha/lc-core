@@ -71,12 +71,13 @@ class Server(
       }
     )
   if (playgroundEnabled) {
+    val htmlHeaderMap = Map("Content-Type" -> List("text/html").asJava).asJava
     serverBuilder.GET(
       "/demo/index.html",
       (_) => {
         val resStream = getClass().getResourceAsStream("/index.html")
         val str = Source.fromInputStream(resStream).mkString
-        new StringResponse(200, str)
+        new StringResponse(200, str, htmlHeaderMap)
       }
     )
     serverBuilder.GET(
@@ -88,8 +89,8 @@ class Server(
           <h3><a href="/demo/index.html">Link to Demo</a></h3>
           <h3>API is served at <b>/v2/</b></h3>
         </html>
-        """
-        new StringResponse(200, str)
+        """;
+        new StringResponse(200, str, htmlHeaderMap)
       }
     )
     println("Playground enabled on /demo/index.html")
