@@ -31,12 +31,15 @@ class Server(
     .POST(
       "/v2/captcha",
       (request) => {
-        val paramEither = Parameters.codec.decode(ByteBuffer.wrap(request.getBodyString().getBytes("UTF-8")))
-        val id = paramEither match {
-          case Right(param) => captchaManager.getChallenge(param)
-          case Left(err) => Left(Error("Invalid parameters: " + err.toString))
+        val bodyStr = request.getBodyString().trim.replaceAll("\u0000", "")
+        val paramEither = Parameters.codec.decode(ByteBuffer.wrap(bodyStr.getBytes("UTF-8")))
+        paramEither match {
+          case Right(param) =>
+            val id = captchaManager.getChallenge(param)
+            getResponse(id, headerMap)
+          case Left(err) =>
+            getResponse(Left(Error("Invalid parameters: " + err.toString)), headerMap)
         }
-        getResponse(id, headerMap)
       }
     )
     .GET(
@@ -56,12 +59,15 @@ class Server(
     .POST(
       "/v2/answer",
       (request) => {
-        val answerEither = Answer.codec.decode(ByteBuffer.wrap(request.getBodyString().getBytes("UTF-8")))
-        val result = answerEither match {
-          case Right(answer) => captchaManager.checkAnswer(answer)
-          case Left(err) => Left(Error("Invalid answer format: " + err.toString))
+        val bodyStr = request.getBodyString().trim.replaceAll("\u0000", "")
+        val answerEither = Answer.codec.decode(ByteBuffer.wrap(bodyStr.getBytes("UTF-8")))
+        answerEither match {
+          case Right(answer) =>
+            val result = captchaManager.checkAnswer(answer)
+            getResponse(result, headerMap)
+          case Left(err) =>
+            getResponse(Left(Error("Invalid answer format: " + err.toString)), headerMap)
         }
-        getResponse(result, headerMap)
       }
     )
   if (playgroundEnabled) {
