@@ -14,8 +14,8 @@ lazy val root = (project in file(".")).settings(
   name := "LibreCaptcha",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.3.10",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.3.10",
-  libraryDependencies += "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-core" % "2.38.9",
-  libraryDependencies += "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-macros" % "2.38.9" % "provided"
+  libraryDependencies += "dev.zio" %% "zio-blocks-schema" % "0.0.31",
+
 )
 
 Compile / unmanagedResourceDirectories += { baseDirectory.value / "lib" }

@@ -1,6 +1,7 @@
 package lc.server
 
-import com.github.plokhotnyuk.jsoniter_scala.core._
+import zio.blocks.schema._
+import zio.blocks.schema.json._
 import lc.core.CaptchaManager
 import lc.core.ErrorMessageEnum
 import lc.core.{Answer, ByteConvert, Error, Id, Parameters}
@@ -9,6 +10,7 @@ import org.limium.picoserve.Server.{ByteResponse, ServerBuilder, StringResponse}
 import scala.io.Source
 import java.net.InetSocketAddress
 import java.util
+import java.nio.ByteBuffer
 import scala.jdk.CollectionConverters._
 
 class Server(
@@ -18,7 +20,7 @@ class Server(
     playgroundEnabled: Boolean,
     corsHeader: String
 ) {
-  var headerMap: util.Map[String, util.List[String]] = _
+  var headerMap: util.Map[String, util.List[String]] = null
   if (corsHeader.nonEmpty) {
     headerMap = Map("Access-Control-Allow-Origin" -> List(corsHeader).asJava).asJava
   }
@@ -29,8 +31,11 @@ class Server(
     .POST(
       "/v2/captcha",
       (request) => {
-        val param = readFromString[Parameters](request.getBodyString())
-        val id = captchaManager.getChallenge(param)
+        val paramEither = Parameters.codec.decode(ByteBuffer.wrap(request.getBodyString().getBytes("UTF-8")))
+        val id = paramEither match {
+          case Right(param) => captchaManager.getChallenge(param)
+          case Left(err) => Left(Error("Invalid parameters: " + err.toString))
+        }
         getResponse(id, headerMap)
       }
     )
@@ -51,8 +56,11 @@ class Server(
     .POST(
       "/v2/answer",
       (request) => {
-        val answer = readFromString[Answer](request.getBodyString())
-        val result = captchaManager.checkAnswer(answer)
+        val answerEither = Answer.codec.decode(ByteBuffer.wrap(request.getBodyString().getBytes("UTF-8")))
+        val result = answerEither match {
+          case Right(answer) => captchaManager.checkAnswer(answer)
+          case Left(err) => Left(Error("Invalid answer format: " + err.toString))
+        }
         getResponse(result, headerMap)
       }
     )

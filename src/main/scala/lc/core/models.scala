@@ -1,53 +1,79 @@
 package lc.core
 
-import com.github.plokhotnyuk.jsoniter_scala.macros._
-import com.github.plokhotnyuk.jsoniter_scala.core._
+import zio.blocks.schema._
+import zio.blocks.schema.json._
+import zio.blocks.schema.codec.BinaryCodec
+import java.nio.ByteBuffer
 
 trait ByteConvert { def toBytes(): Array[Byte] }
 case class Size(height: Int, width: Int)
 
 case class Parameters(level: String, media: String, input_type: String, size: String)
 object Parameters {
-  implicit val codec: JsonValueCodec[Parameters] = JsonCodecMaker.make
+  implicit val schema: Schema[Parameters] = Schema.derived
+  implicit val codec: BinaryCodec[Parameters] = schema.derive(JsonFormat.deriver)
 }
 
-case class Id(id: String) extends ByteConvert { def toBytes(): Array[Byte] = { writeToArray(this) } }
+object BufferEncoder {
+  def encode[A](value: A, codec: BinaryCodec[A]): Array[Byte] = {
+    // Start with 1KB, if it fails, try with 10KB, 100KB, etc up to 1MB
+    var size = 1024
+    var result: Array[Byte] = null
+    while (result == null && size <= 1048576) {
+      try {
+        val buf = ByteBuffer.allocate(size)
+        codec.encode(value, buf)
+        buf.flip()
+        result = new Array[Byte](buf.remaining())
+        buf.get(result)
+      } catch {
+        case _: java.nio.BufferOverflowException =>
+          size *= 10
+      }
+    }
+    if (result == null) {
+      throw new Exception("Buffer overflow encoding object")
+    }
+    result
+  }
+}
+
+case class Id(id: String) extends ByteConvert {
+  def toBytes(): Array[Byte] = {
+    BufferEncoder.encode(this, Id.codec)
+  }
+}
 object Id {
-  implicit val codec: JsonValueCodec[Id] = JsonCodecMaker.make
+  implicit val schema: Schema[Id] = Schema.derived
+  implicit val codec: BinaryCodec[Id] = schema.derive(JsonFormat.deriver)
 }
 
 case class Image(image: Array[Byte]) extends ByteConvert { def toBytes(): Array[Byte] = { image } }
 
 case class Answer(answer: String, id: String)
 object Answer {
-  implicit val codec: JsonValueCodec[Answer] = JsonCodecMaker.make
+  implicit val schema: Schema[Answer] = Schema.derived
+  implicit val codec: BinaryCodec[Answer] = schema.derive(JsonFormat.deriver)
 }
 
-case class Success(result: String) extends ByteConvert { def toBytes(): Array[Byte] = { writeToArray(this) } }
-object Success {
-  implicit val codec: JsonValueCodec[Success] = JsonCodecMaker.make
-}
-
-case class Error(message: String) extends ByteConvert { def toBytes(): Array[Byte] = { writeToArray(this) } }
-object Error {
-  implicit val codec: JsonValueCodec[Error] = JsonCodecMaker.make
-}
-
-case class JSONString(string: String)
-
-object JSONString {
-  implicit val codec: JsonValueCodec[JSONString] = new JsonValueCodec[JSONString] {
-    def decodeValue(in: JsonReader, default: JSONString): JSONString = {
-      val raw = in.readRawValAsBytes()
-      JSONString(new String(raw, "UTF-8"))
-    }
-
-    def encodeValue(x: JSONString, out: JsonWriter): Unit = {
-      out.writeRawVal(x.string.getBytes("UTF-8"))
-    }
-
-    def nullValue: JSONString = null.asInstanceOf[JSONString]
+case class Success(result: String) extends ByteConvert {
+  def toBytes(): Array[Byte] = {
+    BufferEncoder.encode(this, Success.codec)
   }
+}
+object Success {
+  implicit val schema: Schema[Success] = Schema.derived
+  implicit val codec: BinaryCodec[Success] = schema.derive(JsonFormat.deriver)
+}
+
+case class Error(message: String) extends ByteConvert {
+  def toBytes(): Array[Byte] = {
+    BufferEncoder.encode(this, Error.codec)
+  }
+}
+object Error {
+  implicit val schema: Schema[Error] = Schema.derived
+  implicit val codec: BinaryCodec[Error] = schema.derive(JsonFormat.deriver)
 }
 
 case class CaptchaConfig(
@@ -56,7 +82,7 @@ case class CaptchaConfig(
     allowedMedia: List[String],
     allowedInputType: List[String],
     allowedSizes: List[String],
-    config: JSONString
+    config: zio.blocks.schema.json.Json
 )
 
 case class AppConfig(
@@ -77,7 +103,8 @@ case class AppConfig(
   )
 }
 object AppConfig {
-  implicit val codec: JsonValueCodec[AppConfig] = JsonCodecMaker.make
+  implicit val schema: Schema[AppConfig] = Schema.derived
+  implicit val codec: BinaryCodec[AppConfig] = schema.derive(JsonFormat.deriver)
 }
 case class ConfigField(
     port: Option[Int] = None,
