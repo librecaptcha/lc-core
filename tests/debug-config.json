@@ -14,6 +14,6 @@
     "allowedMedia" : [ "image/png" ],
     "allowedInputType" : [ "text" ],
     "allowedSizes" : [ "350x100" ],
-    "config" : { }
+    "config" : {}
   }]
 }
