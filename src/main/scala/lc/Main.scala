@@ -5,6 +5,37 @@ import lc.server.Server
 import lc.background.BackgroundTask
 import lc.database.Statements
 
+class LCFramework {
+  private var backgroundTask: Option[BackgroundTask] = None
+  private var server: Option[Server] = None
+
+  def start(configFilePath: String = "data/config.json"): Unit = {
+    val config = new Config(configFilePath)
+    Statements.maxAttempts = config.maxAttempts
+    val captchaProviders = new CaptchaProviders(config = config)
+    val captchaManager = new CaptchaManager(config = config, captchaProviders = captchaProviders)
+    val task = new BackgroundTask(config = config, captchaManager = captchaManager)
+    task.beginThread(delay = config.threadDelay)
+    backgroundTask = Some(task)
+
+    val srv = new Server(
+      address = config.address,
+      port = config.port,
+      captchaManager = captchaManager,
+      playgroundEnabled = config.playgroundEnabled,
+      corsHeader = config.corsHeader
+    )
+    srv.start()
+    server = Some(srv)
+  }
+
+  def stop(): Unit = {
+    println("Shutting down gracefully...")
+    backgroundTask.foreach(_.shutdown())
+    server.foreach(_.stop())
+  }
+}
+
 object LCFramework {
   def main(args: scala.Array[String]): Unit = {
     val configFilePath = if (args.length > 0) {
@@ -12,28 +43,16 @@ object LCFramework {
     } else {
       "data/config.json"
     }
-    val config = new Config(configFilePath)
-    Statements.maxAttempts = config.maxAttempts
-    val captchaProviders = new CaptchaProviders(config = config)
-    val captchaManager = new CaptchaManager(config = config, captchaProviders = captchaProviders)
-    val backgroundTask = new BackgroundTask(config = config, captchaManager = captchaManager)
-    backgroundTask.beginThread(delay = config.threadDelay)
-    val server = new Server(
-      address = config.address,
-      port = config.port,
-      captchaManager = captchaManager,
-      playgroundEnabled = config.playgroundEnabled,
-      corsHeader = config.corsHeader
-    )
+
+    val framework = new LCFramework()
 
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run(): Unit = {
-        println("Shutting down gracefully...")
-        backgroundTask.shutdown()
+        framework.stop()
       }
     })
 
-    server.start()
+    framework.start(configFilePath)
   }
 }
 
