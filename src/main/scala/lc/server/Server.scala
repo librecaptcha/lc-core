@@ -116,4 +116,9 @@ class Server(
     println("Starting server on " + address + ":" + port)
     server.start()
   }
+
+  def stop(): Unit = {
+    println("Stopping server...")
+    server.stop(0)
+  }
 }
