@@ -65,32 +65,95 @@ class CrumpledTextCaptcha extends ChallengeProvider {
     val oldTransform = g.getTransform()
     g.translate(xOffset, yOffset)
     g.scale(scaleX, 1d)
-
-    // Draw characters with random rotation and vertical offset to simulate being on different paper folds
-    var currentX = 0
-    for (char <- secret) {
-        val charTransform = g.getTransform()
-        g.translate(currentX, r.nextInt(height / 4) - height / 8)
-        g.rotate((r.nextDouble() - 0.5) * 1.0)
-        g.drawString(char.toString, 0, 0)
-        currentX += g.getFontMetrics().charWidth(char)
-        g.setTransform(charTransform)
-    }
-
+    g.drawString(secret, 0, 0)
     g.setTransform(oldTransform)
     g.dispose()
 
-    val image = ImmutableImage.fromAwt(canvas)
+    var img = canvas
+    val numFolds = level match {
+        case "easy" => 15
+        case "medium" => 25
+        case "hard" => 35
+        case _ => 25
+    }
+    for (_ <- 0 until numFolds) {
+        img = applyFold(img, r)
+    }
 
-    // Use a Triangle ripple to create sharp "folds" in the image
-    val ripple = new RippleFilter(com.sksamuel.scrimage.filter.RippleType.Triangle, 10.toFloat, 10.toFloat, 0.05f, 0.05f)
-
-    val filteredImage = image.filter(ripple)
-
-    val img = filteredImage.awt()
     val baos = new ByteArrayOutputStream()
     PngImageWriter.write(baos, img);
     new Challenge(baos.toByteArray, "image/png", secret)
+  }
+
+  private def applyFold(img: BufferedImage, r: scala.util.Random): BufferedImage = {
+    val width = img.getWidth
+    val height = img.getHeight
+    val newImg = new BufferedImage(width, height, img.getType)
+
+    val x1 = r.nextInt(width)
+    val y1 = r.nextInt(height)
+    val angle = r.nextDouble() * 2 * Math.PI
+    val L = (r.nextDouble() * 0.5 + 0.3) * width
+    val W = (r.nextDouble() * 0.3 + 0.1) * height
+
+    val dx = Math.cos(angle)
+    val dy = Math.sin(angle)
+    val nx = -dy
+    val ny = dx
+
+    val maxShift = (r.nextDouble() - 0.5) * 20.0
+
+    for (y <- 0 until height) {
+      for (x <- 0 until width) {
+        val px = x - x1
+        val py = y - y1
+        val projS = px * dx + py * dy
+        val projN = px * nx + py * ny
+
+        if (projS >= 0 && projS <= L && Math.abs(projN) <= W) {
+          val shift = (projN / W) * maxShift
+          val srcX = x - shift * dx
+          val srcY = y - shift * dy
+
+          if (srcX >= 0 && srcX < width - 1 && srcY >= 0 && srcY < height - 1) {
+            val xf = Math.floor(srcX).toInt
+            val yf = Math.floor(srcY).toInt
+            val xt = srcX - xf
+            val yt = srcY - yf
+
+            val rgb00 = img.getRGB(xf, yf)
+            val rgb10 = img.getRGB(xf + 1, yf)
+            val rgb01 = img.getRGB(xf, yf + 1)
+            val rgb11 = img.getRGB(xf + 1, yf + 1)
+
+            val r00 = (rgb00 >> 16) & 0xFF
+            val g00 = (rgb00 >> 8) & 0xFF
+            val b00 = rgb00 & 0xFF
+            val r10 = (rgb10 >> 16) & 0xFF
+            val g10 = (rgb10 >> 8) & 0xFF
+            val b10 = rgb10 & 0xFF
+            val r01 = (rgb01 >> 16) & 0xFF
+            val g01 = (rgb01 >> 8) & 0xFF
+            val b01 = rgb01 & 0xFF
+            val r11 = (rgb11 >> 16) & 0xFF
+            val g11 = (rgb11 >> 8) & 0xFF
+            val b11 = rgb11 & 0xFF
+
+            val rInterp = (r00 * (1 - xt) * (1 - yt) + r10 * xt * (1 - yt) + r01 * (1 - xt) * yt + r11 * xt * yt).toInt
+            val gInterp = (g00 * (1 - xt) * (1 - yt) + g10 * xt * (1 - yt) + g01 * (1 - xt) * yt + g11 * xt * yt).toInt
+            val bInterp = (b00 * (1 - xt) * (1 - yt) + b10 * xt * (1 - yt) + b01 * (1 - xt) * yt + b11 * xt * yt).toInt
+
+            val rgb = (0xFF << 24) | (rInterp << 16) | (gInterp << 8) | bInterp
+            newImg.setRGB(x, y, rgb)
+          } else {
+            newImg.setRGB(x, y, 0xFFFFFFFF)
+          }
+        } else {
+          newImg.setRGB(x, y, img.getRGB(x, y))
+        }
+      }
+    }
+    newImg
   }
 
   def checkAnswer(secret: String, answer: String): Boolean = {
