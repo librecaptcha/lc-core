@@ -6,7 +6,6 @@ import java.awt.image.BufferedImage
 import java.awt.Font
 import java.awt.Color
 import java.awt.Graphics2D
-import java.awt.BasicStroke
 import java.awt.RenderingHints
 import lc.captchas.interfaces.ChallengeProvider
 import lc.captchas.interfaces.Challenge
@@ -54,12 +53,6 @@ class CrumpledTextCaptcha extends ChallengeProvider {
     g.setColor(Color.WHITE)
     g.fillRect(0, 0, width, height)
 
-    // Draw background "noise" or "crumbs"
-    for (_ <- 0 until 100) {
-      g.setColor(new Color(200 + r.nextInt(55), 200 + r.nextInt(55), 200 + r.nextInt(55)))
-      g.fillRect(r.nextInt(width), r.nextInt(height), 2, 2)
-    }
-
     g.setColor(Color.BLACK)
     val font = new Font("Serif", Font.BOLD, fontHeight)
     g.setFont(font)
@@ -73,45 +66,26 @@ class CrumpledTextCaptcha extends ChallengeProvider {
     g.translate(xOffset, yOffset)
     g.scale(scaleX, 1d)
 
-    // Draw characters with slight random rotation/offset
+    // Draw characters with random rotation and vertical offset to simulate being on different paper folds
     var currentX = 0
     for (char <- secret) {
         val charTransform = g.getTransform()
-        g.translate(currentX, r.nextInt(10) - 5)
-        g.rotate((r.nextDouble() - 0.5) * 0.3)
+        g.translate(currentX, r.nextInt(height / 4) - height / 8)
+        g.rotate((r.nextDouble() - 0.5) * 1.0)
         g.drawString(char.toString, 0, 0)
         currentX += g.getFontMetrics().charWidth(char)
         g.setTransform(charTransform)
     }
 
     g.setTransform(oldTransform)
-
-    // Add random creases
-    for (_ <- 0 until 20) {
-      val x1 = r.nextInt(width)
-      val y1 = r.nextInt(height)
-      val x2 = r.nextInt(width)
-      val y2 = r.nextInt(height)
-
-      // Light crease
-      g.setColor(new Color(180, 180, 180, 180))
-      g.setStroke(new BasicStroke(r.nextFloat() * 2.0f))
-      g.drawLine(x1, y1, x2, y2)
-
-      // Darker edge of the crease
-      g.setColor(new Color(100, 100, 100, 100))
-      g.setStroke(new BasicStroke(0.5f))
-      g.drawLine(x1 + 1, y1 + 1, x2 + 1, y2 + 1)
-    }
-
     g.dispose()
 
     val image = ImmutableImage.fromAwt(canvas)
 
-    val ripple = new RippleFilter(com.sksamuel.scrimage.filter.RippleType.Noise, 8.toFloat, 8.toFloat, 0.01f, 0.01f)
-    val blur = new GaussianBlurFilter(1)
+    // Use a Triangle ripple to create sharp "folds" in the image
+    val ripple = new RippleFilter(com.sksamuel.scrimage.filter.RippleType.Triangle, 10.toFloat, 10.toFloat, 0.05f, 0.05f)
 
-    val filteredImage = image.filter(ripple, blur)
+    val filteredImage = image.filter(ripple)
 
     val img = filteredImage.awt()
     val baos = new ByteArrayOutputStream()
