@@ -71,10 +71,10 @@ class CrumpledTextCaptcha extends ChallengeProvider {
 
     var img = canvas
     val numFolds = level match {
-        case "easy" => 15
-        case "medium" => 25
-        case "hard" => 35
-        case _ => 25
+        case "easy" => 7
+        case "medium" => 14
+        case "hard" => 19
+        case _ => 14
     }
     for (_ <- 0 until numFolds) {
         img = applyFold(img, r)
