@@ -38,3 +38,5 @@ ThisBuild / assemblyMergeStrategy := {
 }
 
 run / fork := true
+
+Test / parallelExecution := false

@@ -19,7 +19,8 @@ class Server(
     captchaManager: CaptchaManager,
     playgroundEnabled: Boolean,
     corsHeader: String,
-    authRequired: Boolean = false
+    authRequired: Boolean = false,
+    authKey: Option[String] = None
 ) {
   var headerMap: util.Map[String, util.List[String]] = null
   if (corsHeader.nonEmpty) {
@@ -33,7 +34,7 @@ class Server(
       val authHeaderValues = headers.get("Auth")
       if (authHeaderValues != null && authHeaderValues.size() > 0) {
         val authHeader = authHeaderValues.get(0)
-        val expectedKey = sys.env.get("AUTH_KEY").getOrElse("")
+        val expectedKey = authKey.getOrElse("")
         return authHeader == expectedKey
       }
     }

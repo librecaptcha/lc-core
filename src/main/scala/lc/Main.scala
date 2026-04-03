@@ -5,14 +5,14 @@ import lc.server.Server
 import lc.background.BackgroundTask
 import lc.database.Statements
 
-class LCFramework {
+class LCFramework(authKey: Option[String] = sys.env.get("AUTH_KEY")) {
   private var backgroundTask: Option[BackgroundTask] = None
   private var server: Option[Server] = None
 
   def start(configFilePath: String = "data/config.json"): Unit = {
     val config = new Config(configFilePath)
 
-    if (config.authRequired && sys.env.get("AUTH_KEY").isEmpty) {
+    if (config.authRequired && authKey.isEmpty) {
       throw new Exception("AUTH_KEY environment variable is not specified, but authRequired is true.")
     }
 
@@ -29,7 +29,8 @@ class LCFramework {
       captchaManager = captchaManager,
       playgroundEnabled = config.playgroundEnabled,
       corsHeader = config.corsHeader,
-      authRequired = config.authRequired
+      authRequired = config.authRequired,
+      authKey = authKey
     )
     srv.start()
     server = Some(srv)
