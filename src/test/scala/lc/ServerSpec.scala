@@ -5,6 +5,7 @@ import org.scalatest.BeforeAndAfterAll
 import java.net.{HttpURLConnection, URL}
 import java.io.{BufferedReader, InputStreamReader, OutputStreamWriter}
 import lc.LCFramework
+import scala.jdk.CollectionConverters._
 
 class ServerSpec extends AnyFunSuite with BeforeAndAfterAll {
 
@@ -12,12 +13,16 @@ class ServerSpec extends AnyFunSuite with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     framework.start("tests/debug-config.json")
+
     // Give the server a moment to start and generate some captchas
     Thread.sleep(2000)
   }
 
   override def afterAll(): Unit = {
-    framework.stop()
+    // Cannot safely stop the framework because the single underlying H2 database connection
+    // is closed when shutting down the framework, causing other tests to fail in parallel
+    // or sequential runs inside the same forked JVM.
+    // framework.stop()
   }
 
   test("Server should respond with an id for a valid captcha request") {

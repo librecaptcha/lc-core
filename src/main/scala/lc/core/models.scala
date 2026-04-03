@@ -95,11 +95,12 @@ case class AppConfig(
     playgroundEnabled: Option[Boolean] = None,
     corsHeader: Option[String] = None,
     maxAttemptsRatio: Option[Float] = None,
+    authRequired: Option[Boolean] = None,
     captchas: List[CaptchaConfig] = List.empty
 ) {
   def toConfigField: ConfigField = ConfigField(
     port, address, bufferCount, seed, captchaExpiryTimeLimit,
-    threadDelay, playgroundEnabled, corsHeader, maxAttemptsRatio
+    threadDelay, playgroundEnabled, corsHeader, maxAttemptsRatio, authRequired
   )
 }
 object AppConfig {
@@ -115,7 +116,8 @@ case class ConfigField(
     threadDelay: Option[Int] = None,
     playgroundEnabled: Option[Boolean] = None,
     corsHeader: Option[String] = None,
-    maxAttemptsRatio: Option[Float] = None
+    maxAttemptsRatio: Option[Float] = None,
+    authRequired: Option[Boolean] = None
 ) {
   lazy val portInt: Option[Int] = port
   lazy val bufferCountInt: Option[Int] = bufferCount
@@ -124,4 +126,5 @@ case class ConfigField(
   lazy val threadDelayInt: Option[Int] = threadDelay
   lazy val maxAttemptsRatioFloat: Option[Float] = maxAttemptsRatio
   lazy val playgroundEnabledBool: Option[Boolean] = playgroundEnabled.map(_ || false)
+  lazy val authRequiredBool: Option[Boolean] = authRequired.map(_ || false)
 }

@@ -51,6 +51,7 @@ class Config(configFilePath: String) {
   val playgroundEnabled: Boolean = configFields.playgroundEnabledBool.getOrElse(true)
   val corsHeader: String = configFields.corsHeader.getOrElse("")
   val maxAttempts: Int = Math.max(1, (configFields.maxAttemptsRatioFloat.getOrElse(0.01f) * bufferCount).toInt)
+  val authRequired: Boolean = configFields.authRequiredBool.getOrElse(false)
 
   val captchaConfig: List[CaptchaConfig] = appConfig.captchas
   val allowedLevels: Set[String] = captchaConfig.flatMap(_.allowedLevels).toSet
@@ -70,6 +71,7 @@ class Config(configFilePath: String) {
       playgroundEnabled = Some(true),
       corsHeader = Some(""),
       maxAttemptsRatio = Some(0.01f),
+      authRequired = Some(false),
       captchas = List(
         CaptchaConfig(
           name = "FilterChallenge",
