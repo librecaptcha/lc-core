@@ -57,7 +57,7 @@ class ServerAuthSpec extends AnyFunSuite {
       responseCode = connection3.getResponseCode
       assert(responseCode == 200, s"Expected 200 but got $responseCode")
     } finally {
-      // Do not stop framework to avoid stopping the DB
+      // Do not stop to avoid H2 shared database closure
       // authFramework.stop()
     }
   }

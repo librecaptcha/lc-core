@@ -19,7 +19,10 @@ class ServerSpec extends AnyFunSuite with BeforeAndAfterAll {
   }
 
   override def afterAll(): Unit = {
-    framework.stop()
+    // Cannot safely stop the framework because the single underlying H2 database connection
+    // is closed when shutting down the framework, causing other tests to fail in parallel
+    // or sequential runs inside the same forked JVM.
+    // framework.stop()
   }
 
   test("Server should respond with an id for a valid captcha request") {

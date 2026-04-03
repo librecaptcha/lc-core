@@ -39,4 +39,5 @@ ThisBuild / assemblyMergeStrategy := {
 
 run / fork := true
 
-Test / parallelExecution := false
+Test / fork := true
+Test / forkOptions := ForkOptions().withRunJVMOptions(Vector("-Djava.awt.headless=true"))
