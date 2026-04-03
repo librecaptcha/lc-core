@@ -5,6 +5,7 @@ import org.scalatest.BeforeAndAfterAll
 import java.net.{HttpURLConnection, URL}
 import java.io.{BufferedReader, InputStreamReader, OutputStreamWriter}
 import lc.LCFramework
+import scala.jdk.CollectionConverters._
 
 class ServerSpec extends AnyFunSuite with BeforeAndAfterAll {
 
@@ -12,6 +13,7 @@ class ServerSpec extends AnyFunSuite with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     framework.start("tests/debug-config.json")
+
     // Give the server a moment to start and generate some captchas
     Thread.sleep(2000)
   }

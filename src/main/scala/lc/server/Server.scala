@@ -18,12 +18,28 @@ class Server(
     port: Int,
     captchaManager: CaptchaManager,
     playgroundEnabled: Boolean,
-    corsHeader: String
+    corsHeader: String,
+    authRequired: Boolean = false
 ) {
   var headerMap: util.Map[String, util.List[String]] = null
   if (corsHeader.nonEmpty) {
     headerMap = Map("Access-Control-Allow-Origin" -> List(corsHeader).asJava).asJava
   }
+
+  private def checkAuth(request: picoserve.Server#Request): Boolean = {
+    if (!authRequired) return true
+    val headers = request.getHeaders()
+    if (headers != null && headers.containsKey("Auth")) {
+      val authHeaderValues = headers.get("Auth")
+      if (authHeaderValues != null && authHeaderValues.size() > 0) {
+        val authHeader = authHeaderValues.get(0)
+        val expectedKey = sys.env.get("AUTH_KEY").getOrElse("")
+        return authHeader == expectedKey
+      }
+    }
+    false
+  }
+
   val serverBuilder: ServerBuilder = picoserve.Server
     .builder()
     .address(new InetSocketAddress(address, port))
@@ -31,42 +47,54 @@ class Server(
     .POST(
       "/v2/captcha",
       (request) => {
-        val bodyStr = request.getBodyString().trim.replaceAll("\u0000", "")
-        val paramEither = Parameters.codec.decode(ByteBuffer.wrap(bodyStr.getBytes("UTF-8")))
-        paramEither match {
-          case Right(param) =>
-            val id = captchaManager.getChallenge(param)
-            getResponse(id, headerMap)
-          case Left(err) =>
-            getResponse(Left(Error("Invalid parameters: " + err.toString)), headerMap)
+        if (!checkAuth(request)) {
+          new StringResponse(401, "Unauthorized", headerMap)
+        } else {
+          val bodyStr = request.getBodyString().trim.replaceAll("\u0000", "")
+          val paramEither = Parameters.codec.decode(ByteBuffer.wrap(bodyStr.getBytes("UTF-8")))
+          paramEither match {
+            case Right(param) =>
+              val id = captchaManager.getChallenge(param)
+              getResponse(id, headerMap)
+            case Left(err) =>
+              getResponse(Left(Error("Invalid parameters: " + err.toString)), headerMap)
+          }
         }
       }
     )
     .GET(
       "/v2/media",
       (request) => {
-        val params = request.getQueryParams()
-        val result = if (params.containsKey("id")) {
-          val paramId = params.get("id").get(0)
-          val id = Id(paramId)
-          captchaManager.getCaptcha(id)
+        if (!checkAuth(request)) {
+          new StringResponse(401, "Unauthorized", headerMap)
         } else {
-          Left(Error(ErrorMessageEnum.INVALID_PARAM.toString + "=> id"))
+          val params = request.getQueryParams()
+          val result = if (params.containsKey("id")) {
+            val paramId = params.get("id").get(0)
+            val id = Id(paramId)
+            captchaManager.getCaptcha(id)
+          } else {
+            Left(Error(ErrorMessageEnum.INVALID_PARAM.toString + "=> id"))
+          }
+          getResponse(result, headerMap)
         }
-        getResponse(result, headerMap)
       }
     )
     .POST(
       "/v2/answer",
       (request) => {
-        val bodyStr = request.getBodyString().trim.replaceAll("\u0000", "")
-        val answerEither = Answer.codec.decode(ByteBuffer.wrap(bodyStr.getBytes("UTF-8")))
-        answerEither match {
-          case Right(answer) =>
-            val result = captchaManager.checkAnswer(answer)
-            getResponse(result, headerMap)
-          case Left(err) =>
-            getResponse(Left(Error("Invalid answer format: " + err.toString)), headerMap)
+        if (!checkAuth(request)) {
+          new StringResponse(401, "Unauthorized", headerMap)
+        } else {
+          val bodyStr = request.getBodyString().trim.replaceAll("\u0000", "")
+          val answerEither = Answer.codec.decode(ByteBuffer.wrap(bodyStr.getBytes("UTF-8")))
+          answerEither match {
+            case Right(answer) =>
+              val result = captchaManager.checkAnswer(answer)
+              getResponse(result, headerMap)
+            case Left(err) =>
+              getResponse(Left(Error("Invalid answer format: " + err.toString)), headerMap)
+          }
         }
       }
     )

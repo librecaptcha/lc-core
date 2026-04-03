@@ -83,6 +83,10 @@ public final class Server {
       return exchange.getRequestMethod();
     }
 
+    public Map<String, List<String>> getHeaders() {
+      return exchange.getRequestHeaders();
+    }
+
     public Map<String, List<String>> getQueryParams() {
       final var query = exchange.getRequestURI().getQuery();
       final var params = parseParams(query);
