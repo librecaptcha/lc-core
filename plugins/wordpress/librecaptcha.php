@@ -231,6 +231,151 @@ class LibreCaptchaPlugin {
                 </table>
                 <?php submit_button(); ?>
             </form>
+
+            <hr>
+            <h3>Test LibreCaptcha Connection</h3>
+            <p>Use this section to verify your server configuration and ensure CAPTCHAs are loading and validating correctly.</p>
+            <div id="lc-test-container" style="border: 1px solid #ccc; padding: 15px; max-width: 500px; background: #fff;">
+                <button type="button" id="lc-test-load-btn" class="button button-secondary">Load Test CAPTCHA</button>
+                <div id="lc-test-status" style="margin-top: 10px; font-weight: bold;"></div>
+
+                <div id="lc-test-captcha-area" style="display: none; margin-top: 15px;">
+                    <div id="lc-test-image-container" style="margin-bottom: 10px;"></div>
+                    <input type="hidden" id="lc-test-captcha-id" value="" />
+                    <input type="text" id="lc-test-captcha-answer" placeholder="Enter CAPTCHA answer" style="width: 100%; max-width: 350px; margin-bottom: 10px;" />
+                    <br>
+                    <button type="button" id="lc-test-check-btn" class="button button-primary">Check Answer</button>
+                </div>
+            </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var loadBtn = document.getElementById('lc-test-load-btn');
+                var checkBtn = document.getElementById('lc-test-check-btn');
+                var statusEl = document.getElementById('lc-test-status');
+                var captchaArea = document.getElementById('lc-test-captcha-area');
+                var imageContainer = document.getElementById('lc-test-image-container');
+                var idInput = document.getElementById('lc-test-captcha-id');
+                var answerInput = document.getElementById('lc-test-captcha-answer');
+
+                function getServerUrl() {
+                    return document.querySelector('input[name="lc_server_url"]').value.replace(/\/$/, '');
+                }
+
+                function getConfigJson() {
+                    try {
+                        return JSON.parse(document.querySelector('textarea[name="lc_config_json"]').value);
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                loadBtn.addEventListener('click', function() {
+                    var serverUrl = getServerUrl();
+                    var configJson = getConfigJson();
+
+                    if (!serverUrl) {
+                        statusEl.innerText = 'Error: Server URL is empty.';
+                        statusEl.style.color = 'red';
+                        return;
+                    }
+
+                    if (!configJson) {
+                        statusEl.innerText = 'Error: Invalid Config JSON.';
+                        statusEl.style.color = 'red';
+                        return;
+                    }
+
+                    statusEl.innerText = 'Loading CAPTCHA...';
+                    statusEl.style.color = '#0073aa';
+                    captchaArea.style.display = 'none';
+                    imageContainer.innerHTML = '';
+                    answerInput.value = '';
+
+                    fetch(serverUrl + '/v2/captcha', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(configJson)
+                    })
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('Server responded with ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (data && data.id) {
+                            idInput.value = data.id;
+                            var img = document.createElement('img');
+                            img.src = serverUrl + '/v1/media?id=' + data.id;
+                            img.alt = 'Test CAPTCHA';
+                            img.style.maxWidth = '100%';
+                            img.onload = function() {
+                                statusEl.innerText = 'CAPTCHA loaded successfully.';
+                                statusEl.style.color = 'green';
+                                captchaArea.style.display = 'block';
+                            };
+                            img.onerror = function() {
+                                statusEl.innerText = 'Error: Failed to load image from /v1/media';
+                                statusEl.style.color = 'red';
+                            };
+                            imageContainer.appendChild(img);
+                        } else {
+                            throw new Error('Invalid response format');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Test load error:', error);
+                        statusEl.innerText = 'Error loading CAPTCHA: ' + error.message;
+                        statusEl.style.color = 'red';
+                    });
+                });
+
+                checkBtn.addEventListener('click', function() {
+                    var serverUrl = getServerUrl();
+                    var captchaId = idInput.value;
+                    var answer = answerInput.value;
+
+                    if (!answer) {
+                        alert('Please enter an answer.');
+                        return;
+                    }
+
+                    statusEl.innerText = 'Checking answer...';
+                    statusEl.style.color = '#0073aa';
+
+                    fetch(serverUrl + '/v2/answer', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id: captchaId, answer: answer })
+                    })
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('Server responded with ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (data && (data.result === 'True' || data.result === true)) {
+                            statusEl.innerText = 'Success! Answer is correct.';
+                            statusEl.style.color = 'green';
+                        } else {
+                            statusEl.innerText = 'Incorrect answer or expired.';
+                            statusEl.style.color = 'red';
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Test check error:', error);
+                        statusEl.innerText = 'Error checking answer: ' + error.message;
+                        statusEl.style.color = 'red';
+                    });
+                });
+            });
+            </script>
         </div>
         <?php
     }
