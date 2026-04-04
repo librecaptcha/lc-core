@@ -216,3 +216,16 @@ Things to do in the future:
 * Sandboxed plugin architecture
 * Audio CAPTCHA samples
 * Interactive CAPTCHA samples
+
+## WordPress Plugin
+
+A WordPress plugin is included to protect forms on your WordPress site (such as Comments, Login, and Registration).
+
+### Installation
+1. Copy the `plugins/wordpress/librecaptcha.php` file (or the `plugins/wordpress` directory) to your WordPress `wp-content/plugins/` directory.
+2. Log into your WordPress admin dashboard and go to **Plugins**.
+3. Activate the **LibreCaptcha** plugin.
+4. Navigate to **Settings > LibreCaptcha**.
+5. Enter the **LibreCaptcha Server URL** (e.g., `http://localhost:8888`).
+6. Adjust the JSON configuration and select the forms you wish to protect.
+7. You can also use the `[librecaptcha]` shortcode to embed the CAPTCHA in custom pages.
