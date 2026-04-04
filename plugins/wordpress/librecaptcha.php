@@ -242,7 +242,7 @@ class LibreCaptchaPlugin {
         }
 
         $captcha_id = esc_attr( $data['id'] );
-        $media_url = esc_url( $server_url . '/v1/media?id=' . $captcha_id );
+        $media_url = esc_url( $server_url . '/v2/media?id=' . $captcha_id );
 
         ?>
         <div class="librecaptcha-container" style="margin-bottom: 15px;">
@@ -373,7 +373,7 @@ class LibreCaptchaPlugin {
                             var data = responseJson.data;
                             idInput.value = data.id;
                             var img = document.createElement('img');
-                            img.src = data.server_url + '/v1/media?id=' + data.id;
+                            img.src = data.server_url + '/v2/media?id=' + data.id;
                             img.alt = 'Test CAPTCHA';
                             img.style.maxWidth = '100%';
                             img.onload = function() {
@@ -382,7 +382,7 @@ class LibreCaptchaPlugin {
                                 captchaArea.style.display = 'block';
                             };
                             img.onerror = function() {
-                                statusEl.innerText = 'Error: Failed to load image from /v1/media';
+                                statusEl.innerText = 'Error: Failed to load image from /v2/media';
                                 statusEl.style.color = 'red';
                             };
                             imageContainer.appendChild(img);
