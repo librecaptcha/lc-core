@@ -256,6 +256,11 @@ public final class Server {
       return this;
     }
 
+    public ServerBuilder OPTIONS(final String path, final Processor processor) {
+      handlers.add(new Handler(path, "OPTIONS", request -> processor.process(request)));
+      return this;
+    }
+
     public ServerBuilder GET(final String path, final Processor processor) {
       handlers.add(new Handler(path, "GET", request -> processor.process(request)));
       return this;
