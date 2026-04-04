@@ -213,50 +213,45 @@ class LibreCaptchaPlugin {
         }
 
         $server_url = rtrim( $server_url, '/' );
-        $config_json = get_option( 'lc_config_json', '{"level":"easy","media":"image/png","input_type":"text","size":"350x100"}' );
+        $auth_key = get_option( 'lc_auth_key', '' );
+        $config_json_string = get_option( 'lc_config_json', '{"level":"easy","media":"image/png","input_type":"text","size":"350x100"}' );
+
+        $headers = array( 'Content-Type' => 'application/json' );
+        if ( ! empty( $auth_key ) ) {
+            $headers['Auth'] = $auth_key;
+        }
+
+        $response = wp_remote_post( $server_url . '/v2/captcha', array(
+            'headers'     => $headers,
+            'body'        => $config_json_string,
+            'method'      => 'POST',
+            'data_format' => 'body',
+        ) );
+
+        if ( is_wp_error( $response ) ) {
+            echo '<div class="librecaptcha-container" style="margin-bottom: 15px; color: red;">Error connecting to LibreCaptcha server.</div>';
+            return;
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        if ( ! isset( $data['id'] ) ) {
+            echo '<div class="librecaptcha-container" style="margin-bottom: 15px; color: red;">Error loading CAPTCHA. Invalid response.</div>';
+            return;
+        }
+
+        $captcha_id = esc_attr( $data['id'] );
+        $media_url = esc_url( $server_url . '/v1/media?id=' . $captcha_id );
 
         ?>
         <div class="librecaptcha-container" style="margin-bottom: 15px;">
             <div id="librecaptcha-image-container" style="margin-bottom: 10px;">
-                <!-- Image will be injected here -->
+                <img src="<?php echo $media_url; ?>" alt="CAPTCHA" style="max-width: 100%;" />
             </div>
-            <input type="hidden" name="lc_captcha_id" id="lc_captcha_id" value="" />
+            <input type="hidden" name="lc_captcha_id" id="lc_captcha_id" value="<?php echo $captcha_id; ?>" />
             <input type="text" name="lc_captcha_answer" id="lc_captcha_answer" placeholder="Enter CAPTCHA here" required style="width: 100%; max-width: 350px;" />
         </div>
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var serverUrl = <?php echo json_encode( $server_url ); ?>;
-            var configJson = <?php echo $config_json; ?>;
-
-            fetch(serverUrl + '/v2/captcha', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(configJson)
-            })
-            .then(function(response) {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(function(data) {
-                if (data && data.id) {
-                    document.getElementById('lc_captcha_id').value = data.id;
-                    var img = document.createElement('img');
-                    img.src = serverUrl + '/v1/media?id=' + data.id;
-                    img.alt = 'CAPTCHA';
-                    img.style.maxWidth = '100%';
-                    document.getElementById('librecaptcha-image-container').appendChild(img);
-                }
-            })
-            .catch(function(error) {
-                console.error('Error fetching LibreCaptcha:', error);
-                document.getElementById('librecaptcha-image-container').innerText = 'Error loading CAPTCHA. Please refresh the page.';
-            });
-        });
-        </script>
         <?php
     }
 
