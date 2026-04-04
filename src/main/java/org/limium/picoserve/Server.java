@@ -139,26 +139,50 @@ public final class Server {
       throws IOException {
     this.server = HttpServer.create(addr, backlog);
     this.server.setExecutor(executor);
+
+    // Group handlers by path to combine their allowed methods
+    final java.util.Map<String, java.util.List<Handler>> handlersByPath = new java.util.HashMap<>();
     for (final var handler : handlers) {
-      // System.out.println("Registering handler for " + handler.path);
+        handlersByPath.computeIfAbsent(handler.path, k -> new java.util.ArrayList<>()).add(handler);
+    }
+
+    for (final var entry : handlersByPath.entrySet()) {
+      final String path = entry.getKey();
+      final java.util.List<Handler> pathHandlers = entry.getValue();
+      // System.out.println("Registering handler for " + path);
       this.server.createContext(
-          handler.path,
+          path,
           new HttpHandler() {
             public void handle(final HttpExchange exchange) {
               final var method = exchange.getRequestMethod();
-              final Response errorResponse = checkMethods(handler.methods, method);
-              try (final var os = exchange.getResponseBody()) {
-                Response response;
-                if (errorResponse != null) {
-                  response = errorResponse;
-                } else {
+
+              Handler matchingHandler = null;
+              for (Handler h : pathHandlers) {
+                  if (h.methods.length == 0 || java.util.Arrays.asList(h.methods).contains(method)) {
+                      matchingHandler = h;
+                      break;
+                  }
+              }
+
+              Response response;
+              if (matchingHandler == null) {
+                  // Collect all allowed methods
+                  java.util.List<String> allowedMethods = new java.util.ArrayList<>();
+                  for (Handler h : pathHandlers) {
+                      allowedMethods.addAll(java.util.Arrays.asList(h.methods));
+                  }
+                  java.util.Map<String, java.util.List<String>> allowHeader = new java.util.HashMap<>();
+                  allowHeader.put("Allow", java.util.Collections.singletonList(String.join(", ", allowedMethods)));
+                  response = new StringResponse(405, "Method Not Allowed", allowHeader);
+              } else {
                   try {
-                    response = handler.processor.process(new Request(exchange));
+                    response = matchingHandler.processor.process(new Request(exchange));
                   } catch (final Exception e) {
                     e.printStackTrace();
                     response = new StringResponse(500, "Error: " + e);
                   }
-                }
+              }
+              try (final var os = exchange.getResponseBody()) {
                 final var headersToSend = response.getResponseHeaders();
                 if (headersToSend != null) {
                   final var responseHeaders = exchange.getResponseHeaders();
@@ -253,6 +277,11 @@ public final class Server {
 
     public ServerBuilder handle(final Handler handler) {
       handlers.add(handler);
+      return this;
+    }
+
+    public ServerBuilder OPTIONS(final String path, final Processor processor) {
+      handlers.add(new Handler(path, "OPTIONS", request -> processor.process(request)));
       return this;
     }
 

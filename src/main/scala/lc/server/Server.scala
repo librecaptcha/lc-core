@@ -41,10 +41,21 @@ class Server(
     false
   }
 
+  private def getOptionsResponse(): StringResponse = {
+    val optionsHeaderMap = new java.util.HashMap[String, java.util.List[String]]()
+    if (corsHeader.nonEmpty) {
+      optionsHeaderMap.put("Access-Control-Allow-Origin", List(corsHeader).asJava)
+    }
+    optionsHeaderMap.put("Access-Control-Allow-Methods", List("POST, GET, OPTIONS").asJava)
+    optionsHeaderMap.put("Access-Control-Allow-Headers", List("Content-Type, Auth").asJava)
+    new StringResponse(200, "", optionsHeaderMap)
+  }
+
   val serverBuilder: ServerBuilder = picoserve.Server
     .builder()
     .address(new InetSocketAddress(address, port))
     .backlog(32)
+    .OPTIONS("/v2/captcha", (_) => getOptionsResponse())
     .POST(
       "/v2/captcha",
       (request) => {
@@ -63,6 +74,7 @@ class Server(
         }
       }
     )
+    .OPTIONS("/v2/media", (_) => getOptionsResponse())
     .GET(
       "/v2/media",
       (request) => {
@@ -81,6 +93,7 @@ class Server(
         }
       }
     )
+    .OPTIONS("/v2/answer", (_) => getOptionsResponse())
     .POST(
       "/v2/answer",
       (request) => {
