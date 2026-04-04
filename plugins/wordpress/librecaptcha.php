@@ -30,6 +30,10 @@ class LibreCaptchaPlugin {
         // Register shortcode
         add_shortcode( 'librecaptcha', array( $this, 'render_captcha_shortcode' ) );
 
+        // AJAX actions for testing settings
+        add_action( 'wp_ajax_lc_test_load', array( $this, 'ajax_test_load' ) );
+        add_action( 'wp_ajax_lc_test_check', array( $this, 'ajax_test_check' ) );
+
         // Verification hooks
         if ( get_option( 'lc_enable_login', 0 ) ) {
             add_filter( 'authenticate', array( $this, 'verify_login_captcha' ), 20, 3 );
@@ -56,9 +60,15 @@ class LibreCaptchaPlugin {
         $captcha_answer = sanitize_text_field( $_POST['lc_captcha_answer'] );
 
         $server_url = rtrim( $server_url, '/' );
+        $auth_key = get_option( 'lc_auth_key', '' );
+
+        $headers = array( 'Content-Type' => 'application/json' );
+        if ( ! empty( $auth_key ) ) {
+            $headers['Auth'] = $auth_key;
+        }
 
         $response = wp_remote_post( $server_url . '/v2/answer', array(
-            'headers'     => array( 'Content-Type' => 'application/json' ),
+            'headers'     => $headers,
             'body'        => wp_json_encode( array(
                 'id'     => $captcha_id,
                 'answer' => $captcha_answer,
@@ -108,6 +118,86 @@ class LibreCaptchaPlugin {
                 wp_die( __( '<strong>ERROR</strong>: The CAPTCHA was incorrect. Please go back and try again.' ) );
             }
         }
+    }
+
+    public function ajax_test_load() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'Unauthorized' );
+        }
+
+        $server_url = rtrim( get_option( 'lc_server_url', '' ), '/' );
+        $auth_key = get_option( 'lc_auth_key', '' );
+        $config_json_string = get_option( 'lc_config_json', '{"level":"easy","media":"image/png","input_type":"text","size":"350x100"}' );
+
+        if ( empty( $server_url ) ) {
+            wp_send_json_error( 'Server URL is not configured.' );
+        }
+
+        $headers = array( 'Content-Type' => 'application/json' );
+        if ( ! empty( $auth_key ) ) {
+            $headers['Auth'] = $auth_key;
+        }
+
+        $response = wp_remote_post( $server_url . '/v2/captcha', array(
+            'headers'     => $headers,
+            'body'        => $config_json_string,
+            'method'      => 'POST',
+            'data_format' => 'body',
+        ) );
+
+        if ( is_wp_error( $response ) ) {
+            wp_send_json_error( 'Failed to connect to LibreCaptcha server.' );
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        if ( isset( $data['id'] ) ) {
+            // Also return the full server URL so the client can load the image
+            wp_send_json_success( array( 'id' => $data['id'], 'server_url' => $server_url ) );
+        } else {
+            wp_send_json_error( 'Invalid response from LibreCaptcha server.' );
+        }
+    }
+
+    public function ajax_test_check() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'Unauthorized' );
+        }
+
+        $captcha_id = sanitize_text_field( $_POST['captcha_id'] ?? '' );
+        $captcha_answer = sanitize_text_field( $_POST['captcha_answer'] ?? '' );
+
+        if ( empty( $captcha_id ) || empty( $captcha_answer ) ) {
+            wp_send_json_error( 'Missing ID or Answer.' );
+        }
+
+        $server_url = rtrim( get_option( 'lc_server_url', '' ), '/' );
+        $auth_key = get_option( 'lc_auth_key', '' );
+
+        $headers = array( 'Content-Type' => 'application/json' );
+        if ( ! empty( $auth_key ) ) {
+            $headers['Auth'] = $auth_key;
+        }
+
+        $response = wp_remote_post( $server_url . '/v2/answer', array(
+            'headers'     => $headers,
+            'body'        => wp_json_encode( array(
+                'id'     => $captcha_id,
+                'answer' => $captcha_answer,
+            ) ),
+            'method'      => 'POST',
+            'data_format' => 'body',
+        ) );
+
+        if ( is_wp_error( $response ) ) {
+            wp_send_json_error( 'Failed to connect to LibreCaptcha server.' );
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        wp_send_json_success( $data );
     }
 
     public function render_captcha_shortcode() {
@@ -182,6 +272,7 @@ class LibreCaptchaPlugin {
 
     public function register_settings() {
         register_setting( 'librecaptcha_options_group', 'lc_server_url' );
+        register_setting( 'librecaptcha_options_group', 'lc_auth_key' );
         register_setting( 'librecaptcha_options_group', 'lc_config_json' );
         register_setting( 'librecaptcha_options_group', 'lc_enable_login' );
         register_setting( 'librecaptcha_options_group', 'lc_enable_registration' );
@@ -201,6 +292,13 @@ class LibreCaptchaPlugin {
                         <td>
                             <input type="text" name="lc_server_url" value="<?php echo esc_attr( get_option('lc_server_url', '') ); ?>" class="regular-text" placeholder="http://localhost:8888" />
                             <p class="description">The URL to your LibreCaptcha instance (e.g. http://localhost:8888). Leave empty to disable.</p>
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row">Auth Key (Optional)</th>
+                        <td>
+                            <input type="text" name="lc_auth_key" value="<?php echo esc_attr( get_option('lc_auth_key', '') ); ?>" class="regular-text" placeholder="Secret Key" />
+                            <p class="description">Optional auth key if your server requires it.</p>
                         </td>
                     </tr>
                     <tr valign="top">
@@ -258,58 +356,29 @@ class LibreCaptchaPlugin {
                 var idInput = document.getElementById('lc-test-captcha-id');
                 var answerInput = document.getElementById('lc-test-captcha-answer');
 
-                function getServerUrl() {
-                    return document.querySelector('input[name="lc_server_url"]').value.replace(/\/$/, '');
-                }
-
-                function getConfigJson() {
-                    try {
-                        return JSON.parse(document.querySelector('textarea[name="lc_config_json"]').value);
-                    } catch (e) {
-                        return null;
-                    }
-                }
-
                 loadBtn.addEventListener('click', function() {
-                    var serverUrl = getServerUrl();
-                    var configJson = getConfigJson();
-
-                    if (!serverUrl) {
-                        statusEl.innerText = 'Error: Server URL is empty.';
-                        statusEl.style.color = 'red';
-                        return;
-                    }
-
-                    if (!configJson) {
-                        statusEl.innerText = 'Error: Invalid Config JSON.';
-                        statusEl.style.color = 'red';
-                        return;
-                    }
-
                     statusEl.innerText = 'Loading CAPTCHA...';
                     statusEl.style.color = '#0073aa';
                     captchaArea.style.display = 'none';
                     imageContainer.innerHTML = '';
                     answerInput.value = '';
 
-                    fetch(serverUrl + '/v2/captcha', {
+                    var formData = new FormData();
+                    formData.append('action', 'lc_test_load');
+
+                    fetch(ajaxurl, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(configJson)
+                        body: formData
                     })
                     .then(function(response) {
-                        if (!response.ok) {
-                            throw new Error('Server responded with ' + response.status);
-                        }
                         return response.json();
                     })
-                    .then(function(data) {
-                        if (data && data.id) {
+                    .then(function(responseJson) {
+                        if (responseJson.success && responseJson.data.id) {
+                            var data = responseJson.data;
                             idInput.value = data.id;
                             var img = document.createElement('img');
-                            img.src = serverUrl + '/v1/media?id=' + data.id;
+                            img.src = data.server_url + '/v1/media?id=' + data.id;
                             img.alt = 'Test CAPTCHA';
                             img.style.maxWidth = '100%';
                             img.onload = function() {
@@ -323,7 +392,7 @@ class LibreCaptchaPlugin {
                             };
                             imageContainer.appendChild(img);
                         } else {
-                            throw new Error('Invalid response format');
+                            throw new Error(responseJson.data || 'Invalid response format');
                         }
                     })
                     .catch(function(error) {
@@ -334,7 +403,6 @@ class LibreCaptchaPlugin {
                 });
 
                 checkBtn.addEventListener('click', function() {
-                    var serverUrl = getServerUrl();
                     var captchaId = idInput.value;
                     var answer = answerInput.value;
 
@@ -346,26 +414,30 @@ class LibreCaptchaPlugin {
                     statusEl.innerText = 'Checking answer...';
                     statusEl.style.color = '#0073aa';
 
-                    fetch(serverUrl + '/v2/answer', {
+                    var formData = new FormData();
+                    formData.append('action', 'lc_test_check');
+                    formData.append('captcha_id', captchaId);
+                    formData.append('captcha_answer', answer);
+
+                    fetch(ajaxurl, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ id: captchaId, answer: answer })
+                        body: formData
                     })
                     .then(function(response) {
-                        if (!response.ok) {
-                            throw new Error('Server responded with ' + response.status);
-                        }
                         return response.json();
                     })
-                    .then(function(data) {
-                        if (data && (data.result === 'True' || data.result === true)) {
-                            statusEl.innerText = 'Success! Answer is correct.';
-                            statusEl.style.color = 'green';
+                    .then(function(responseJson) {
+                        if (responseJson.success) {
+                            var data = responseJson.data;
+                            if (data && (data.result === 'True' || data.result === true)) {
+                                statusEl.innerText = 'Success! Answer is correct.';
+                                statusEl.style.color = 'green';
+                            } else {
+                                statusEl.innerText = 'Incorrect answer or expired.';
+                                statusEl.style.color = 'red';
+                            }
                         } else {
-                            statusEl.innerText = 'Incorrect answer or expired.';
-                            statusEl.style.color = 'red';
+                            throw new Error(responseJson.data || 'Failed to verify');
                         }
                     })
                     .catch(function(error) {
