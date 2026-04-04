@@ -41,23 +41,25 @@ class Server(
     false
   }
 
+  private def getOptionsResponse(): StringResponse = {
+    val optionsHeaderMap = new java.util.HashMap[String, java.util.List[String]]()
+    if (corsHeader.nonEmpty) {
+      optionsHeaderMap.put("Access-Control-Allow-Origin", List(corsHeader).asJava)
+    }
+    optionsHeaderMap.put("Access-Control-Allow-Methods", List("POST, GET, OPTIONS").asJava)
+    optionsHeaderMap.put("Access-Control-Allow-Headers", List("Content-Type, Auth").asJava)
+    new StringResponse(200, "", optionsHeaderMap)
+  }
+
   val serverBuilder: ServerBuilder = picoserve.Server
     .builder()
     .address(new InetSocketAddress(address, port))
     .backlog(32)
-    .handle(new picoserve.Server.Handler(
+    .OPTIONS("/v2/captcha", (_) => getOptionsResponse())
+    .POST(
       "/v2/captcha",
-      "POST,OPTIONS",
       (request) => {
-        if (request.getMethod() == "OPTIONS") {
-          val optionsHeaderMap = new java.util.HashMap[String, java.util.List[String]]()
-          if (corsHeader.nonEmpty) {
-            optionsHeaderMap.put("Access-Control-Allow-Origin", List(corsHeader).asJava)
-          }
-          optionsHeaderMap.put("Access-Control-Allow-Methods", List("POST, GET, OPTIONS").asJava)
-          optionsHeaderMap.put("Access-Control-Allow-Headers", List("Content-Type, Auth").asJava)
-          new StringResponse(200, "", optionsHeaderMap)
-        } else if (!checkAuth(request)) {
+        if (!checkAuth(request)) {
           new StringResponse(401, "Unauthorized", headerMap)
         } else {
           val bodyStr = request.getBodyString().trim.replaceAll("\u0000", "")
@@ -71,20 +73,12 @@ class Server(
           }
         }
       }
-    ))
-    .handle(new picoserve.Server.Handler(
+    )
+    .OPTIONS("/v2/media", (_) => getOptionsResponse())
+    .GET(
       "/v2/media",
-      "GET,OPTIONS",
       (request) => {
-        if (request.getMethod() == "OPTIONS") {
-          val optionsHeaderMap = new java.util.HashMap[String, java.util.List[String]]()
-          if (corsHeader.nonEmpty) {
-            optionsHeaderMap.put("Access-Control-Allow-Origin", List(corsHeader).asJava)
-          }
-          optionsHeaderMap.put("Access-Control-Allow-Methods", List("POST, GET, OPTIONS").asJava)
-          optionsHeaderMap.put("Access-Control-Allow-Headers", List("Content-Type, Auth").asJava)
-          new StringResponse(200, "", optionsHeaderMap)
-        } else if (!checkAuth(request)) {
+        if (!checkAuth(request)) {
           new StringResponse(401, "Unauthorized", headerMap)
         } else {
           val params = request.getQueryParams()
@@ -98,20 +92,12 @@ class Server(
           getResponse(result, headerMap)
         }
       }
-    ))
-    .handle(new picoserve.Server.Handler(
+    )
+    .OPTIONS("/v2/answer", (_) => getOptionsResponse())
+    .POST(
       "/v2/answer",
-      "POST,OPTIONS",
       (request) => {
-        if (request.getMethod() == "OPTIONS") {
-          val optionsHeaderMap = new java.util.HashMap[String, java.util.List[String]]()
-          if (corsHeader.nonEmpty) {
-            optionsHeaderMap.put("Access-Control-Allow-Origin", List(corsHeader).asJava)
-          }
-          optionsHeaderMap.put("Access-Control-Allow-Methods", List("POST, GET, OPTIONS").asJava)
-          optionsHeaderMap.put("Access-Control-Allow-Headers", List("Content-Type, Auth").asJava)
-          new StringResponse(200, "", optionsHeaderMap)
-        } else if (!checkAuth(request)) {
+        if (!checkAuth(request)) {
           new StringResponse(401, "Unauthorized", headerMap)
         } else {
           val bodyStr = request.getBodyString().trim.replaceAll("\u0000", "")
@@ -125,7 +111,7 @@ class Server(
           }
         }
       }
-    ))
+    )
   if (playgroundEnabled) {
     val htmlHeaderMap = Map("Content-Type" -> List("text/html").asJava).asJava
     serverBuilder.GET(
