@@ -35,10 +35,10 @@ class CrumpledTextCaptcha extends ChallengeProvider {
   def returnChallenge(level: String, size: String): Challenge = {
     val r = new scala.util.Random
     val n = level match {
-      case "easy" => 5
+      case "easy"   => 5
       case "medium" => 6
-      case "hard" => 7
-      case _ => 6
+      case "hard"   => 7
+      case _        => 6
     }
     val characters = if (level == "hard") HelperFunctions.safeCharacters else HelperFunctions.safeAlphaNum
     val secret = LazyList.continually(r.nextInt(characters.size)).map(characters).take(n).mkString
@@ -71,13 +71,13 @@ class CrumpledTextCaptcha extends ChallengeProvider {
 
     var img = canvas
     val numFolds = level match {
-        case "easy" => 7
-        case "medium" => 14
-        case "hard" => 19
-        case _ => 14
+      case "easy"   => 7
+      case "medium" => 14
+      case "hard"   => 19
+      case _        => 14
     }
     for (_ <- 0 until numFolds) {
-        img = applyFold(img, r)
+      img = applyFold(img, r)
     }
 
     val baos = new ByteArrayOutputStream()
@@ -126,27 +126,27 @@ class CrumpledTextCaptcha extends ChallengeProvider {
             val rgb01 = img.getRGB(xf, yf + 1)
             val rgb11 = img.getRGB(xf + 1, yf + 1)
 
-            val r00 = (rgb00 >> 16) & 0xFF
-            val g00 = (rgb00 >> 8) & 0xFF
-            val b00 = rgb00 & 0xFF
-            val r10 = (rgb10 >> 16) & 0xFF
-            val g10 = (rgb10 >> 8) & 0xFF
-            val b10 = rgb10 & 0xFF
-            val r01 = (rgb01 >> 16) & 0xFF
-            val g01 = (rgb01 >> 8) & 0xFF
-            val b01 = rgb01 & 0xFF
-            val r11 = (rgb11 >> 16) & 0xFF
-            val g11 = (rgb11 >> 8) & 0xFF
-            val b11 = rgb11 & 0xFF
+            val r00 = (rgb00 >> 16) & 0xff
+            val g00 = (rgb00 >> 8) & 0xff
+            val b00 = rgb00 & 0xff
+            val r10 = (rgb10 >> 16) & 0xff
+            val g10 = (rgb10 >> 8) & 0xff
+            val b10 = rgb10 & 0xff
+            val r01 = (rgb01 >> 16) & 0xff
+            val g01 = (rgb01 >> 8) & 0xff
+            val b01 = rgb01 & 0xff
+            val r11 = (rgb11 >> 16) & 0xff
+            val g11 = (rgb11 >> 8) & 0xff
+            val b11 = rgb11 & 0xff
 
             val rInterp = (r00 * (1 - xt) * (1 - yt) + r10 * xt * (1 - yt) + r01 * (1 - xt) * yt + r11 * xt * yt).toInt
             val gInterp = (g00 * (1 - xt) * (1 - yt) + g10 * xt * (1 - yt) + g01 * (1 - xt) * yt + g11 * xt * yt).toInt
             val bInterp = (b00 * (1 - xt) * (1 - yt) + b10 * xt * (1 - yt) + b01 * (1 - xt) * yt + b11 * xt * yt).toInt
 
-            val rgb = (0xFF << 24) | (rInterp << 16) | (gInterp << 8) | bInterp
+            val rgb = (0xff << 24) | (rInterp << 16) | (gInterp << 8) | bInterp
             newImg.setRGB(x, y, rgb)
           } else {
-            newImg.setRGB(x, y, 0xFFFFFFFF)
+            newImg.setRGB(x, y, 0xffffffff)
           }
         } else {
           newImg.setRGB(x, y, img.getRGB(x, y))
