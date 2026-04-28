@@ -38,7 +38,7 @@ class Config(configFilePath: String) {
   private val appConfigEither = AppConfig.codec.decode(ByteBuffer.wrap(configString.getBytes("UTF-8")))
   private val appConfig = appConfigEither match {
     case Right(conf) => conf
-    case Left(err) => throw new Exception(err.toString)
+    case Left(err)   => throw new Exception(err.toString)
   }
   private val configFields: ConfigField = appConfig.toConfigField
 
@@ -121,5 +121,4 @@ class Config(configFilePath: String) {
 
 }
 
-object Config {
-}
+object Config {}

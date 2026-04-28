@@ -99,8 +99,16 @@ case class AppConfig(
     captchas: List[CaptchaConfig] = List.empty
 ) {
   def toConfigField: ConfigField = ConfigField(
-    port, address, bufferCount, seed, captchaExpiryTimeLimit,
-    threadDelay, playgroundEnabled, corsHeader, maxAttemptsRatio, authRequired
+    port,
+    address,
+    bufferCount,
+    seed,
+    captchaExpiryTimeLimit,
+    threadDelay,
+    playgroundEnabled,
+    corsHeader,
+    maxAttemptsRatio,
+    authRequired
   )
 }
 object AppConfig {
