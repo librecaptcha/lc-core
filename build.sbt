@@ -16,7 +16,7 @@ lazy val root = (project in file(".")).settings(
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.4.2",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.4.2",
   libraryDependencies += "dev.zio" %% "zio-blocks-schema" % "0.0.34",
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.20" % Test
 )
 
 Compile / unmanagedResourceDirectories += { baseDirectory.value / "lib" }
