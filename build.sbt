@@ -15,7 +15,7 @@ lazy val root = (project in file(".")).settings(
 
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core" % "4.4.5",
   libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters" % "4.4.5",
-  libraryDependencies += "dev.zio" %% "zio-blocks-schema" % "0.0.34",
+  libraryDependencies += "dev.zio" %% "zio-blocks-schema" % "0.0.41",
   libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.20" % Test
 )
 
